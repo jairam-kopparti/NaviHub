@@ -5,7 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
+import { getTopResources } from "./lib/getTopResources";
 
+type Resource = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  imageUrl: string;
+  views: number;
+};
 /* ---------------- STAT COMPONENT ---------------- */
 
 function Stat({
@@ -58,9 +68,20 @@ export default function Home() {
   const line1 = "Building Bridges,";
   const line2 = "Not Walls";
 
+  const [topResources, setTopResources] = useState<Resource[]>([]);
+
+  useEffect(() => {
+    async function fetchResources() {
+      const resources = await getTopResources();
+      setTopResources(resources);
+    }
+    fetchResources();
+  }, []);
+
   return (
     <>
       {/* ================= HERO ================= */}
+
       <main className="relative min-h-screen overflow-hidden">
         <Image
           src="/hero.jpg"
@@ -199,9 +220,9 @@ export default function Home() {
 
       {/* ================= SECTION 2 ================= */}
       <section className="relative bg-[#FFFFFA] pt-4 overflow-hidden">
-        {/* Marquee at the very top */}
+        {/* ===== Marquee (Top) ===== */}
         <div className="w-full overflow-hidden">
-          <div className="marquee flex gap-12 text-[80px] font-bold uppercase whitespace-nowrap">
+          <div className="marquee flex gap-12 text-[64px] font-bold uppercase whitespace-nowrap">
             {Array.from({ length: 30 }).map((_, i) => (
               <span key={i} className={i % 2 === 0 ? "filled" : "outlined"}>
                 HIGHLIGHTS
@@ -210,15 +231,20 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Spacer content can go here */}
-        <div className="max-w-6xl mx-auto px-6 py-24">
-          {/* intentionally blank or other content */}
+        {/* ===== Carousel ===== */}
+        <div className="mt-12 flex justify-center">
+          {topResources.length > 0 ? (
+            <HighlightsCarousel resources={topResources} />
+          ) : (
+            <div className="text-center py-12 text-(--secondary-text)">
+              Loading highlights...
+            </div>
+          )}
         </div>
 
         <style jsx>{`
           .marquee {
-            display: inline-flex;
-            animation: scroll-left 30s linear infinite; /* slower scroll */
+            animation: scroll-left 30s linear infinite;
           }
 
           @keyframes scroll-left {
@@ -237,11 +263,9 @@ export default function Home() {
           .outlined {
             color: transparent;
             -webkit-text-stroke: 1px black;
-            text-stroke: 1px black;
           }
         `}</style>
       </section>
-
 
 
       {/* ================= QUOTE ================= */}
