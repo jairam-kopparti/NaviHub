@@ -11,13 +11,13 @@ export default function Footer() {
           <Link href="/" className="hover:text-(--accent) transition">
             Home
           </Link>
-          <Link href="/resources" className="hover:text-(--accent) transition">
+          <Link href="/pages/resources" className="hover:text-(--accent) transition">
             Resources
           </Link>
-          <Link href="/form" className="hover:text-(--accent) transition">
+          <Link href="/pages/form" className="hover:text-(--accent) transition">
             Form
           </Link>
-          <Link href="/about" className="hover:text-(--accent) transition">
+          <Link href="/pages/about" className="hover:text-(--accent) transition">
             About
           </Link>
         </div>

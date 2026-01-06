@@ -1,72 +1,56 @@
-"use client";
-
-import Image from "next/image";
 import { Eye } from "lucide-react";
 
-type HighlightCardProps = {
-  title: string;
+interface HighlightsCardProps {
   category: string;
+  title: string;
   description: string;
-  imageUrl: string;
-  views: number;
-};
+  imageUrl?: string;
+  views?: number;
+}
 
-export default function HighlightCard({
-  title,
+export default function HighlightsCard({
   category,
+  title,
   description,
   imageUrl,
   views,
-}: HighlightCardProps) {
+
+}: HighlightsCardProps) {
   return (
-    <div
-        className="
-            flex
-            w-full
-            max-w-4xl
-            h-[260px]
-            bg-(--bg)
-            rounded-2xl
-            overflow-hidden
-            shadow-sm
-            transition
-            duration-300
-            hover:shadow-md
-            hover:-translate-y-1
-        "
-    >
+    <div className="relative w-[336px] p-2">
+      {/* Gray background layer */}
+      <div className="absolute inset-0 rounded-[36px] bg-gray-300" />
 
-      {/* Image (Left) */}
-      <div className="relative w-[40%] h-full">
-        <Image
-          src={imageUrl}
-          alt={title}
-          fill
-          className="object-cover"
-        />
-      </div>
+      {/* Main card */}
+      <div className="relative rounded-[32px] bg-black shadow-lg p-6 flex flex-col">
+        {/* Category */}
+        <h3 className="text-xl font-semibold mb-4">{category}</h3>
 
-      {/* Content (Right) */}
-      <div className="flex flex-col justify-between p-6 w-[60%]">
-        {/* Top content */}
-        <div>
-          <h3 className="text-2xl font-semibold text-(--primary-text)">
-            {title}
-          </h3>
+        {/* Image */}
+        {imageUrl && (
+          <div className="mb-4">
+            <img
+              src={imageUrl}
+              alt={title}
+              className="w-full h-[120px] object-cover rounded-2xl"
+            />
+          </div>
+        )}
 
-          <p className="mt-1 text-sm uppercase tracking-wide text-(--secondary-text)">
-            {category}
-          </p>
+        {/* Title */}
+        <h4 className="text-lg font-semibold mb-2">{title}</h4>
 
-          <p className="mt-3 text-(--primary-text)/80 line-clamp-3">
-            {description}
-          </p>
-        </div>
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-6 text-left min-h-[80px]">
+          {description}
+        </p>
 
-        {/* Views */}
-        <div className="flex items-center justify-end gap-2 text-sm text-(--secondary-text)">
-          <Eye className="w-4 h-4" />
-          <span>{views.toLocaleString()}</span>
+        {/* Footer */}
+        <div className="mt-auto flex items-center gap-2">
+          <Eye className="w-5 h-5 text-blue-600" />
+          <span className="text-sm font-medium text-white">
+            {views}
+          </span>
         </div>
       </div>
     </div>
