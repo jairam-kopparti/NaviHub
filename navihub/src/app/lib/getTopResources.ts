@@ -1,24 +1,39 @@
 import { supabase } from "./supabaseClient";
 
-export async function getTopResources() {
+type Resource = {
+  id: string;
+  title: string;
+  category: string;
+  description: string | null;
+  imageUrl: string | null;
+  views: number;
+};
+
+export async function getTopResources(): Promise<Resource[]> {
   const { data, error } = await supabase
     .from("resources")
     .select("id, title, category, description, image_url, views")
-    .order("views", { ascending: false })
-    .limit(3);
+    .order("views", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching top resources:", error);
+  if (error || !data) {
+    console.error("Error fetching resources:", error);
     return [];
   }
 
-  // Map to frontend-friendly shape
-  return data.map((r) => ({
-    id: r.id,
-    title: r.title,
-    category: r.category,
-    description: r.description,
-    imageUrl: r.image_url,
-    views: r.views,
-  }));
+  const byCategory = new Map<string, Resource>();
+
+  for (const resource of data) {
+    if (!byCategory.has(resource.category)) {
+      byCategory.set(resource.category, {
+        id: resource.id,
+        title: resource.title,
+        category: resource.category,
+        description: resource.description,
+        imageUrl: resource.image_url,
+        views: resource.views,
+      });
+    }
+  }
+
+  return Array.from(byCategory.values()).slice(0, 9);
 }

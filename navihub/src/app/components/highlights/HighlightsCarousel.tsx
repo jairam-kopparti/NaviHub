@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import HighlightCard from "./HighlightCard";
+import HighlightsCard from "./HighlightCard";
 
 type Resource = {
   id: string;
@@ -14,145 +14,107 @@ type Resource = {
   views: number;
 };
 
-type Props = {
+interface Props {
   resources: Resource[];
-};
+}
 
 export default function HighlightsCarousel({ resources }: Props) {
-  const [index, setIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [direction, setDirection] = useState<1 | -1>(1);
-
   const total = resources.length;
 
-  /* ---------------- AUTO SLIDE ---------------- */
+  /* ---------- AUTO SLIDE ---------- */
   useEffect(() => {
-    if (isHovered) return;
+    if (total <= 0 || isHovered || total <= 3) return;
 
     const interval = setInterval(() => {
-      setDirection(1);
-      setIndex((prev) => (prev + 1) % total);
-    }, 4500);
+      setActiveIndex((prev) => (prev + 1) % total);
+    }, 3500);
 
     return () => clearInterval(interval);
   }, [isHovered, total]);
 
-  /* ---------------- NAV CONTROLS ---------------- */
-  const next = () => {
-    setDirection(1);
-    setIndex((prev) => (prev + 1) % total);
-  };
+  /* ---------- NAVIGATION ---------- */
+  const next = () => setActiveIndex((prev) => (prev + 1) % total);
+  const prev = () =>
+    setActiveIndex((prev) => (prev - 1 + total) % total);
 
-  const prev = () => {
-    setDirection(-1);
-    setIndex((prev) => (prev - 1 + total) % total);
-  };
+  /* ---------- VISIBLE CARDS ---------- */
+  const getIndex = (i: number) => (i + total) % total;
+  const leftIndex = getIndex(activeIndex - 1);
+  const rightIndex = getIndex(activeIndex + 1);
 
-  /* ---------------- ANIMATION VARIANTS ---------------- */
+  const visibleCards =
+    total > 0
+      ? [
+          { resource: resources[leftIndex], position: "left" },
+          { resource: resources[activeIndex], position: "center" },
+          { resource: resources[rightIndex], position: "right" },
+        ]
+      : [];
+
+  /* ---------- ANIMATION VARIANTS ---------- */
   const variants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 300 : -300,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -300 : 300,
-      opacity: 0,
-    }),
+    left: { x: "-130%", scale: 0.85, opacity: 0.5, zIndex: 0 },
+    center: { x: "0%", scale: 1, opacity: 1, zIndex: 2 },
+    right: { x: "130%", scale: 0.85, opacity: 0.5, zIndex: 0 },
   };
 
-  if (total === 0) return null; // nothing to show
+  if (total === 0) return null;
 
   return (
-    <div className="relative w-full flex flex-col items-center">
-      {/* Card Area */}
-      <div
-        className="relative w-full flex justify-center"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <AnimatePresence custom={direction} mode="wait">
+    <div
+      className="relative w-full max-w-7xl mx-auto mt-12"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* ---------- CAROUSEL TRACK ---------- */}
+      <div className="relative h-[420px] flex items-center justify-center overflow-hidden">
+        {visibleCards.map(({ resource, position }) => (
           <motion.div
-            key={resources[index].id}
-            custom={direction}
+            key={resource.id}
+            className="absolute w-[280px]"
             variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.7, ease: "easeInOut" }}
+            animate={position}
+            transition={{ type: "spring", stiffness: 260, damping: 30 }}
           >
-            <HighlightCard {...resources[index]} />
+            <HighlightsCard {...resource} />
           </motion.div>
-        </AnimatePresence>
-
-        {/* Left Arrow */}
-        <button
-          aria-label="Previous highlight"
-          onClick={prev}
-          className="
-            absolute
-            left-0
-            top-1/2
-            -translate-y-1/2
-            -translate-x-1/2
-            w-10 h-10
-            rounded-full
-            bg-(--bg)
-            border
-            border-(--primary-text)/20
-            flex items-center justify-center
-            hover:bg-(--primary-text)/5
-            transition
-          "
-        >
-          <ChevronLeft className="w-5 h-5 text-(--primary-text)" />
-        </button>
-
-        {/* Right Arrow */}
-        <button
-          aria-label="Next highlight"
-          onClick={next}
-          className="
-            absolute
-            right-0
-            top-1/2
-            -translate-y-1/2
-            translate-x-1/2
-            w-10 h-10
-            rounded-full
-            bg-(--bg)
-            border
-            border-(--primary-text)/20
-            flex items-center justify-center
-            hover:bg-(--primary-text)/5
-            transition
-          "
-        >
-          <ChevronRight className="w-5 h-5 text-(--primary-text)" />
-        </button>
+        ))}
       </div>
 
-      {/* Dots */}
-      <div className="flex gap-2 mt-6">
+      {/* ---------- DOTS ---------- */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {resources.map((_, i) => (
           <button
             key={i}
-            aria-label={`Go to highlight ${i + 1}`}
-            onClick={() => {
-              setDirection(i > index ? 1 : -1);
-              setIndex(i);
-            }}
-            className={`w-2.5 h-2.5 rounded-full transition ${
-              i === index
-                ? "bg-(--primary-text)"
-                : "bg-(--primary-text)/30"
+            onClick={() => setActiveIndex(i)}
+            className={`h-2 w-2 rounded-full transition ${
+              i === activeIndex
+                ? "bg-black scale-125"
+                : "bg-black/30 hover:bg-black/50"
             }`}
+            aria-label={`Go to slide ${i + 1}`}
           />
         ))}
       </div>
+
+      {/* ---------- ARROWS ---------- */}
+      <button
+        onClick={prev}
+        className="absolute left-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-105 transition"
+        aria-label="Previous"
+      >
+        <ChevronLeft className="w-6 h-6 text-black" />
+      </button>
+
+      <button
+        onClick={next}
+        className="absolute right-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-105 transition"
+        aria-label="Next"
+      >
+        <ChevronRight className="w-6 h-6 text-black" />
+      </button>
     </div>
   );
 }

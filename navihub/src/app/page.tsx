@@ -78,6 +78,36 @@ export default function Home() {
     fetchResources();
   }, []);
 
+  const quotes = [
+    {
+      id: 1,
+      text: "Having access to reliable community resources in one place makes a real difference for families across the city.",
+      name: "Alex Rivera",
+      image: "https://images.unsplash.com/photo-1623594675959-02360202d4d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+    },
+    {
+      id: 2,
+      text: "NaviHub helped me connect with local programs that truly support my neighborhood.",
+      name: "Jordan Lee",
+      image: "https://images.unsplash.com/photo-1672685667592-0392f458f46f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+    },
+    {
+      id: 3,
+      text: "Centralizing resources has made it so much easier for our organization to reach those who need help most.",
+      name: "Emily Chen",
+      image: "https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+    },
+    {
+      id: 4,
+      text: "From nonprofits to local support, this hub ensures no resident feels left behind.",
+      name: "Michael Torres",
+      image: "https://images.unsplash.com/photo-1617386124435-9eb3935b1e11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+    }
+  ];
+
+  const [activeQuoteId, setActiveQuoteId] = useState(1);
+  const activeQuote = quotes.find(q => q.id === activeQuoteId) || quotes[0];
+
   return (
     <>
       {/* ================= HERO ================= */}
@@ -268,18 +298,43 @@ export default function Home() {
       </section>
 
 
-      {/* ================= QUOTE ================= */}
-      <section className="py-20 bg-(--bg)">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <blockquote className="text-[clamp(20px,2.2vw,28px)] italic font-semibold text-(--primary-text)/95">
-            “Having access to reliable community resources in one place makes a
-            real difference for families across the city.”
+      {/* ================= QUOTES SECTION ================= */}
+      <section className="w-full py-24 bg-(--bg) flex flex-col items-center">
+        <div className="max-w-4xl w-full text-center px-6">
+          {/* Quote Text */}
+          <blockquote className="text-[clamp(22px,2.2vw,32px)] italic font-semibold text-(--primary-text)/95 mb-4">
+            "{activeQuote.text}"
           </blockquote>
-          <cite className="mt-4 block text-sm text-(--secondary-text)">
-            — Community Partner, New York City
-          </cite>
+          <p className="text-lg md:text-xl font-semibold text-(--primary-text)/80 mb-12">
+            — {activeQuote.name}
+          </p>
+
+          {/* Profile Pictures */}
+          <div className="flex items-center justify-center gap-6">
+            {quotes.map((quote) => {
+              const isActive = quote.id === activeQuoteId;
+              return (
+                <button
+                  key={quote.id}
+                  onClick={() => setActiveQuoteId(quote.id)}
+                  className={`rounded-full overflow-hidden border-4 transition-all duration-300 ${
+                    isActive
+                      ? "w-20 h-20 border-blue-500"
+                      : "w-16 h-16 border-gray-300 grayscale hover:grayscale-0"
+                  }`}
+                >
+                  <img
+                    src={quote.image}
+                    alt={quote.name}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
+
     </>
   );
 }
