@@ -1,39 +1,25 @@
-import { supabase } from "./supabaseClient";
+import { Resource } from "./types"; // adjust path as needed
+import { createClient } from "@supabase/supabase-js";
 
-type Resource = {
-  id: string;
-  title: string;
-  category: string;
-  description: string | null;
-  imageUrl: string | null;
-  views: number;
-};
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function getTopResources(): Promise<Resource[]> {
   const { data, error } = await supabase
     .from("resources")
     .select("id, title, category, description, image_url, views")
-    .order("views", { ascending: false });
+    .order("views", { ascending: false })
+    .limit(9);
 
-  if (error || !data) {
-    console.error("Error fetching resources:", error);
-    return [];
-  }
+  if (error) return [];
 
-  const byCategory = new Map<string, Resource>();
-
-  for (const resource of data) {
-    if (!byCategory.has(resource.category)) {
-      byCategory.set(resource.category, {
-        id: resource.id,
-        title: resource.title,
-        category: resource.category,
-        description: resource.description,
-        imageUrl: resource.image_url,
-        views: resource.views,
-      });
-    }
-  }
-
-  return Array.from(byCategory.values()).slice(0, 9);
+  return data?.map((r) => ({
+    id: r.id,
+    title: r.title,
+    category: r.category,
+    description: r.description ?? "",
+    imageUrl: r.image_url ?? "",
+    views: r.views ?? 0,
+  })) ?? [];
 }

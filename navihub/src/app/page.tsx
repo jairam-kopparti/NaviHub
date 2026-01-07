@@ -7,15 +7,8 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
 import { getTopResources } from "./lib/getTopResources";
+import { Resource } from "./lib/types";
 
-type Resource = {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  imageUrl: string;
-  views: number;
-};
 /* ---------------- STAT COMPONENT ---------------- */
 
 function Stat({
@@ -77,6 +70,7 @@ export default function Home() {
     }
     fetchResources();
   }, []);
+
 
   const quotes = [
     {
@@ -303,7 +297,7 @@ export default function Home() {
         <div className="max-w-4xl w-full text-center px-6">
           {/* Quote Text */}
           <blockquote className="text-[clamp(22px,2.2vw,32px)] italic font-semibold text-(--primary-text)/95 mb-4">
-            "{activeQuote.text}"
+            {activeQuote.text}
           </blockquote>
           <p className="text-lg md:text-xl font-semibold text-(--primary-text)/80 mb-12">
             — {activeQuote.name}
