@@ -111,14 +111,14 @@ export default function Home() {
           src="/hero.jpg"
           alt="Hero"
           fill
-          className="object-cover opacity-80"
+          className="object-cover opacity-90"
           priority
         />
-        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0" />
 
         <div className="relative z-10 flex flex-col justify-center min-h-screen px-8 sm:px-12">
           <h1
-            className="text-white font-bold leading-[1.05] max-w-3xl text-[clamp(64px,8vw,120px)]"
+            className="text-(--thirdary-text) font-bold leading-[1.05] max-w-3xl text-[clamp(64px,8vw,120px)]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             <span className="block overflow-hidden leading-[1.2]">
@@ -281,12 +281,12 @@ export default function Home() {
           }
 
           .filled {
-            color: black;
+            color: #997E67;
           }
 
           .outlined {
             color: transparent;
-            -webkit-text-stroke: 1px black;
+            -webkit-text-stroke: 1px #997E67;
           }
         `}</style>
       </section>

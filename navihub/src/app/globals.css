@@ -1,41 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700&family=Petrona:wght@500;700&display=swap');
 @import "tailwindcss";
 
-/*
-  UI Style Kit
-  - Modern + minimalist, warm neutral tones
-  - Headings: Petrona Medium
-  - Body: Open Sans Regular
-*/
-
 :root {
-  --bg: #FFFFFA; /* off-white / cream */
-  --surface: #FFFFFF;
-  --primary-text: #1F1F1F; /* deep charcoal */
-  --secondary-text: #909090; /* medium gray */
+  --bg: #FFDBBB;
+  --surface: #FFFFFA;
+  --primary-text: #1F1F1F;
+  --secondary-text: #CCBEB1;
+  --thirdary-text: #FFFFFA;
+
   --border: rgba(144, 144, 144, 0.2);
-  --accent: #1F1F1F; /* active / current */
-  --radius: 100px; /* rounded approachability */
-  --dot-size: 7px; /* circular indicator */
+  --accent: #1F1F1F;
+  --radius: 100px;
+  --dot-size: 7px;
   --shadow-subtle: 0 1px 3px rgba(31,31,31,0.04);
   --shadow-depth: 0 6px 18px rgba(31,31,31,0.06);
 
-  /* fonts */
   --font-heading: 'Petrona', Georgia, serif;
   --font-body: 'Open Sans', Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0a0a0a;
-    --surface: #0a0a0a;
-    --primary-text: #ffffff;
-    --secondary-text: #bdbdbd;
-    --border: rgba(255,255,255,0.06);
-  }
-}
-
-/* Global box-sizing */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -56,7 +39,6 @@ body {
   overflow-x: hidden !important;
 }
 
-/* Headings */
 h1 {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -96,10 +78,9 @@ nav a:hover, .nav-link:hover {
 
 nav a.active, .nav-link.active {
   color: var(--accent);
-  font-weight: 700; /* active state emphasis */
+  font-weight: 700;
 }
 
-/* Surface / cards */
 .surface {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -107,13 +88,11 @@ nav a.active, .nav-link.active {
   box-shadow: var(--shadow-subtle);
 }
 
-/* Buttons */
 button, .button {
   border-radius: var(--radius);
   font-family: var(--font-body);
 }
 
-/* Dot separator */
 .dot-sep {
   width: var(--dot-size);
   height: var(--dot-size);
@@ -122,21 +101,18 @@ button, .button {
   display: inline-block;
 }
 
-/* Divider */
 .divider {
   height: 1px;
   background: var(--border);
   width: 100%;
 }
 
-/* Utility: subtle elevated surface */
 .elevated {
   background: var(--surface);
   border-radius: 12px;
   box-shadow: var(--shadow-depth);
 }
 
-/* Section: stats */
 .stat-item {
   display: flex;
   flex-direction: column;
@@ -154,7 +130,6 @@ button, .button {
   color: var(--secondary-text);
 }
 
-/* Navbar */
 .navbar {
   background: transparent;
   backdrop-filter: none;
@@ -240,7 +215,6 @@ body {
   background-color: rgba(0,0,0,0.85);
 }
 
-/* Scroll Progress Bar */
 .scroll-indicator {
   position: fixed;
   top: 0;
@@ -260,7 +234,6 @@ body {
   transition: height 0.2s ease;
 }
 
-/* You can hide scroll indicator on small screens */
 @media (max-width: 832px) {
   .scroll-indicator {
     display: none !important;

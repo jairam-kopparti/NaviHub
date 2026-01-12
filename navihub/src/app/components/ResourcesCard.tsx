@@ -1,0 +1,53 @@
+"use client";
+
+import { Eye } from "lucide-react";
+
+interface ResourcesCardProps {
+  category: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  views?: number;
+}
+
+export function ResourcesCard({
+  category,
+  title,
+  description,
+  imageUrl,
+  views,
+}: ResourcesCardProps) {
+  return (
+    <div className="border border-[var(--border)] rounded-xl bg-[var(--surface)] p-4 flex flex-col gap-3 hover:shadow-sm transition">
+      {/* Image */}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={title}
+          className="w-full h-[120px] object-cover rounded-lg"
+        />
+      )}
+
+      {/* Category */}
+      <span className="text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+        {category}
+      </span>
+
+      {/* Title */}
+      <h3 className="text-base font-semibold">
+        {title}
+      </h3>
+
+      {/* Description */}
+      <p className="text-sm text-[var(--secondary-text)] line-clamp-3">
+        {description}
+      </p>
+
+      {/* Footer */}
+      <div className="mt-auto flex items-center gap-2 text-sm">
+        <Eye className="w-4 h-4" />
+        <span>{views}</span>
+      </div>
+    </div>
+  );
+}

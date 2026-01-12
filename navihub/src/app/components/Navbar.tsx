@@ -19,39 +19,43 @@ export default function Navbar() {
   const links = [
     { name: 'Home', href: '/' },
     { name: 'Resources', href: '/pages/resources' },
-    { name: 'Form', href: '/pages/form' },
+    { name: 'News', href: '/pages/news' },
     { name: 'About', href: '/pages/about' },
   ]
 
   return (
     <header
-      className={`navbar fixed top-0 left-0 w-full z-50 ${
+      className={`navbar fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled ? 'scrolled' : ''
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-5 flex items-center gap-6">
-        
+
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/main_logo.png"
-            alt="Main logo"
-            width={80}
-            height={58}
+            alt="NaviHub logo"
+            width={72}
+            height={52}
             className="object-contain"
+            priority
           />
           <span className="sr-only">NaviHub</span>
         </Link>
 
         {/* Separator */}
-        <span className="hidden md:block text-white/50 text-2xl select-none">
+        <span className="hidden md:block text-(--secondary-text) text-2xl select-none">
           |
         </span>
 
-        {/* Navigation */}
+        {/* Navigation Links */}
         <nav className="hidden md:flex items-center gap-10">
           {links.map((link) => {
-            const isActive = pathname === link.href
+            const isActive =
+              link.href === '/'
+                ? pathname === '/'
+                : pathname.startsWith(link.href)
 
             return (
               <Link
@@ -59,11 +63,15 @@ export default function Navbar() {
                 href={link.href}
                 className={`
                   nav-link
-                  text-white
                   text-[22px]
                   font-semibold
                   tracking-wide
-                  ${isActive ? 'active' : ''}
+                  transition
+                  ${
+                    isActive
+                      ? 'text-(--primary-text) active'
+                      : 'text-(--secondary-text)'
+                  }
                 `}
               >
                 {link.name}
@@ -72,15 +80,52 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Mobile menu */}
+        {/* Auth Buttons */}
+        <div className="hidden md:flex items-center gap-4 ml-auto">
+          <Link
+            href="/pages/signin"
+            className="
+              px-5 py-2
+              text-(--primary-text)
+              border border-(--primary-text)
+              rounded-md
+              text-sm
+              font-semibold
+              hover:bg-(--primary-text)
+              hover:text-white
+              transition
+            "
+          >
+            Sign In
+          </Link>
+
+          <Link
+            href="/pages/signup"
+            className="
+              px-5 py-2
+              bg-(--primary-text)
+              text-white
+              rounded-md
+              text-sm
+              font-semibold
+              hover:opacity-90
+              transition
+            "
+          >
+            Sign Up
+          </Link>
+        </div>
+
+        {/* Mobile Menu Button */}
         <div className="ml-auto md:hidden">
           <button
             aria-label="Open menu"
-            className="nav-menu-btn p-2 text-white"
+            className="nav-menu-btn p-2 text-(--primary-text)"
           >
             <Menu size={26} />
           </button>
         </div>
+
       </div>
     </header>
   )

@@ -14,8 +14,8 @@ export default function Footer() {
           <Link href="/pages/resources" className="hover:text-(--accent) transition">
             Resources
           </Link>
-          <Link href="/pages/form" className="hover:text-(--accent) transition">
-            Form
+          <Link href="/pages/news" className="hover:text-(--accent) transition">
+            News
           </Link>
           <Link href="/pages/about" className="hover:text-(--accent) transition">
             About
