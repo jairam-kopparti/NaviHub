@@ -76,7 +76,7 @@ export default function ResourcesPage() {
           <div className="sticky top-8 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-6">
             {/* Categories */}
             <div>
-              <h3 className="font-semibold text-xl mb-4">Filter by Category</h3>
+              <h3 className="font-semibold text-xl mb-4 text-(--secondary-text)">Filter by Category</h3>
               <div className="flex flex-col gap-2">
                 {CATEGORIES.map((category) => {
                   const isSelected = selectedCategories.includes(category);
@@ -90,8 +90,8 @@ export default function ResourcesPage() {
                       }
                       className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors border ${
                         isSelected
-                          ? "bg-[#997e67] text-white border-[#997e67]"
-                          : "border-[var(--border)] hover:bg-[var(--bg)] text-[var(--primary-text)]"
+                          ? "bg-[#997e67] text-(--secondary-text) border-[#997e67]"
+                          : "border-[var(--border)] hover:bg-[var(--bg)] text-(--secondary-text)"
                       }`}
                     >
                       {isSelected && <Check className="w-4 h-4" />}
@@ -104,11 +104,11 @@ export default function ResourcesPage() {
 
             {/* Views Dropdown */}
             <div>
-              <h3 className="font-semibold text-xl mb-2">Sort by Views</h3>
+              <h3 className="font-semibold text-xl mb-2 text-(--secondary-text)">Sort by Views</h3>
               <select
                 value={selectedView}
                 onChange={(e) => setSelectedView(e.target.value)}
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-lg bg-[var(--surface)] text-[var(--primary-text)] focus:outline-none focus:ring-2 focus:ring-[#997e67]"
+                className="w-full px-4 py-2 border border-[var(--border)] rounded-lg bg-[var(--surface)] text-(--secondary-text) focus:outline-none focus:ring-2 focus:ring-[#997e67]"
               >
                 {VIEWS_OPTIONS.map((option) => (
                   <option key={option} value={option}>
@@ -125,13 +125,13 @@ export default function ResourcesPage() {
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-4xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-(--secondary-text) w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent"
+                className="w-full pl-12 pr-4 py-4 border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent "
               />
             </div>
           </div>

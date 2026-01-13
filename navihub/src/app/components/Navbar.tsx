@@ -86,13 +86,13 @@ export default function Navbar() {
             href="/pages/signin"
             className="
               px-5 py-2
-              text-(--primary-text)
+              text-(--secondary-text)
               border border-(--primary-text)
               rounded-md
               text-sm
               font-semibold
               hover:bg-(--primary-text)
-              hover:text-white
+              hover:text-(--secondary-text)
               transition
             "
           >
@@ -104,7 +104,7 @@ export default function Navbar() {
             className="
               px-5 py-2
               bg-(--primary-text)
-              text-white
+              text-(--secondary-text)
               rounded-md
               text-sm
               font-semibold

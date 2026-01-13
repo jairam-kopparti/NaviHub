@@ -106,12 +106,12 @@ export default function Home() {
     <>
       {/* ================= HERO ================= */}
 
-      <main className="relative min-h-screen overflow-hidden">
+      <main className="relative min-h-screen overflow-hidden bg-black">
         <Image
           src="/hero.jpg"
           alt="Hero"
           fill
-          className="object-cover opacity-90"
+          className="object-cover opacity-80"
           priority
         />
         <div className="absolute inset-0" />
@@ -161,7 +161,7 @@ export default function Home() {
             transition={{ duration: 0.55, ease: "easeOut", delay: 2 }}
           >
             <Link
-              href="/resources"
+              href="/pages/resources"
               className="group inline-flex items-center gap-4 mt-8 px-7 py-3.5 bg-white text-black rounded-full font-semibold shadow-md hover:shadow-lg transition w-max"
             >
               <span>Browse Community Resources</span>
@@ -215,10 +215,10 @@ export default function Home() {
       <section className="min-h-screen bg-(--bg) flex items-center py-24">
         <div className="max-w-6xl mx-auto px-6 w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            <p className="text-(--primary-text) text-lg sm:text-xl md:text-2xl max-w-xl">
+            <p className="text-lg sm:text-xl md:text-2xl max-w-xl text-(--secondary-text)">
               NaviHub is dedicated to helping residents easily find local support
               and services. We bring together trusted non-profits, community
-              programs, and support organizations in one place, making it simpler
+              programs, and organizations in one place, making it simpler
               for New Yorkers to get the help they need.
             </p>
 

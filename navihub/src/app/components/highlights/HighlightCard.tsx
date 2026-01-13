@@ -22,9 +22,9 @@ export default function HighlightsCard({
       <div className="absolute inset-0 rounded-[36px] bg-gray-300" />
 
       {/* Main card */}
-      <div className="relative rounded-[32px] bg-black shadow-lg p-6 flex flex-col">
+      <div className="relative rounded-[32px] bg-(--surface) shadow-lg p-6 flex flex-col">
         {/* Category */}
-        <h3 className="text-xl font-semibold mb-4">{category}</h3>
+        <h3 className="text-xl font-semibold mb-4 text-(--secondary-text)">{category}</h3>
 
         {/* Image */}
         {imageUrl && (
@@ -38,7 +38,7 @@ export default function HighlightsCard({
         )}
 
         {/* Title */}
-        <h4 className="text-lg font-semibold mb-2">{title}</h4>
+        <h4 className="text-lg font-semibold mb-2 text-(--secondary-text)">{title}</h4>
 
         {/* Description */}
         <p className="text-sm text-gray-600 mb-6 text-left min-h-[80px]">
@@ -47,8 +47,8 @@ export default function HighlightsCard({
 
         {/* Footer */}
         <div className="mt-auto flex items-center gap-2">
-          <Eye className="w-5 h-5 text-blue-600" />
-          <span className="text-sm font-medium text-white">
+          <Eye className="w-5 h-5 text-(--secondary-text)" />
+          <span className="text-sm font-medium text-(--secondary-text)">
             {views}
           </span>
         </div>

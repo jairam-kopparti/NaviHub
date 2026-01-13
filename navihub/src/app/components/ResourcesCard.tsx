@@ -29,22 +29,22 @@ export function ResourcesCard({
       )}
 
       {/* Category */}
-      <span className="text-xs font-semibold uppercase tracking-wide text-[var(--secondary-text)]">
+      <span className="text-xs font-semibold uppercase tracking-wide text-(--secondary-text)">
         {category}
       </span>
 
       {/* Title */}
-      <h3 className="text-base font-semibold">
+      <h3 className="text-(--secondary-text) font-semibold">
         {title}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-[var(--secondary-text)] line-clamp-3">
+      <p className="text-sm text-(--secondary-text) line-clamp-3">
         {description}
       </p>
 
       {/* Footer */}
-      <div className="mt-auto flex items-center gap-2 text-sm">
+      <div className="mt-auto flex items-center gap-2 text-(--secondary-text)">
         <Eye className="w-4 h-4" />
         <span>{views}</span>
       </div>
