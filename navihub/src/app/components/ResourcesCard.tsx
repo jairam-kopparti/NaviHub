@@ -19,13 +19,17 @@ export function ResourcesCard({
 }: ResourcesCardProps) {
   return (
     <div className="border border-[var(--border)] rounded-xl bg-[var(--surface)] p-4 flex flex-col gap-3 hover:shadow-sm transition">
-      {/* Image */}
-      {imageUrl && (
+      {/* Image or Placeholder */}
+      {imageUrl ? (
         <img
           src={imageUrl}
           alt={title}
           className="w-full h-[120px] object-cover rounded-lg"
         />
+      ) : (
+        <div className="w-full h-[120px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
+          <span className="text-gray-500 text-sm font-medium">Image Not Available</span>
+        </div>
       )}
 
       {/* Category */}

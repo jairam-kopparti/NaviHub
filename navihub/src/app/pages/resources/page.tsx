@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Check } from "lucide-react";
+import { Search, Check, X, Eye } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
 import { ResourcesCard } from "../../components/ResourcesCard";
+import { useRouter } from "next/navigation";
+import { useUser } from "../../lib/useUser";
 
 const CATEGORIES = [
   "Nonprofit & Charitable Organizations",
@@ -24,6 +26,7 @@ export default function ResourcesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedView, setSelectedView] = useState<string>("Most Viewed");
+  const [selectedCard, setSelectedCard] = useState<Resource | null>(null);
 
   // Fetch resources from Supabase
   useEffect(() => {
@@ -46,12 +49,16 @@ export default function ResourcesPage() {
     fetchResources();
   }, [selectedCategories, selectedView]);
 
-  // Filter search locally
-  const filteredResources = resources.filter(
-    (res) =>
-      res.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      res.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter search locally (null-safe)
+  const queryLower = searchQuery.trim().toLowerCase();
+  const filteredResources = resources.filter((res) => {
+    const title = res.title ?? "";
+    const description = res.description ?? "";
+    return (
+      title.toLowerCase().includes(queryLower) ||
+      description.toLowerCase().includes(queryLower)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -122,35 +129,125 @@ export default function ResourcesPage() {
 
         {/* Resource Cards Section */}
         <div className="flex-1">
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative max-w-4xl mx-auto">
+          {/* Search Bar + Add Resource Button */}
+          <div className="mb-6 flex gap-4 items-center">
+            <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-(--secondary-text) w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent "
+                className="w-full pl-12 pr-4 py-4 border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent placeholder:text-(--secondary-text)"
               />
             </div>
+            <button className="px-6 py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap">
+              Add resource
+            </button>
           </div>
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredResources.map((resource) => (
-              <ResourcesCard
+              <div
                 key={resource.id}
-                title={resource.title}
-                description={resource.description}
-                imageUrl={resource.imageUrl}
-                views={resource.views}
-                category={resource.category}
-              />
+                onClick={() => setSelectedCard(resource)}
+                className="cursor-pointer"
+              >
+                <ResourcesCard
+                  title={resource.title}
+                  description={resource.description}
+                  imageUrl={resource.imageUrl}
+                  views={resource.views}
+                  category={resource.category}
+                />
+              </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Modal Overlay */}
+      {selectedCard && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedCard(null)}
+        >
+          {/* Modal Card */}
+          <div
+            className="relative bg-[var(--surface)] rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto animate-zoomIn"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedCard(null)}
+              className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md"
+            >
+              <X className="w-5 h-5 text-black" />
+            </button>
+
+            {/* Image Section */}
+            {selectedCard.imageUrl ? (
+              <div className="relative w-full h-[35%] min-h-[240px] overflow-hidden rounded-t-3xl">
+                <img
+                  src={selectedCard.imageUrl}
+                  alt={selectedCard.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="relative w-full h-[35%] min-h-[240px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-t-3xl flex items-center justify-center">
+                <span className="text-gray-500 text-lg font-medium">Image Not Available</span>
+              </div>
+            )}
+
+            {/* Content Section */}
+            <div className="p-8">
+              {/* Category */}
+              <div className="inline-block mb-4">
+                <span className="text-sm font-semibold px-4 py-2 bg-[#997e67]/10 text-[#997e67] rounded-full">
+                  {selectedCard.category}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-3xl font-semibold text-(--primary-text) mb-4">
+                {selectedCard.title}
+              </h2>
+
+              {/* Description */}
+              <p className="text-lg text-(--secondary-text) mb-6 leading-relaxed">
+                {selectedCard.description}
+              </p>
+
+              {/* Views */}
+              <div className="flex items-center gap-2 text-(--secondary-text)">
+                <Eye className="w-5 h-5" />
+                <span className="text-sm font-medium">
+                  {selectedCard.views} views
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Zoom Animation Styles */}
+      <style jsx>{`
+        @keyframes zoomIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }

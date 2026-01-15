@@ -26,16 +26,20 @@ export default function HighlightsCard({
         {/* Category */}
         <h3 className="text-xl font-semibold mb-4 text-(--secondary-text)">{category}</h3>
 
-        {/* Image */}
-        {imageUrl && (
-          <div className="mb-4">
+        {/* Image or Placeholder */}
+        <div className="mb-4">
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={title}
-              className="w-full h-[120px] object-cover rounded-2xl"
+              className="w-full h-[160px] object-cover rounded-2xl"
             />
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-[160px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center">
+              <span className="text-gray-500 text-sm font-medium">Image Not Available</span>
+            </div>
+          )}
+        </div>
 
         {/* Title */}
         <h4 className="text-lg font-semibold mb-2 text-(--secondary-text)">{title}</h4>

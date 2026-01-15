@@ -1,0 +1,144 @@
+.about-mission-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 1.5rem;
+  text-align: center;
+}
+
+.about-mission-heading {
+  font-family: "Petrona", serif;
+  font-weight: 500;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 3rem;
+}
+
+.about-mission-heading .primary {
+  color: #1f1f1f; /* primary text */
+}
+
+.about-mission-heading .secondary {
+  color: #ccbeb1; /* secondary text */
+}
+
+.about-mission-text {
+  max-width: 820px;
+  margin: 0 auto;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #1f1f1f;
+}
+
+/* subtle divider like navieats */
+.about-mission-divider {
+  width: 60px;
+  height: 2px;
+  background-color: #ccbeb1;
+  margin: 2.5rem auto;
+}
+
+/* ===== SHARED SECTION WRAPPER ===== */
+
+.about-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 1.5rem;
+}
+
+.about-section-heading {
+  font-family: "Petrona", serif;
+  font-weight: 500;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 2rem;
+}
+
+.about-section-heading .primary {
+  color: #1f1f1f;
+}
+
+.about-section-heading .secondary {
+  color: #ccbeb1;
+}
+
+.about-section-text {
+  font-family: "Open Sans", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #1f1f1f;
+  max-width: 850px;
+}
+
+/* ===== WHAT WE DO ===== */
+
+.what-we-do-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin-top: 3.5rem;
+}
+
+.what-we-do-item h4 {
+  font-family: "Petrona", serif;
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+  color: #1f1f1f;
+}
+
+.what-we-do-item p {
+  font-family: "Open Sans", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #1f1f1f;
+}
+
+/* ===== HOW IT WORKS ===== */
+
+.how-it-works-list {
+  margin-top: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.how-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.how-step-number {
+  font-family: "Petrona", serif;
+  font-size: 3rem;
+  color: #ccbeb1;
+  line-height: 1;
+}
+
+.how-step-content h4 {
+  font-family: "Petrona", serif;
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.how-step-content p {
+  font-family: "Open Sans", sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 700px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 900px) {
+  .what-we-do-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .how-step {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

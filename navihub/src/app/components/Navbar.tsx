@@ -2,13 +2,18 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu } from 'lucide-react'
+import { Menu, ChevronDown, LogOut, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useUser } from '../lib/useUser'
+import { supabase } from '../lib/supabaseClient'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, loading } = useUser()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -22,6 +27,12 @@ export default function Navbar() {
     { name: 'News', href: '/pages/news' },
     { name: 'About', href: '/pages/about' },
   ]
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setOpen(false)
+    router.push('/pages/signin')
+  }
 
   return (
     <header
@@ -45,7 +56,7 @@ export default function Navbar() {
         </Link>
 
         {/* Separator */}
-        <span className="hidden md:block text-(--secondary-text) text-2xl select-none">
+        <span className="hidden md:block text-(--primary-text) text-2xl select-none">
           |
         </span>
 
@@ -80,40 +91,107 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Auth Buttons */}
-        <div className="hidden md:flex items-center gap-4 ml-auto">
-          <Link
-            href="/pages/signin"
-            className="
-              px-5 py-2
-              text-(--secondary-text)
-              border border-(--primary-text)
-              rounded-md
-              text-sm
-              font-semibold
-              hover:bg-(--primary-text)
-              hover:text-(--secondary-text)
-              transition
-            "
-          >
-            Sign In
-          </Link>
+        {/* Auth Area */}
+        <div className="hidden md:flex items-center gap-4 ml-auto relative">
+          {!loading && !user && (
+            <>
+              <Link
+                href={`/pages/signin?redirect=${encodeURIComponent(pathname)}`}
+                className="
+                  px-5 py-2
+                  text-(--primary-text)
+                  border border-(--primary-text)
+                  rounded-md
+                  text-sm
+                  font-semibold
+                  hover:bg-(--primary-text)
+                  hover:text-(--secondary-text)
+                  transition
+                "
+              >
+                Sign In
+              </Link>
 
-          <Link
-            href="/pages/signup"
-            className="
-              px-5 py-2
-              bg-(--primary-text)
-              text-(--secondary-text)
-              rounded-md
-              text-sm
-              font-semibold
-              hover:opacity-90
-              transition
-            "
-          >
-            Sign Up
-          </Link>
+              <Link
+                href={`/pages/signup?redirect=${encodeURIComponent(pathname)}`}
+                className="
+                  px-5 py-2
+                  bg-(--primary-text)
+                  text-(--secondary-text)
+                  rounded-md
+                  text-sm
+                  font-semibold
+                  hover:opacity-90
+                  transition
+                "
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+
+          {!loading && user && (
+            <div className="relative">
+              <button
+                onClick={() => setOpen(!open)}
+                className="
+                  flex items-center gap-2
+                  px-4 py-2
+                  border border-(--primary-text)
+                  rounded-md
+                  text-sm
+                  font-semibold
+                  text-(--primary-text)
+                  hover:bg-(--primary-text)
+                  hover:text-(--secondary-text)
+                  transition
+                "
+              >
+                {user.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="User avatar"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <User size={16} />
+                )}
+
+                <span className="max-w-[140px] truncate">
+                  {user.user_metadata?.full_name || user.email}
+                </span>
+                <ChevronDown size={16} />
+              </button>
+
+              {open && (
+                <div
+                  className="
+                    absolute right-0 mt-2 w-40
+                    bg-(--secondary-bg)
+                    border border-(--border)
+                    rounded-md
+                    shadow-lg
+                    overflow-hidden
+                  "
+                >
+                  <button
+                    onClick={handleSignOut}
+                    className="
+                      w-full px-4 py-3
+                      flex items-center gap-2
+                      text-sm
+                      text-(--primary-text)
+                      hover:bg-(--hover-bg)
+                      transition
+                    "
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu Button */}

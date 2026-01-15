@@ -69,7 +69,7 @@ export default function HighlightsCarousel({ resources }: Props) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ---------- CAROUSEL TRACK ---------- */}
-      <div className="relative h-[420px] flex items-center justify-center overflow-hidden">
+      <div className="relative h-[520px] flex items-center justify-center overflow-visible pb-16">
         {visibleCards.map(({ resource, position }) => (
           <motion.div
             key={resource.id}
