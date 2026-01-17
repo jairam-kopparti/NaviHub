@@ -85,7 +85,7 @@ export default function AboutUs() {
       <section className="border-b border-[var(--border)] bg-white py-24 px-6">
         <div className="about-section text-center">
           <h2 className="about-section-heading mb-6">
-            <span className="primary">How It</span> <span className="secondary">Works</span>
+            <span className="primary">How It</span> <span className="tertiary">Works</span>
           </h2>
           <div className="about-mission-divider" />
 

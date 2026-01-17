@@ -135,10 +135,10 @@ export default function Navbar() {
               <button
                 onClick={() => setOpen(!open)}
                 className="
-                  flex items-center gap-2
-                  px-4 py-2
+                  flex items-center gap-3
+                  px-3 py-2
                   border border-(--primary-text)
-                  rounded-md
+                  rounded-3xl
                   text-sm
                   font-semibold
                   text-(--primary-text)
@@ -147,20 +147,21 @@ export default function Navbar() {
                   transition
                 "
               >
-                {user.user_metadata?.avatar_url ? (
-                  <img
-                    src={user.user_metadata.avatar_url}
-                    alt="User avatar"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                ) : (
-                  <User size={16} />
-                )}
+                <div className="
+                  w-8 h-8
+                  rounded-full
+                  bg-(--primary-text)
+                  text-(--secondary-text)
+                  flex items-center justify-center
+                  font-bold
+                  text-xs
+                ">
+                  {(user.user_metadata?.full_name || user.email).charAt(0).toUpperCase()}
+                </div>
 
-                <span className="max-w-[140px] truncate">
+                <span className="max-w-[100px] truncate">
                   {user.user_metadata?.full_name || user.email}
                 </span>
-                <ChevronDown size={16} />
               </button>
 
               {open && (

@@ -25,7 +25,7 @@ export default function Footer() {
         {/* Column 2: Hours */}
         <div className="flex flex-col gap-2">
           <h4 className="font-semibold text-(--secondary-text) mb-2">Hours of Operation</h4>
-          <span>Mon-Fri: 9:00 AM - 8:00 PM</span>
+          <span>Mon - Fri: 9:00 AM - 8:00 PM</span>
           <span>Sat: 10:00 AM - 6:00 PM</span>
           <span>Sun: 11:00 AM - 4:00 PM</span>
         </div>

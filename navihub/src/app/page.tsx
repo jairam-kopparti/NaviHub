@@ -254,12 +254,6 @@ export default function Home() {
             <Link
               href="/pages/resources"
               className="group inline-flex items-center gap-4 mt-8 px-7 py-3.5 bg-white text-black rounded-full font-semibold shadow-md hover:shadow-lg transition w-max"
-              style={{
-                animation: "none"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.animation = "buttonHop 0.6s ease-in-out";
-              }}
             >
               <span>Browse Community Resources</span>
               <span className="flex items-center justify-center w-9 h-9 rounded-full bg-black">

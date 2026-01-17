@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import { Search, Check, X, Eye } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
-import { ResourcesCard } from "../../components/ResourcesCard";
+import { ResourcesCard } from "../../components/resourcepage/ResourcesCard";
 import { useRouter } from "next/navigation";
 import { useUser } from "../../lib/useUser";
+import AddResourceModal from "../../components/resourcepage/AddResourceButton";
+import AuthErrorModal from "../../components/resourcepage/AuthErrorPopup";
 
 const CATEGORIES = [
   "Nonprofit & Charitable Organizations",
   "Health & Wellness Services",
   "Education & Learning",
   "Employment & Career Support",
+  "Legal, Civic & Government Services",
   "Housing & Utilities Assistance",
   "Food & Basic Needs",
   "Community Events & Programs",
@@ -27,23 +30,38 @@ export default function ResourcesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedView, setSelectedView] = useState<string>("Most Viewed");
   const [selectedCard, setSelectedCard] = useState<Resource | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showAuthError, setShowAuthError] = useState(false);
+  const { user, loading: userLoading } = useUser();
 
   // Fetch resources from Supabase
   useEffect(() => {
     const fetchResources = async () => {
-      let query = supabase.from("resources").select("*");
+      try {
+        let query = supabase.from("resources").select("*");
 
-      // Filter by categories if selected
-      if (selectedCategories.length > 0) {
-        query = query.in("category", selectedCategories);
+        // Filter by categories if selected
+        if (selectedCategories.length > 0) {
+          query = query.in("category", selectedCategories);
+        }
+
+        // Sort by views
+        if (selectedView === "Most Viewed") query = query.order("views", { ascending: false });
+        else query = query.order("views", { ascending: true });
+
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error("Error fetching resources:", error);
+          setResources([]);
+          return;
+        }
+        
+        if (data) setResources(data as Resource[]);
+      } catch (err) {
+        console.error("Unexpected error fetching resources:", err);
+        setResources([]);
       }
-
-      // Sort by views
-      if (selectedView === "Most Viewed") query = query.order("views", { ascending: false });
-      else query = query.order("views", { ascending: true });
-
-      const { data, error } = await query;
-      if (!error && data) setResources(data as Resource[]);
     };
 
     fetchResources();
@@ -59,6 +77,69 @@ export default function ResourcesPage() {
       description.toLowerCase().includes(queryLower)
     );
   });
+
+  const handleAddResourceClick = () => {
+    if (!user) {
+      setShowAuthError(true);
+    } else {
+      setShowAddModal(true);
+    }
+  };
+
+  const handleResourceCardClick = async (resource: Resource) => {
+    // Increment view count
+    try {
+      const { error } = await supabase
+        .from("resources")
+        .update({ views: (resource.views || 0) + 1 })
+        .eq("id", resource.id);
+
+      if (error) {
+        console.error("Error incrementing views:", error);
+        setSelectedCard(resource);
+        return;
+      }
+
+      // Update local state
+      setResources(resources.map(r =>
+        r.id === resource.id ? { ...r, views: (r.views || 0) + 1 } : r
+      ));
+      // Update selected card
+      setSelectedCard({ ...resource, views: (resource.views || 0) + 1 });
+    } catch (err) {
+      console.error("Error incrementing views:", err);
+      setSelectedCard(resource);
+    }
+  };
+
+  const handleResourcesUpdated = () => {
+    // Refetch resources after adding a new one
+    const fetchResources = async () => {
+      try {
+        let query = supabase.from("resources").select("*");
+
+        if (selectedCategories.length > 0) {
+          query = query.in("category", selectedCategories);
+        }
+
+        if (selectedView === "Most Viewed") query = query.order("views", { ascending: false });
+        else query = query.order("views", { ascending: true });
+
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error("Error refetching resources:", error);
+          return;
+        }
+        
+        if (data) setResources(data as Resource[]);
+      } catch (err) {
+        console.error("Unexpected error refetching resources:", err);
+      }
+    };
+
+    fetchResources();
+  };
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -79,7 +160,7 @@ export default function ResourcesPage() {
       {/* Section 2 + 3: Preferences + Resources */}
       <div className="container mx-auto px-4 py-8 flex gap-8 border-b border-[var(--border)]">
         {/* Preferences Panel */}
-        <aside className="w-72 flex-shrink-0 relative left-[-1rem]">
+        <aside className="w-72 flex-shrink-0">
           <div className="sticky top-8 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-6">
             {/* Categories */}
             <div>
@@ -138,10 +219,13 @@ export default function ResourcesPage() {
                 placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent placeholder:text-(--secondary-text)"
+                className="w-full pl-12 pr-4 py-4 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-(--secondary-text)"
+                style={{ color: "#4a4a4a" }}
               />
             </div>
-            <button className="px-6 py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap">
+            <button 
+              onClick={handleAddResourceClick}
+              className="px-6 py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap">
               Add resource
             </button>
           </div>
@@ -151,7 +235,7 @@ export default function ResourcesPage() {
             {filteredResources.map((resource) => (
               <div
                 key={resource.id}
-                onClick={() => setSelectedCard(resource)}
+                onClick={() => handleResourceCardClick(resource)}
                 className="cursor-pointer"
               >
                 <ResourcesCard
@@ -214,12 +298,12 @@ export default function ResourcesPage() {
               </div>
 
               {/* Title */}
-              <h2 className="text-3xl font-semibold text-(--primary-text) mb-4">
+              <h2 className="text-3xl font-semibold mb-4" style={{ color: "#1F1F1F" }}>
                 {selectedCard.title}
               </h2>
 
               {/* Description */}
-              <p className="text-lg text-(--secondary-text) mb-6 leading-relaxed">
+              <p className="text-lg mb-6 leading-relaxed" style={{ color: "#1F1F1F" }}>
                 {selectedCard.description}
               </p>
 
@@ -248,6 +332,17 @@ export default function ResourcesPage() {
           }
         }
       `}</style>
+
+      {/* Modals */}
+      <AddResourceModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={handleResourcesUpdated}
+      />
+      <AuthErrorModal
+        isOpen={showAuthError}
+        onClose={() => setShowAuthError(false)}
+      />
     </div>
   );
 }

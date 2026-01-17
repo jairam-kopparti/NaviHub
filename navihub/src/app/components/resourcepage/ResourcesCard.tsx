@@ -43,7 +43,7 @@ export function ResourcesCard({
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-(--secondary-text) line-clamp-3">
+      <p className="text-sm line-clamp-3" style={{ color: "#1F1F1F" }}>
         {description}
       </p>
 

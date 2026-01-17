@@ -61,6 +61,10 @@
 }
 
 .about-section-heading .secondary {
+  color: #FFFFFA;
+}
+
+.about-section-heading .tertiary {
   color: #ccbeb1;
 }
 

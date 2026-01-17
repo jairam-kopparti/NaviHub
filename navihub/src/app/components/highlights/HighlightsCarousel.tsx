@@ -102,7 +102,7 @@ export default function HighlightsCarousel({ resources }: Props) {
       {/* ---------- ARROWS ---------- */}
       <button
         onClick={prev}
-        className="absolute left-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-105 transition"
+        className="absolute left-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-125 hover:border-2 hover:border-black transition-all cursor-pointer"
         aria-label="Previous"
       >
         <ChevronLeft className="w-6 h-6 text-black" />
@@ -110,7 +110,7 @@ export default function HighlightsCarousel({ resources }: Props) {
 
       <button
         onClick={next}
-        className="absolute right-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-105 transition"
+        className="absolute right-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-125 hover:border-2 hover:border-black transition-all cursor-pointer"
         aria-label="Next"
       >
         <ChevronRight className="w-6 h-6 text-black" />

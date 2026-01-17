@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 import { supabase } from "../../lib/supabaseClient"
 
 interface AuthCardProps {
@@ -15,10 +16,13 @@ export default function AuthCard({ type }: AuthCardProps) {
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setEmailNotConfirmed(false)
     setLoading(true)
 
     try {
@@ -35,20 +39,71 @@ export default function AuthCard({ type }: AuthCardProps) {
 
         if (error) throw error
         alert("Check your email to confirm your account.")
+        // Clear form after signup
+        setEmail("")
+        setPassword("")
+        setName("")
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
 
-        if (error) throw error
-        window.location.href = "/"
+        if (error) {
+          // Check if error is due to unconfirmed email
+          if (error.message.includes("Invalid login credentials") || error.message.includes("incorrect")) {
+            setEmailNotConfirmed(true)
+            throw new Error("Email not confirmed or invalid credentials")
+          }
+          throw error
+        }
+        
+        // Redirect to home or previous page
+        const redirect = new URLSearchParams(window.location.search).get('redirect')
+        window.location.href = redirect || "/"
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred"
+      
+      // Provide more helpful error messages
+      if (errorMessage.includes("Email not confirmed")) {
+        setError("Please check your email to confirm your account")
+      } else if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("incorrect")) {
+        setError("Invalid email or password")
+      } else {
+        setError(errorMessage)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function resendConfirmation() {
+    if (!email) {
+      setError("Please enter your email address")
+      return
+    }
+    
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      })
+      
+      if (error) throw error
+      alert("Confirmation email sent! Check your inbox.")
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to resend email"
       setError(errorMessage)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading) {
+      handleSubmit(e as unknown as React.FormEvent)
     }
   }
 
@@ -72,6 +127,7 @@ export default function AuthCard({ type }: AuthCardProps) {
             className="auth-input"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onKeyPress={handleKeyPress}
             required
           />
         )}
@@ -82,20 +138,43 @@ export default function AuthCard({ type }: AuthCardProps) {
           className="auth-input"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyPress={handleKeyPress}
           required
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="auth-input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="password-input-container">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="auth-input password-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={handleKeyPress}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="password-toggle-btn"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
 
         {error && (
           <p className="text-red-600 text-sm">{error}</p>
+        )}
+
+        {emailNotConfirmed && !isSignup && (
+          <button
+            type="button"
+            onClick={resendConfirmation}
+            disabled={loading}
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+          >
+            Resend confirmation email
+          </button>
         )}
 
         <button
