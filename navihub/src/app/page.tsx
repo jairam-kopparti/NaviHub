@@ -9,8 +9,6 @@ import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
 import { getTopResources } from "./lib/getTopResources";
 import { Resource } from "./lib/types";
 
-/* ---------------- STAT COMPONENT ---------------- */
-
 function Stat({
   value,
   suffix = "",
@@ -166,27 +164,27 @@ export default function Home() {
   const quotes = [
     {
       id: 1,
-      text: "Having access to reliable community resources in one place makes a real difference for families across the city.",
+      text: "“From the moment I landed on this website, it felt like a true home base for the community. Everything is organized in a way that makes sense, from nonprofits to support services to local programs, and I never feel lost while browsing. The layout is clean, the information is clear, and it genuinely feels like the site was built with real people in mind, not just to look nice but to actually help.”",
       name: "Alex Rivera",
-      image: "https://images.unsplash.com/photo-1623594675959-02360202d4d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+      image: "/person1.jpg"
     },
     {
       id: 2,
-      text: "NaviHub helped me connect with local programs that truly support my neighborhood.",
+      text: "“What stands out most about this community resource hub is how much effort clearly went into making resources easy to find and understand. Whether I am looking for help, trying to learn about organizations in the area, or just exploring what is available nearby, the site makes the process simple and welcoming. It turns what could be overwhelming information into something approachable and useful.”",
       name: "Jordan Lee",
-      image: "https://images.unsplash.com/photo-1672685667592-0392f458f46f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+      image: "/person2.jpg"
     },
     {
       id: 3,
-      text: "Centralizing resources has made it so much easier for our organization to reach those who need help most.",
+      text: "“This website does an amazing job of connecting people to opportunities and support within the community. The way resources are grouped, explained, and presented shows that the creators deeply understand what residents need. It feels less like a random list of links and more like a guided experience that encourages people to get involved and actually use what is offered.”",
       name: "Emily Chen",
-      image: "https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+      image: "/person3.jpg"
     },
     {
       id: 4,
-      text: "From nonprofits to local support, this hub ensures no resident feels left behind.",
+      text: "“What I appreciate most about this site is that it feels reliable and thoughtfully built. The structure, design, and content all work together to highlight events, organizations, and services in a way that feels trustworthy and up to date. It gives the impression of a living hub that grows with the community and truly supports the goal of bringing people together through accessible information.”",
       name: "Michael Torres",
-      image: "https://images.unsplash.com/photo-1617386124435-9eb3935b1e11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080&q=80"
+      image: "/person4.jpg"
     }
   ];
 
@@ -424,7 +422,7 @@ export default function Home() {
                   onClick={() => setActiveQuoteId(quote.id)}
                   className={`rounded-full overflow-hidden border-4 transition-all duration-300 ${
                     isActive
-                      ? "w-20 h-20 border-blue-500"
+                      ? "w-20 h-20 border-[#997e67]"
                       : "w-16 h-16 border-gray-300 grayscale hover:grayscale-0"
                   }`}
                 >

@@ -14,8 +14,8 @@ export default function Footer() {
           <Link href="/pages/resources" className="hover:text-(--accent) transition">
             Resources
           </Link>
-          <Link href="/pages/news" className="hover:text-(--accent) transition">
-            News
+          <Link href="/pages/events" className="hover:text-(--accent) transition">
+            Events
           </Link>
           <Link href="/pages/about" className="hover:text-(--accent) transition">
             About
@@ -25,9 +25,9 @@ export default function Footer() {
         {/* Column 2: Hours */}
         <div className="flex flex-col gap-2">
           <h4 className="font-semibold text-(--secondary-text) mb-2">Hours of Operation</h4>
-          <span>Mon - Fri: 9:00 AM - 8:00 PM</span>
-          <span>Sat: 10:00 AM - 6:00 PM</span>
-          <span>Sun: 11:00 AM - 4:00 PM</span>
+          <span>Mon - Fri: 7:00 AM - 8:00 PM</span>
+          <span>Sat: 8:00 AM - 6:00 PM</span>
+          <span>Sun: 8:00 AM - 5:00 PM</span>
         </div>
 
         {/* Column 3: Find Us */}

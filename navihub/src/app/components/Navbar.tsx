@@ -15,6 +15,8 @@ export default function Navbar() {
   const router = useRouter()
   const { user, loading } = useUser()
 
+  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources')
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll)
@@ -24,7 +26,7 @@ export default function Navbar() {
   const links = [
     { name: 'Home', href: '/' },
     { name: 'Resources', href: '/pages/resources' },
-    { name: 'News', href: '/pages/news' },
+    { name: 'Events', href: '/pages/events' },
     { name: 'About', href: '/pages/about' },
   ]
 
@@ -37,21 +39,23 @@ export default function Navbar() {
   return (
     <header
       className={`navbar fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'scrolled' : ''
+        scrolled || isSpecialPage ? 'scrolled' : ''
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-5 flex items-center gap-6">
+      <div className="max-w-8xl mx-auto px-6 py-5 flex items-center gap-6">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/main_logo.png"
-            alt="NaviHub logo"
-            width={72}
-            height={52}
-            className="object-contain"
-            priority
-          />
+          <div className="p-2 rounded-lg bg-white">
+            <Image
+              src="/main_logo.png"
+              alt="NaviHub logo"
+              width={72}
+              height={52}
+              className="object-contain"
+              priority
+            />
+          </div>
           <span className="sr-only">NaviHub</span>
         </Link>
 
