@@ -3,11 +3,12 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
 import { getTopResources } from "./lib/getTopResources";
 import { Resource } from "./lib/types";
+import "./styles/home.css";
 
 function Stat({
   value,
@@ -191,6 +192,18 @@ export default function Home() {
   const [activeQuoteId, setActiveQuoteId] = useState(1);
   const activeQuote = quotes.find(q => q.id === activeQuoteId) || quotes[0];
 
+  // Auto-cycle through quotes every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveQuoteId((prevId) => {
+        const nextId = prevId === quotes.length ? 1 : prevId + 1;
+        return nextId;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       {/* ================= HERO ================= */}
@@ -265,45 +278,10 @@ export default function Home() {
         </div>
 
         <style jsx>{`
-          @keyframes letterReveal {
-            0% {
-              transform: translateX(-100%);
-              opacity: 0;
-            }
-            100% {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
-          .animate-letter {
-            animation: letterReveal 0.5s cubic-bezier(0.77, 0, 0.175, 1)
-              forwards;
-          }
-
-          @keyframes slideUp {
-            0% {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            100% {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
           .animate-slideUp {
-            animation: slideUp 1s ease forwards;
             animation-delay: ${line1.length * 0.05 +
             line2.length * 0.05 +
             0.3}s;
-          }
-
-          @keyframes buttonHop {
-            0%, 100% {
-              transform: translateY(0);
-            }
-            50% {
-              transform: translateY(-8px);
-            }
           }
         `}</style>
       </main>
@@ -374,36 +352,69 @@ export default function Home() {
             </div>
           )}
         </div>
-
-        <style jsx>{`
-          .marquee {
-            animation: scroll-left 30s linear infinite;
-          }
-
-          @keyframes scroll-left {
-            0% {
-              transform: translateX(0%);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-
-          .filled {
-            color: #997E67;
-          }
-
-          .outlined {
-            color: transparent;
-            -webkit-text-stroke: 1px #997E67;
-          }
-        `}</style>
       </section>
 
 
       {/* ================= QUOTES SECTION ================= */}
-      <section className="w-full py-24 bg-(--bg) flex flex-col items-center">
-        <div className="max-w-4xl w-full text-center px-6">
+      <section className="w-full py-24 bg-(--bg) flex flex-col items-center relative">
+        {/* Left Marquee */}
+        <div className="absolute left-0 top-0 h-full w-32 overflow-hidden hidden lg:flex items-center justify-center">
+          <div className="marquee-vertical-stacked flex flex-col gap-12 text-[48px] font-bold uppercase">
+            {Array.from({ length: 30 }).map((_, i) => {
+              const words = ["New", "York", "City"];
+              const phraseIsFilled = i % 2 === 0;
+              return (
+                <div key={i} className="flex flex-col gap-0 leading-none">
+                  {words.map((word, wordIdx) => {
+                    const isYork = wordIdx === 1;
+                    const shouldFill = isYork ? !phraseIsFilled : phraseIsFilled;
+                    return word.split("").map((letter, letterIdx) => (
+                      <span key={`${wordIdx}-${letterIdx}`} className={shouldFill ? "filled" : "outlined"}>
+                        {letter}
+                      </span>
+                    ));
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Marquee */}
+        <div className="absolute right-0 top-0 h-full w-40 overflow-hidden hidden lg:flex items-center justify-center">
+          <div className="marquee-vertical-stacked flex flex-col gap-12 text-[48px] font-bold uppercase">
+            {Array.from({ length: 30 }).map((_, i) => {
+              const words = ["Building", "Bridges"];
+              const phraseIsFilled = i % 2 === 0;
+              return (
+                <div key={i} className="flex flex-col gap-0 leading-none">
+                  {words.map((word, wordIdx) => {
+                    const isBridges = wordIdx === 1;
+                    const shouldFill = isBridges ? !phraseIsFilled : phraseIsFilled;
+                    return word.split("").map((letter, letterIdx) => (
+                      <span key={`${wordIdx}-${letterIdx}`} className={shouldFill ? "filled" : "outlined"}>
+                        {letter}
+                      </span>
+                    ));
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="max-w-4xl w-full text-center px-6 relative z-10">
+          {/* Star Rating */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                size={24}
+                className="fill-[#997e67] text-[#997e67]"
+              />
+            ))}
+          </div>
+
           {/* Quote Text */}
           <blockquote className="text-[clamp(22px,2.2vw,32px)] italic font-semibold text-(--primary-text)/95 mb-4">
             {activeQuote.text}
@@ -413,24 +424,36 @@ export default function Home() {
           </p>
 
           {/* Profile Pictures */}
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center justify-center gap-6 h-10">
             {quotes.map((quote) => {
               const isActive = quote.id === activeQuoteId;
               return (
                 <button
                   key={quote.id}
                   onClick={() => setActiveQuoteId(quote.id)}
-                  className={`rounded-full overflow-hidden border-4 transition-all duration-300 ${
+                  className={`rounded-full overflow-hidden border-4 transition-all duration-300 cursor-pointer ${
                     isActive
                       ? "w-20 h-20 border-[#997e67]"
                       : "w-16 h-16 border-gray-300 grayscale hover:grayscale-0"
                   }`}
                 >
-                  <img
-                    src={quote.image}
-                    alt={quote.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="relative w-full h-full">
+                    <img
+                      src={quote.image}
+                      alt={quote.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {isActive && (
+                      <img
+                        src={quote.image}
+                        alt={quote.name}
+                        className="absolute inset-0 w-full h-full object-cover animate-colorReveal"
+                        style={{
+                          filter: "grayscale(100%)"
+                        }}
+                      />
+                    )}
+                  </div>
                 </button>
               );
             })}

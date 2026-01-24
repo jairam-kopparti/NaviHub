@@ -1,0 +1,94 @@
+/* Hero Section Animations */
+@keyframes letterReveal {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-letter {
+  animation: letterReveal 0.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 1s ease forwards;
+}
+
+@keyframes buttonHop {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Marquee Animation */
+.marquee {
+  animation: scroll-left 30s linear infinite;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.filled {
+  color: #997E67;
+}
+
+.outlined {
+  color: transparent;
+  -webkit-text-stroke: 1px #997E67;
+}
+
+/* Vertical Marquee Animation */
+.marquee-vertical {
+  animation: scroll-up 30s linear infinite;
+}
+
+.marquee-vertical-stacked {
+  animation: scroll-up 30s linear infinite;
+}
+
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* Color Reveal Animation (Left to Right) */
+@keyframes colorReveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.animate-colorReveal {
+  animation: colorReveal 5s ease-in-out forwards;
+}
