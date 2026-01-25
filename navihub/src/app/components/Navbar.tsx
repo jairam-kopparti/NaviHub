@@ -15,7 +15,7 @@ export default function Navbar() {
   const router = useRouter()
   const { user, loading } = useUser()
 
-  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources')
+  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources') || pathname.includes('/pages/events')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
