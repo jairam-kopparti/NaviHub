@@ -6,7 +6,7 @@ import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
   title: "NaviHub",
-  description: "ITE@RHS TSA Webmaster 2025-2026; Team #2014-1",
+  description: "Team #2014-1",
 };
 
 export default function RootLayout({

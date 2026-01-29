@@ -5,7 +5,7 @@ import { Eye } from "lucide-react";
 interface ResourcesCardProps {
   category: string;
   title: string;
-  description: string;
+  description?: string;
   imageUrl?: string;
   views?: number;
 }
@@ -43,9 +43,11 @@ export function ResourcesCard({
       </h3>
 
       {/* Description */}
-      <p className="text-sm line-clamp-3" style={{ color: "#1F1F1F" }}>
-        {description}
-      </p>
+      {description && (
+        <p className="text-sm line-clamp-3" style={{ color: "#1F1F1F" }}>
+          {description}
+        </p>
+      )}
 
       {/* Footer */}
       <div className="mt-auto flex items-center gap-2 text-(--secondary-text)">

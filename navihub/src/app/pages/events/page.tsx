@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
+import "../../styles/events.css";
 
 type Category =
   | "sports"
@@ -907,6 +908,47 @@ export default function CommunityEvents() {
     } else {
       setUserSignups((prev) => prev.filter((id) => id !== eventId));
     }
+    
+    // Refetch events to update spots_taken
+    const refetchEvents = async () => {
+      try {
+        let query = supabase
+          .from("events")
+          .select("*")
+          .order("event_date", { ascending: true })
+          .order("start_time", { ascending: true });
+
+        if (selectedCategories.length > 0) {
+          query = query.in("category", selectedCategories);
+        }
+
+        if (selectedBoroughs.length > 0) {
+          query = query.in("location_name", selectedBoroughs);
+        }
+
+        const { data } = await query;
+        if (data) {
+          let filteredEvents = data as Event[];
+          if (selectedCapacity !== "all") {
+            filteredEvents = filteredEvents.filter((event) => {
+              if (!event.capacity) return selectedCapacity === "unlimited";
+              const spotsAvailable = event.capacity - event.spots_taken;
+              if (selectedCapacity === "available") {
+                return spotsAvailable > 0;
+              } else if (selectedCapacity === "full") {
+                return spotsAvailable === 0;
+              }
+              return true;
+            });
+          }
+          setEvents(filteredEvents);
+        }
+      } catch (err) {
+        console.error("Error refetching events:", err);
+      }
+    };
+    
+    refetchEvents();
   };
 
   const allCategories: Category[] = [
@@ -923,6 +965,7 @@ export default function CommunityEvents() {
 
   return (
     <div
+      className="events-page"
       style={{
         backgroundColor: "var(--bg)",
         minHeight: "100vh",
@@ -1228,6 +1271,9 @@ export default function CommunityEvents() {
               padding: "1.5rem",
               borderRadius: "8px",
               border: "1px solid var(--border)",
+              display: "flex",
+              flexDirection: "column",
+              maxHeight: "644px",
             }}
           >
             <h2
@@ -1266,39 +1312,49 @@ export default function CommunityEvents() {
               />
             </div>
 
-            {loading ? (
-              <p style={{ color: "var(--thirdary-text)", textAlign: "center" }}>
-                Loading events...
-              </p>
-            ) : sortedDates.length === 0 ? (
-              <p style={{ color: "var(--thirdary-text)", textAlign: "center" }}>
-                No events found matching your filters.
-              </p>
-            ) : (
-              sortedDates.map((date) => (
-                <div key={date} style={{ marginBottom: "2rem" }}>
-                  <h3
-                    style={{
-                      color: "var(--secondary-text)",
-                      fontSize: "1rem",
-                      fontWeight: 600,
-                      borderBottom: "2px solid var(--border)",
-                      paddingBottom: "0.5rem",
-                      margin: "0 0 1rem 0",
-                    }}
-                  >
-                    {formatDateLabel(date)}
-                  </h3>
-                  {groupedByDate[date].map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onClick={() => setSelectedEvent(event)}
-                    />
-                  ))}
-                </div>
-              ))
-            )}
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                border: "2px solid var(--border)",
+                borderRadius: "6px",
+                padding: "0.5rem",
+              }}
+            >
+              {loading ? (
+                <p style={{ color: "var(--thirdary-text)", textAlign: "center" }}>
+                  Loading events...
+                </p>
+              ) : sortedDates.length === 0 ? (
+                <p style={{ color: "var(--thirdary-text)", textAlign: "center" }}>
+                  No events found matching your filters.
+                </p>
+              ) : (
+                sortedDates.map((date) => (
+                  <div key={date} style={{ marginBottom: "2rem" }}>
+                    <h3
+                      style={{
+                        color: "var(--secondary-text)",
+                        fontSize: "1rem",
+                        fontWeight: 600,
+                        borderBottom: "2px solid var(--border)",
+                        paddingBottom: "0.5rem",
+                        margin: "0 0 1rem 0",
+                      }}
+                    >
+                      {formatDateLabel(date)}
+                    </h3>
+                    {groupedByDate[date].map((event) => (
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        onClick={() => setSelectedEvent(event)}
+                      />
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

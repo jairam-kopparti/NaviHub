@@ -44,11 +44,6 @@ export default function HighlightsCard({
         {/* Title */}
         <h4 className="text-lg font-semibold mb-2 text-(--secondary-text)">{title}</h4>
 
-        {/* Description */}
-        <p className="text-sm text-gray-600 mb-6 text-left min-h-[80px]">
-          {description}
-        </p>
-
         {/* Footer */}
         <div className="mt-auto flex items-center gap-2">
           <Eye className="w-5 h-5 text-(--secondary-text)" />

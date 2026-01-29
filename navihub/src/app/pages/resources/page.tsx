@@ -5,7 +5,6 @@ import { Search, Check, X, Eye } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
 import { ResourcesCard } from "../../components/resourcepage/ResourcesCard";
-import { useRouter } from "next/navigation";
 import { useUser } from "../../lib/useUser";
 import AddResourceModal from "../../components/resourcepage/AddResourceButton";
 import AuthErrorModal from "../../components/resourcepage/AuthErrorPopup";
@@ -32,7 +31,7 @@ export default function ResourcesPage() {
   const [selectedCard, setSelectedCard] = useState<Resource | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAuthError, setShowAuthError] = useState(false);
-  const { user, loading: userLoading } = useUser();
+  const { user } = useUser();
 
   // Fetch resources from Supabase
   useEffect(() => {
@@ -142,7 +141,7 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       {/* Section 1: Hero Image */}
       <section className="relative h-[60vh] border-b border-(--border) overflow-hidden">
         <img
@@ -158,10 +157,10 @@ export default function ResourcesPage() {
       </section>
 
       {/* Section 2 + 3: Preferences + Resources */}
-      <div className="container mx-auto px-4 py-8 flex gap-8 border-b border-[var(--border)]">
+      <div className="container mx-auto px-4 py-8 flex gap-8 border-b border-(--border)">
         {/* Preferences Panel */}
         <aside className="w-72 flex-shrink-0">
-          <div className="sticky top-8 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-6">
+          <div className="sticky top-8 bg-(--surface) border border-(--border) rounded-2xl p-6 shadow-sm flex flex-col gap-6">
             {/* Categories */}
             <div>
               <h3 className="font-semibold text-xl mb-4 text-(--secondary-text)">Filter by Category</h3>
@@ -176,10 +175,10 @@ export default function ResourcesPage() {
                           ? setSelectedCategories(selectedCategories.filter((c) => c !== category))
                           : setSelectedCategories([...selectedCategories, category])
                       }
-                      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors border ${
+                      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors border cursor-pointer ${
                         isSelected
                           ? "bg-[#997e67] text-(--secondary-text) border-[#997e67]"
-                          : "border-[var(--border)] hover:bg-[var(--bg)] text-(--secondary-text)"
+                          : "border-(--border) hover:bg-(--bg) text-(--secondary-text)"
                       }`}
                     >
                       {isSelected && <Check className="w-4 h-4" />}
@@ -196,7 +195,7 @@ export default function ResourcesPage() {
               <select
                 value={selectedView}
                 onChange={(e) => setSelectedView(e.target.value)}
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-lg bg-[var(--surface)] text-(--secondary-text) focus:outline-none focus:ring-2 focus:ring-[#997e67]"
+                className="w-full px-4 py-2 border border-(--border) rounded-lg bg-(--surface) text-(--secondary-text) focus:outline-none focus:ring-2 focus:ring-[#997e67] cursor-pointer"
               >
                 {VIEWS_OPTIONS.map((option) => (
                   <option key={option} value={option}>
@@ -225,7 +224,7 @@ export default function ResourcesPage() {
             </div>
             <button 
               onClick={handleAddResourceClick}
-              className="px-6 py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap">
+              className="px-6 py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap cursor-pointer">
               Add resource
             </button>
           </div>
@@ -240,7 +239,6 @@ export default function ResourcesPage() {
               >
                 <ResourcesCard
                   title={resource.title}
-                  description={resource.description}
                   imageUrl={resource.imageUrl}
                   views={resource.views}
                   category={resource.category}
@@ -259,7 +257,7 @@ export default function ResourcesPage() {
         >
           {/* Modal Card */}
           <div
-            className="relative bg-[var(--surface)] rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto animate-zoomIn"
+            className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto animate-zoomIn"
             onClick={(e) => e.stopPropagation()}
             style={{
               animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
@@ -268,7 +266,7 @@ export default function ResourcesPage() {
             {/* Close Button */}
             <button
               onClick={() => setSelectedCard(null)}
-              className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md"
+              className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md cursor-pointer"
             >
               <X className="w-5 h-5 text-black" />
             </button>
@@ -303,7 +301,7 @@ export default function ResourcesPage() {
               </h2>
 
               {/* Description */}
-              <p className="text-lg mb-6 leading-relaxed" style={{ color: "#1F1F1F" }}>
+              <p className="text-sm mb-6 leading-relaxed" style={{ color: "#1F1F1F" }}>
                 {selectedCard.description}
               </p>
 

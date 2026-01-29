@@ -1,0 +1,33 @@
+.events-page {
+  --bg: #BAC8B1;
+  --surface: #E6E6E6;
+  --thirdary-text: #404E3B;
+
+  --border: #6C8480
+
+}
+
+/* Custom scrollbar for events page */
+.events-page ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.events-page ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.events-page ::-webkit-scrollbar-thumb {
+  background: var(--secondary-text);
+  border-radius: 4px;
+}
+
+.events-page ::-webkit-scrollbar-thumb:hover {
+  background: var(--thirdary-text);
+}
+
+/* Firefox support */
+.events-page {
+  scrollbar-color: var(--secondary-text) transparent;
+  scrollbar-width: thin;
+}

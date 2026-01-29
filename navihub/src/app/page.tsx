@@ -167,25 +167,29 @@ export default function Home() {
       id: 1,
       text: "“From the moment I landed on this website, it felt like a true home base for the community. Everything is organized in a way that makes sense, from nonprofits to support services to local programs, and I never feel lost while browsing. The layout is clean, the information is clear, and it genuinely feels like the site was built with real people in mind, not just to look nice but to actually help.”",
       name: "Alex Rivera",
-      image: "/person1.jpg"
+      image: "/person1.jpg",
+      rating: 5
     },
     {
       id: 2,
       text: "“What stands out most about this community resource hub is how much effort clearly went into making resources easy to find and understand. Whether I am looking for help, trying to learn about organizations in the area, or just exploring what is available nearby, the site makes the process simple and welcoming. It turns what could be overwhelming information into something approachable and useful.”",
       name: "Jordan Lee",
-      image: "/person2.jpg"
+      image: "/person2.jpg",
+      rating: 4
     },
     {
       id: 3,
       text: "“This website does an amazing job of connecting people to opportunities and support within the community. The way resources are grouped, explained, and presented shows that the creators deeply understand what residents need. It feels less like a random list of links and more like a guided experience that encourages people to get involved and actually use what is offered.”",
       name: "Emily Chen",
-      image: "/person3.jpg"
+      image: "/person3.jpg",
+      rating: 5
     },
     {
       id: 4,
       text: "“What I appreciate most about this site is that it feels reliable and thoughtfully built. The structure, design, and content all work together to highlight events, organizations, and services in a way that feels trustworthy and up to date. It gives the impression of a living hub that grows with the community and truly supports the goal of bringing people together through accessible information.”",
       name: "Michael Torres",
-      image: "/person4.jpg"
+      image: "/person4.jpg",
+      rating: 5
     }
   ];
 
@@ -292,7 +296,7 @@ export default function Home() {
         className="relative z-30"
         style={{
           transform: `translateY(-${slideProgress * 100}vh)`,
-          transition: "transform 0s linear",
+          transition: "transform 0.05s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
           willChange: "transform",
           zIndex: slideProgress > 0 ? 40 : undefined,
           marginBottom: "-100vh",
@@ -410,7 +414,7 @@ export default function Home() {
               <Star
                 key={i}
                 size={24}
-                className="fill-[#997e67] text-[#997e67]"
+                className={i < activeQuote.rating ? "fill-[#997e67] text-[#997e67]" : "fill-gray-300 text-gray-300"}
               />
             ))}
           </div>

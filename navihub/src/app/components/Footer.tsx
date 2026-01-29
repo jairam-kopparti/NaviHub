@@ -17,6 +17,9 @@ export default function Footer() {
           <Link href="/pages/events" className="hover:text-(--accent) transition">
             Events
           </Link>
+          <Link href="/pages/NaviLink" className="hover:text-(--accent) transition">
+            NaviLink
+          </Link>
           <Link href="/pages/about" className="hover:text-(--accent) transition">
             About
           </Link>
