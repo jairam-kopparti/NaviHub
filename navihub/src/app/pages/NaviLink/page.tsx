@@ -167,11 +167,15 @@ const CreatePostModal = ({
   onClose,
   onSubmit,
   categoryName,
+  moderationError,
+  onClearError,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, content: string) => void;
+  onSubmit: (title: string, content: string) => Promise<boolean>;
   categoryName: string;
+  moderationError: string | null;
+  onClearError: () => void;
 }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -180,22 +184,31 @@ const CreatePostModal = ({
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) return;
     setLoading(true);
-    await onSubmit(title.trim(), content.trim());
+    const success = await onSubmit(title.trim(), content.trim());
+    setLoading(false);
+    if (success) {
+      setTitle("");
+      setContent("");
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
     setTitle("");
     setContent("");
-    setLoading(false);
+    onClearError();
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="navilink-modal-overlay" onClick={onClose}>
+    <div className="navilink-modal-overlay" onClick={handleClose}>
       <div className="navilink-modal" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <h3 style={{ margin: 0 }}>Create Post in {categoryName}</h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: "transparent",
               border: "none",
@@ -206,21 +219,42 @@ const CreatePostModal = ({
             <X size={20} />
           </button>
         </div>
+        {moderationError && (
+          <div
+            style={{
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "8px",
+              padding: "0.75rem 1rem",
+              marginBottom: "1rem",
+              color: "#dc2626",
+              fontSize: "0.9rem",
+            }}
+          >
+            {moderationError}
+          </div>
+        )}
         <input
           type="text"
           placeholder="Post Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (moderationError) onClearError();
+          }}
           className="navilink-modal-input"
         />
         <textarea
           placeholder="What would you like to share?"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            if (moderationError) onClearError();
+          }}
           className="navilink-modal-textarea"
         />
         <div className="navilink-modal-actions">
-          <button className="navilink-modal-cancel" onClick={onClose}>
+          <button className="navilink-modal-cancel" onClick={handleClose}>
             Cancel
           </button>
           <button
@@ -228,7 +262,7 @@ const CreatePostModal = ({
             onClick={handleSubmit}
             disabled={loading || !title.trim() || !content.trim()}
           >
-            {loading ? "Posting..." : "Post"}
+            {loading ? "Checking & Posting..." : "Post"}
           </button>
         </div>
       </div>
@@ -242,10 +276,14 @@ const EditPostModalContent = ({
   onClose,
   onSubmit,
   post,
+  moderationError,
+  onClearError,
 }: {
   onClose: () => void;
-  onSubmit: (title: string, content: string) => void;
+  onSubmit: (title: string, content: string) => Promise<boolean>;
   post: Post;
+  moderationError: string | null;
+  onClearError: () => void;
 }) => {
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
@@ -254,18 +292,25 @@ const EditPostModalContent = ({
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) return;
     setLoading(true);
-    await onSubmit(title.trim(), content.trim());
+    const success = await onSubmit(title.trim(), content.trim());
     setLoading(false);
+    if (success) {
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    onClearError();
     onClose();
   };
 
   return (
-    <div className="navilink-modal-overlay" onClick={onClose}>
+    <div className="navilink-modal-overlay" onClick={handleClose}>
       <div className="navilink-modal" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
           <h3 style={{ margin: 0 }}>Edit Post</h3>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: "transparent",
               border: "none",
@@ -276,21 +321,42 @@ const EditPostModalContent = ({
             <X size={20} />
           </button>
         </div>
+        {moderationError && (
+          <div
+            style={{
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "8px",
+              padding: "0.75rem 1rem",
+              marginBottom: "1rem",
+              color: "#dc2626",
+              fontSize: "0.9rem",
+            }}
+          >
+            {moderationError}
+          </div>
+        )}
         <input
           type="text"
           placeholder="Post Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (moderationError) onClearError();
+          }}
           className="navilink-modal-input"
         />
         <textarea
           placeholder="What would you like to share?"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            if (moderationError) onClearError();
+          }}
           className="navilink-modal-textarea"
         />
         <div className="navilink-modal-actions">
-          <button className="navilink-modal-cancel" onClick={onClose}>
+          <button className="navilink-modal-cancel" onClick={handleClose}>
             Cancel
           </button>
           <button
@@ -298,7 +364,7 @@ const EditPostModalContent = ({
             onClick={handleSubmit}
             disabled={loading || !title.trim() || !content.trim()}
           >
-            {loading ? "Saving..." : "Save Changes"}
+            {loading ? "Checking & Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
@@ -311,11 +377,15 @@ const EditPostModal = ({
   onClose,
   onSubmit,
   post,
+  moderationError,
+  onClearError,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (title: string, content: string) => void;
+  onSubmit: (title: string, content: string) => Promise<boolean>;
   post: Post | null;
+  moderationError: string | null;
+  onClearError: () => void;
 }) => {
   if (!isOpen || !post) return null;
 
@@ -326,6 +396,8 @@ const EditPostModal = ({
       onClose={onClose}
       onSubmit={onSubmit}
       post={post}
+      moderationError={moderationError}
+      onClearError={onClearError}
     />
   );
 };
@@ -526,6 +598,7 @@ export default function NaviLinkPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [moderationError, setModerationError] = useState<string | null>(null);
 
   // Fetch posts for selected category
   useEffect(() => {
@@ -643,11 +716,26 @@ export default function NaviLinkPage() {
     };
   }, [posts]);
 
-  // Create post handler
-  const handleCreatePost = async (title: string, content: string) => {
-    if (!user) return;
+  // Create post handler with moderation
+  const handleCreatePost = async (title: string, content: string): Promise<boolean> => {
+    if (!user) return false;
 
     try {
+      // Moderate content before saving (check both title and content)
+      const moderationResponse = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `${title}\n${content}` }),
+      });
+
+      const moderationResult = await moderationResponse.json();
+
+      if (!moderationResult.safe) {
+        setModerationError(moderationResult.message || "Your content contains inappropriate material.");
+        return false;
+      }
+
+      // Content is safe, save to Supabase
       const { error } = await supabase.from("navilink_posts").insert([
         {
           title,
@@ -660,17 +748,37 @@ export default function NaviLinkPage() {
 
       if (error) {
         console.error("Error creating post:", error);
+        return false;
       }
+
+      return true;
     } catch (err) {
       console.error("Unexpected error:", err);
+      setModerationError("Failed to check content. Please try again.");
+      return false;
     }
   };
 
-  // Edit post handler
-  const handleEditPost = async (title: string, content: string) => {
-    if (!user || !editingPost) return;
+  // Edit post handler with moderation
+  const handleEditPost = async (title: string, content: string): Promise<boolean> => {
+    if (!user || !editingPost) return false;
 
     try {
+      // Moderate content before saving (check both title and content)
+      const moderationResponse = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `${title}\n${content}` }),
+      });
+
+      const moderationResult = await moderationResponse.json();
+
+      if (!moderationResult.safe) {
+        setModerationError(moderationResult.message || "Your content contains inappropriate material.");
+        return false;
+      }
+
+      // Content is safe, update in Supabase
       const { error } = await supabase
         .from("navilink_posts")
         .update({ title, content, updated_at: new Date().toISOString() })
@@ -679,9 +787,14 @@ export default function NaviLinkPage() {
 
       if (error) {
         console.error("Error updating post:", error);
+        return false;
       }
+
+      return true;
     } catch (err) {
       console.error("Unexpected error:", err);
+      setModerationError("Failed to check content. Please try again.");
+      return false;
     }
   };
 
@@ -920,6 +1033,8 @@ export default function NaviLinkPage() {
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreatePost}
         categoryName={selectedCategory.name}
+        moderationError={moderationError}
+        onClearError={() => setModerationError(null)}
       />
       <EditPostModal
         isOpen={showEditModal}
@@ -929,6 +1044,8 @@ export default function NaviLinkPage() {
         }}
         onSubmit={handleEditPost}
         post={editingPost}
+        moderationError={moderationError}
+        onClearError={() => setModerationError(null)}
       />
       <DeleteConfirmModal
         isOpen={showDeleteModal}
