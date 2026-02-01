@@ -6,9 +6,10 @@ import Link from "next/link";
 interface AuthErrorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onJudgeOverride?: () => void;
 }
 
-export default function AuthErrorModal({ isOpen, onClose }: AuthErrorModalProps) {
+export default function AuthErrorModal({ isOpen, onClose, onJudgeOverride }: AuthErrorModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -18,7 +19,7 @@ export default function AuthErrorModal({ isOpen, onClose }: AuthErrorModalProps)
     >
       {/* Modal Card */}
       <div
-        className="relative bg-[var(--surface)] rounded-3xl shadow-2xl max-w-md w-full"
+        className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
         style={{
           animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
@@ -55,6 +56,17 @@ export default function AuthErrorModal({ isOpen, onClose }: AuthErrorModalProps)
                   Sign In
                 </button>
               </Link>
+              {onJudgeOverride && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onJudgeOverride();
+                  }}
+                  className="w-full py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors mt-2 border-2 border-blue-600"
+                >
+                  Judge Override
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -188,31 +188,23 @@ button, .button {
    Custom Scrollbar + Scroll Progress
    ========================= */
 
-/* Body scrollbar fallback */
+/* Scrollbar hidden - using progress bar instead */
 body {
-  scrollbar-color: rgba(0,0,0,0.65) white;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 /* WebKit scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 0;
+  height: 0;
 }
 
 ::-webkit-scrollbar-track {
-  background: white;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.65);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-  transition: background-color 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0,0,0,0.85);
+  background-color: transparent;
 }
 
 .scroll-indicator {

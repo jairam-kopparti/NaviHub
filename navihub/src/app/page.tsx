@@ -189,7 +189,7 @@ export default function Home() {
       text: "“What I appreciate most about this site is that it feels reliable and thoughtfully built. The structure, design, and content all work together to highlight events, organizations, and services in a way that feels trustworthy and up to date. It gives the impression of a living hub that grows with the community and truly supports the goal of bringing people together through accessible information.”",
       name: "Michael Torres",
       image: "/person4.jpg",
-      rating: 5
+      rating: 4.5
     }
   ];
 
@@ -410,13 +410,29 @@ export default function Home() {
         <div className="max-w-4xl w-full text-center px-6 relative z-10">
           {/* Star Rating */}
           <div className="flex items-center justify-center gap-2 mb-8">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={24}
-                className={i < activeQuote.rating ? "fill-[#997e67] text-[#997e67]" : "fill-gray-300 text-gray-300"}
-              />
-            ))}
+            {[...Array(5)].map((_, i) => {
+              const isFilled = i < activeQuote.rating;
+              const isHalf = i === Math.floor(activeQuote.rating) && activeQuote.rating % 1 !== 0;
+              return (
+                <div key={i} className="relative w-6 h-6">
+                  <Star
+                    size={24}
+                    className="absolute fill-gray-300 text-gray-300"
+                  />
+                  {(isFilled || isHalf) && (
+                    <div
+                      className="absolute top-0 left-0 overflow-hidden"
+                      style={{ width: isHalf ? "50%" : "100%" }}
+                    >
+                      <Star
+                        size={24}
+                        className="fill-[#997e67] text-[#997e67]"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Quote Text */}

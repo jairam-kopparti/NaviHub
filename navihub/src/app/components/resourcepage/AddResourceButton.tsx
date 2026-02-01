@@ -16,6 +16,14 @@ const CATEGORIES = [
   "Youth, Family & Senior Services",
 ];
 
+const BOROUGHS = [
+  "Manhattan",
+  "Brooklyn",
+  "Queens",
+  "Bronx",
+  "Staten Island",
+];
+
 interface AddResourceModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,11 +37,13 @@ export default function AddResourceModal({
 }: AddResourceModalProps) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("Manhattan");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
   const wordCount = description.trim().split(/\s+/).filter(w => w.length > 0).length;
   const isDescriptionValid = wordCount >= 15;
@@ -63,6 +73,7 @@ export default function AddResourceModal({
             category,
             description: description.trim(),
             image_url: imageUrl.trim() || "",
+            location: location,
             views: 0,
           },
         ]);
@@ -82,6 +93,7 @@ export default function AddResourceModal({
       setTimeout(() => {
         setTitle("");
         setCategory("");
+        setLocation("Manhattan");
         setDescription("");
         setImageUrl("");
         setSuccess(false);
@@ -105,16 +117,22 @@ export default function AddResourceModal({
     >
       {/* Modal Card */}
       <div
-        className="relative bg-[var(--surface)] rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide"
         onClick={(e) => e.stopPropagation()}
         style={{
           animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
+        }}
+        onScroll={(e) => {
+          const element = e.currentTarget;
+          const hasMoreContent = element.scrollHeight > element.clientHeight;
+          const isAtBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
+          setShowScrollIndicator(hasMoreContent && !isAtBottom);
         }}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md"
+          className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md cursor-pointer"
         >
           <X className="w-5 h-5 text-black" />
         </button>
@@ -144,7 +162,7 @@ export default function AddResourceModal({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter resource title"
-                  className="w-full px-4 py-3 border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-gray-400"
+                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-gray-400"
                   style={{ color: "#1F1F1F" }}
                 />
               </div>
@@ -157,13 +175,32 @@ export default function AddResourceModal({
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] bg-white"
+                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] bg-white"
                   style={{ color: "#1F1F1F" }}
                 >
                   <option value="">Select a category</option>
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Location Dropdown */}
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
+                  NYC Borough Location
+                </label>
+                <select
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] bg-white"
+                  style={{ color: "#1F1F1F" }}
+                >
+                  {BOROUGHS.map((borough) => (
+                    <option key={borough} value={borough}>
+                      {borough}
                     </option>
                   ))}
                 </select>
@@ -179,7 +216,7 @@ export default function AddResourceModal({
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-gray-400"
+                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-gray-400"
                   style={{ color: "#1F1F1F" }}
                 />
               </div>
@@ -203,7 +240,7 @@ export default function AddResourceModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter resource description (minimum 15 words)"
-                  className="w-full px-4 py-3 border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] resize-none placeholder:text-gray-400 h-32"
+                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] resize-none placeholder:text-gray-400 h-32"
                   style={{ color: "#1F1F1F" }}
                 />
               </div>
@@ -237,6 +274,26 @@ export default function AddResourceModal({
             </form>
           )}
         </div>
+
+        {/* Scroll Indicator */}
+        {showScrollIndicator && (
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none flex items-end justify-center pb-2">
+            <div className="animate-bounce">
+              <svg
+                className="w-5 h-5"
+                style={{ color: "#997e67" }}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+              </svg>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx>{`
@@ -249,6 +306,13 @@ export default function AddResourceModal({
             opacity: 1;
             transform: scale(1);
           }
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>

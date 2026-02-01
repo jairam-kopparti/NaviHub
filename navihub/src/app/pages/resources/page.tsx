@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Check, X, Eye } from "lucide-react";
+import { Search, Check } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
 import { ResourcesCard } from "../../components/resourcepage/ResourcesCard";
 import { useUser } from "../../lib/useUser";
 import AddResourceModal from "../../components/resourcepage/AddResourceButton";
 import AuthErrorModal from "../../components/resourcepage/AuthErrorPopup";
+import ResourceDetailModal from "../../components/resourcepage/ResourceDetailModal";
 
 const CATEGORIES = [
   "Nonprofit & Charitable Organizations",
@@ -21,19 +22,65 @@ const CATEGORIES = [
   "Youth, Family & Senior Services",
 ];
 
+const LOCATIONS = [
+  "Manhattan",
+  "Brooklyn",
+  "Queens",
+  "Bronx",
+  "Staten Island",
+];
+
+const RATING_OPTIONS = [
+  { label: "5 Stars", value: 5 },
+  { label: "4+ Stars", value: 4 },
+  { label: "3+ Stars", value: 3 },
+  { label: "All Ratings", value: 0 },
+];
+
 const VIEWS_OPTIONS = ["Most Viewed", "Least Viewed"];
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedRating, setSelectedRating] = useState<number>(0);
   const [selectedView, setSelectedView] = useState<string>("Most Viewed");
   const [selectedCard, setSelectedCard] = useState<Resource | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAuthError, setShowAuthError] = useState(false);
+  const [userFavorites, setUserFavorites] = useState<Set<string>>(new Set());
+  const [judgeOverrideMode, setJudgeOverrideMode] = useState(false);
   const { user } = useUser();
 
-  // Fetch resources from Supabase
+  // Fetch user's favorites
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!user && !judgeOverrideMode) {
+        setUserFavorites(new Set());
+        return;
+      }
+
+      try {
+        const userId = judgeOverrideMode ? "judge-override" : user?.id;
+        if (!userId) return;
+
+        const { data, error } = await supabase
+          .from("favorites")
+          .select("resource_id")
+          .eq("user_id", userId);
+
+        if (error) throw error;
+        const favoriteIds = new Set(data?.map(f => f.resource_id) || []);
+        setUserFavorites(favoriteIds);
+      } catch (err) {
+        console.error("Error fetching favorites:", err);
+      }
+    };
+
+    fetchFavorites();
+  }, [user, judgeOverrideMode]);
+
   useEffect(() => {
     const fetchResources = async () => {
       try {
@@ -44,9 +91,10 @@ export default function ResourcesPage() {
           query = query.in("category", selectedCategories);
         }
 
-        // Sort by views
-        if (selectedView === "Most Viewed") query = query.order("views", { ascending: false });
-        else query = query.order("views", { ascending: true });
+        // Filter by locations if selected
+        if (selectedLocations.length > 0) {
+          query = query.in("location", selectedLocations);
+        }
 
         const { data, error } = await query;
         
@@ -56,7 +104,63 @@ export default function ResourcesPage() {
           return;
         }
         
-        if (data) setResources(data as Resource[]);
+        if (data) {
+          // Fetch reviews to calculate average ratings
+          const { data: reviews, error: reviewsError } = await supabase
+            .from("reviews")
+            .select("resource_id, rating");
+
+          if (reviewsError) {
+            console.error("Error fetching reviews:", reviewsError);
+          }
+
+          // Calculate average rating for each resource
+          const ratingMap: { [key: string]: { total: number; count: number } } = {};
+          if (reviews) {
+            reviews.forEach((review) => {
+              if (!ratingMap[review.resource_id]) {
+                ratingMap[review.resource_id] = { total: 0, count: 0 };
+              }
+              ratingMap[review.resource_id].total += review.rating;
+              ratingMap[review.resource_id].count += 1;
+            });
+          }
+
+          // Add average rating to resources
+          let filtered = (data as Resource[]).map((resource) => {
+            if (ratingMap[resource.id]) {
+              const avg = ratingMap[resource.id].total / ratingMap[resource.id].count;
+              return { ...resource, avgRating: parseFloat(avg.toFixed(1)) };
+            }
+            return { ...resource, avgRating: 0 };
+          });
+
+          // Filter by rating
+          if (selectedRating > 0) {
+            filtered = filtered.filter((resource) => {
+              const avgRating = resource.avgRating ?? 0;
+              return avgRating >= selectedRating;
+            });
+          }
+
+          // Sort by views
+          if (selectedView === "Most Viewed") {
+            filtered.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+          } else {
+            filtered.sort((a, b) => (a.views ?? 0) - (b.views ?? 0));
+          }
+
+          // Sort favorites to top
+          const sorted = filtered.sort((a, b) => {
+            const aFavorited = userFavorites.has(a.id);
+            const bFavorited = userFavorites.has(b.id);
+            if (aFavorited && !bFavorited) return -1;
+            if (!aFavorited && bFavorited) return 1;
+            return 0;
+          });
+
+          setResources(sorted);
+        }
       } catch (err) {
         console.error("Unexpected error fetching resources:", err);
         setResources([]);
@@ -64,7 +168,7 @@ export default function ResourcesPage() {
     };
 
     fetchResources();
-  }, [selectedCategories, selectedView]);
+  }, [selectedCategories, selectedLocations, selectedRating, selectedView, userFavorites]);
 
   // Filter search locally (null-safe)
   const queryLower = searchQuery.trim().toLowerCase();
@@ -121,8 +225,9 @@ export default function ResourcesPage() {
           query = query.in("category", selectedCategories);
         }
 
-        if (selectedView === "Most Viewed") query = query.order("views", { ascending: false });
-        else query = query.order("views", { ascending: true });
+        if (selectedLocations.length > 0) {
+          query = query.in("location", selectedLocations);
+        }
 
         const { data, error } = await query;
         
@@ -131,7 +236,59 @@ export default function ResourcesPage() {
           return;
         }
         
-        if (data) setResources(data as Resource[]);
+        if (data) {
+          // Fetch reviews to calculate average ratings
+          const { data: reviews, error: reviewsError } = await supabase
+            .from("reviews")
+            .select("resource_id, rating");
+
+          if (reviewsError) {
+            console.error("Error fetching reviews:", reviewsError);
+          }
+
+          // Calculate average rating for each resource
+          const ratingMap: { [key: string]: { total: number; count: number } } = {};
+          if (reviews) {
+            reviews.forEach((review) => {
+              if (!ratingMap[review.resource_id]) {
+                ratingMap[review.resource_id] = { total: 0, count: 0 };
+              }
+              ratingMap[review.resource_id].total += review.rating;
+              ratingMap[review.resource_id].count += 1;
+            });
+          }
+
+          // Add average rating to resources
+          let filtered = (data as Resource[]).map((resource) => {
+            if (ratingMap[resource.id]) {
+              const avg = ratingMap[resource.id].total / ratingMap[resource.id].count;
+              return { ...resource, avgRating: parseFloat(avg.toFixed(1)) };
+            }
+            return { ...resource, avgRating: 0 };
+          });
+
+          if (selectedRating > 0) {
+            filtered = filtered.filter((resource) => {
+              const avgRating = resource.avgRating ?? 0;
+              return avgRating >= selectedRating;
+            });
+          }
+
+          if (selectedView === "Most Viewed") {
+            filtered.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+          } else {
+            filtered.sort((a, b) => (a.views ?? 0) - (b.views ?? 0));
+          }
+
+          const sorted = filtered.sort((a, b) => {
+            const aFavorited = userFavorites.has(a.id);
+            const bFavorited = userFavorites.has(b.id);
+            if (aFavorited && !bFavorited) return -1;
+            if (!aFavorited && bFavorited) return 1;
+            return 0;
+          });
+          setResources(sorted);
+        }
       } catch (err) {
         console.error("Unexpected error refetching resources:", err);
       }
@@ -140,14 +297,18 @@ export default function ResourcesPage() {
     fetchResources();
   };
 
+  const handleJudgeOverride = () => {
+    setJudgeOverrideMode(true);
+    setShowAddModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-(--bg)">
       {/* Section 1: Hero Image */}
       <section className="relative h-[60vh] border-b border-(--border) overflow-hidden">
-        <img
-          src="/resources.jpg"
-          alt="Resources"
-          className="absolute inset-0 w-full h-full object-cover"
+        <div
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: 'url(/resources.jpg)' }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <h1 className="text-white text-6xl font-(--font-heading)">
@@ -159,8 +320,8 @@ export default function ResourcesPage() {
       {/* Section 2 + 3: Preferences + Resources */}
       <div className="container mx-auto px-4 py-8 flex gap-8 border-b border-(--border)">
         {/* Preferences Panel */}
-        <aside className="w-72 flex-shrink-0">
-          <div className="sticky top-8 bg-(--surface) border border-(--border) rounded-2xl p-6 shadow-sm flex flex-col gap-6">
+        <aside className="w-96 shrink-0">
+          <div className="sticky top-8 bg-(--surface) border border-(--border) rounded-2xl p-6 shadow-sm flex flex-col gap-6 max-h-[95vh] overflow-y-auto">
             {/* Categories */}
             <div>
               <h3 className="font-semibold text-xl mb-4 text-(--secondary-text)">Filter by Category</h3>
@@ -189,8 +350,52 @@ export default function ResourcesPage() {
               </div>
             </div>
 
+            {/* Locations Filter */}
+            <div className="border-t border-(--border) pt-6">
+              <h3 className="font-semibold text-xl mb-4 text-(--secondary-text)">Filter by Location</h3>
+              <div className="flex flex-col gap-2">
+                {LOCATIONS.map((location) => {
+                  const isSelected = selectedLocations.includes(location);
+                  return (
+                    <button
+                      key={location}
+                      onClick={() =>
+                        isSelected
+                          ? setSelectedLocations(selectedLocations.filter((l) => l !== location))
+                          : setSelectedLocations([...selectedLocations, location])
+                      }
+                      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors border cursor-pointer ${
+                        isSelected
+                          ? "bg-[#997e67] text-(--secondary-text) border-[#997e67]"
+                          : "border-(--border) hover:bg-(--bg) text-(--secondary-text)"
+                      }`}
+                    >
+                      {isSelected && <Check className="w-4 h-4" />}
+                      <span className="text-sm">{location}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Rating Filter */}
+            <div className="border-t border-(--border) pt-6">
+              <h3 className="font-semibold text-xl mb-2 text-(--secondary-text)">Filter by Rating</h3>
+              <select
+                value={selectedRating}
+                onChange={(e) => setSelectedRating(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-(--border) rounded-lg bg-(--surface) text-(--secondary-text) focus:outline-none focus:ring-2 focus:ring-[#997e67] cursor-pointer"
+              >
+                {RATING_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Views Dropdown */}
-            <div>
+            <div className="border-t border-(--border) pt-6">
               <h3 className="font-semibold text-xl mb-2 text-(--secondary-text)">Sort by Views</h3>
               <select
                 value={selectedView}
@@ -249,97 +454,28 @@ export default function ResourcesPage() {
         </div>
       </div>
 
-      {/* Modal Overlay */}
-      {selectedCard && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedCard(null)}
-        >
-          {/* Modal Card */}
-          <div
-            className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto animate-zoomIn"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
-            }}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedCard(null)}
-              className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md cursor-pointer"
-            >
-              <X className="w-5 h-5 text-black" />
-            </button>
-
-            {/* Image Section */}
-            {selectedCard.imageUrl ? (
-              <div className="relative w-full h-[35%] min-h-[240px] overflow-hidden rounded-t-3xl">
-                <img
-                  src={selectedCard.imageUrl}
-                  alt={selectedCard.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="relative w-full h-[35%] min-h-[240px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-t-3xl flex items-center justify-center">
-                <span className="text-gray-500 text-lg font-medium">Image Not Available</span>
-              </div>
-            )}
-
-            {/* Content Section */}
-            <div className="p-8">
-              {/* Category */}
-              <div className="inline-block mb-4">
-                <span className="text-sm font-semibold px-4 py-2 bg-[#997e67]/10 text-[#997e67] rounded-full">
-                  {selectedCard.category}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h2 className="text-3xl font-semibold mb-4" style={{ color: "#1F1F1F" }}>
-                {selectedCard.title}
-              </h2>
-
-              {/* Description */}
-              <p className="text-sm mb-6 leading-relaxed" style={{ color: "#1F1F1F" }}>
-                {selectedCard.description}
-              </p>
-
-              {/* Views */}
-              <div className="flex items-center gap-2 text-(--secondary-text)">
-                <Eye className="w-5 h-5" />
-                <span className="text-sm font-medium">
-                  {selectedCard.views} views
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Zoom Animation Styles */}
-      <style jsx>{`
-        @keyframes zoomIn {
-          0% {
-            opacity: 0;
-            transform: scale(0.8);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-      `}</style>
+      {/* Resource Detail Modal with Reviews and Favorites */}
+      <ResourceDetailModal
+        resource={selectedCard}
+        isOpen={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+        user={user}
+        onJudgeOverride={judgeOverrideMode}
+      />
 
       {/* Modals */}
       <AddResourceModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => {
+          setShowAddModal(false);
+          setJudgeOverrideMode(false);
+        }}
         onSuccess={handleResourcesUpdated}
       />
       <AuthErrorModal
         isOpen={showAuthError}
         onClose={() => setShowAuthError(false)}
+        onJudgeOverride={handleJudgeOverride}
       />
     </div>
   );

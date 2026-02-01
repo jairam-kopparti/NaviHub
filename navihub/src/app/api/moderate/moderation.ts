@@ -1,86 +1,77 @@
-// Types for moderation result
-export interface ModerationResult {
-  flagged: boolean;
-  categories: Record<string, boolean>;
-  category_scores: Record<string, number>;
+// moderation.ts
+
+export const bannedWords: string[] = [
+  // General profanity
+  "fuck", "fucked", "fucking", "fucker", "fuckers",
+  "shit", "shitty", "bullshit", "shithead",
+  "ass", "asshole", "assholes", "dumbass", "jackass",
+  "bitch", "bitches", "bitching",
+  "bastard", "prick", "jerk", "moron", "idiot", "stupid",
+
+  // Sexual / explicit
+  "sex", "sexual", "porn", "porno", "pornographic",
+  "nude", "nudes", "naked",
+  "boob", "boobs", "tits", "tit",
+  "penis", "vagina", "dick", "cock", "pussy",
+  "blowjob", "handjob", "cum", "orgasm",
+  "masturbate", "masturbation",
+
+  // Harassment / insults
+  "loser", "trash", "garbage", "scum",
+  "hate", "hateful",
+  "kill", "die", "dead",
+  "ugly", "fat", "stupid",
+  "retard", "retarded",
+
+  // Crude language / variations
+  "wtf", "stfu", "omfg", "lmfao",
+  "damn", "dammit", "hell",
+
+  // Common evasive spellings
+  "fuk", "fuq", "f*ck", "f**k",
+  "sh1t", "sh!t",
+  "a$$", "biatch",
+  "d1ck", "p*ssy"
+]
+
+
+function normalizeText(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[@$!]/g, 'a')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/0/g, 'o')
+    .replace(/[^a-z\s]/g, '')
 }
 
-/**
- * Checks content for inappropriate material using OpenAI's moderation API
- * @param content - The text content to moderate
- * @returns Promise with moderation result
- */
-export async function moderateContent(content: string): Promise<ModerationResult> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    console.error("OPENAI_API_KEY is not set in environment variables");
-    throw new Error("OPENAI_API_KEY environment variable is not set");
+export function moderateContent(text: string) {
+  if (!text || text.trim().length === 0) {
+    return { allowed: false, reason: 'Empty content' }
   }
 
-  console.log("Making direct fetch to OpenAI moderations endpoint...");
-
-  const response = await fetch("https://api.openai.com/v1/moderations", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({ input: content }),
-  });
-
-  console.log("OpenAI response status:", response.status);
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error("OpenAI API error response:", errorData);
-    
-    if (response.status === 401) {
-      throw new Error("Invalid OpenAI API key or insufficient permissions");
-    }
-    if (response.status === 429) {
-      throw new Error("OpenAI rate limit exceeded. Please try again later.");
-    }
-    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+  if (text.length > 1000) {
+    return { allowed: false, reason: 'Content too long' }
   }
 
-  const data = await response.json();
-  console.log("OpenAI moderation response received:", { flagged: data.results?.[0]?.flagged });
+  const normalized = normalizeText(text)
 
-  if (!data.results || data.results.length === 0) {
-    throw new Error("No moderation results returned from OpenAI");
-  }
-
-  const result = data.results[0];
-  
-  return {
-    flagged: result.flagged,
-    categories: result.categories,
-    category_scores: result.category_scores,
-  };
-}
-
-/**
- * Checks if content is appropriate for posting
- * @param content - The text content to check
- * @returns Promise<boolean> - true if content is appropriate, false if flagged
- */
-export async function isContentSafe(content: string): Promise<boolean> {
-  const result = await moderateContent(content);
-  return !result.flagged;
-}
-
-/**
- * Gets the flagged categories from a moderation result
- * @param result - The moderation result
- * @returns Array of flagged category names
- */
-export function getFlaggedCategories(result: ModerationResult): string[] {
-  const flagged: string[] = [];
-  for (const [category, isFlagged] of Object.entries(result.categories)) {
-    if (isFlagged) {
-      flagged.push(category);
+  for (const word of bannedWords) {
+    if (normalized.includes(word)) {
+      return {
+        allowed: false,
+        reason: 'Inappropriate language detected',
+      }
     }
   }
-  return flagged;
+
+  // simple spam check (same character repeated)
+  if (/(.)\1{10,}/.test(text)) {
+    return {
+      allowed: false,
+      reason: 'Spam detected',
+    }
+  }
+
+  return { allowed: true }
 }
