@@ -220,7 +220,7 @@ export default function ResourceDetailModal({
             <div className="w-full h-48 sm:h-72 bg-linear-to-br from-[#997e67] to-[#8a6d5a] flex items-center justify-center">
               <span className="text-white/70 text-sm font-medium">No Image Available</span>
             </div>
-          )}}
+          )}
           
           {/* Floating Close Button */}
           <button
