@@ -304,7 +304,7 @@ body {
     padding-right: 1.25rem;
   }
 
-  footer .flex-col.md\\:flex-row {
+  footer .flex-col.md\:flex-row {
     gap: 2rem;
   }
 
