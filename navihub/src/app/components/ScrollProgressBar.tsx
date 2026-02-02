@@ -5,10 +5,8 @@ import { useEffect, useState } from "react";
 export default function ScrollProgressBar() {
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Track overall page scroll progress
   useEffect(() => {
     let ticking = false;
-    
     const updateScrollProgress = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -39,3 +37,4 @@ export default function ScrollProgressBar() {
     </div>
   );
 }
+

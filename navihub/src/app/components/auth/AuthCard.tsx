@@ -39,7 +39,6 @@ export default function AuthCard({ type }: AuthCardProps) {
 
         if (error) throw error
         alert("Check your email to confirm your account.")
-        // Clear form after signup
         setEmail("")
         setPassword("")
         setName("")
@@ -50,22 +49,17 @@ export default function AuthCard({ type }: AuthCardProps) {
         })
 
         if (error) {
-          // Check if error is due to unconfirmed email
           if (error.message.includes("Invalid login credentials") || error.message.includes("incorrect")) {
             setEmailNotConfirmed(true)
             throw new Error("Email not confirmed or invalid credentials")
           }
           throw error
         }
-        
-        // Redirect to home or previous page
         const redirect = new URLSearchParams(window.location.search).get('redirect')
         window.location.href = redirect || "/"
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred"
-      
-      // Provide more helpful error messages
       if (errorMessage.includes("Email not confirmed")) {
         setError("Please check your email to confirm your account")
       } else if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("incorrect")) {
@@ -83,14 +77,12 @@ export default function AuthCard({ type }: AuthCardProps) {
       setError("Please enter your email address")
       return
     }
-    
     setLoading(true)
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
       })
-      
       if (error) throw error
       alert("Confirmation email sent! Check your inbox.")
     } catch (err) {

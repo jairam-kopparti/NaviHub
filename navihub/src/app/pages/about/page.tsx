@@ -15,7 +15,6 @@ export default function AboutUs() {
   const howStepsRef = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
-    // ===== STICKY BACKGROUND (FIXED POSITION) =====
     if (heroImageRef.current) {
       gsap.set(heroImageRef.current, {
         position: "fixed",
@@ -26,7 +25,6 @@ export default function AboutUs() {
         zIndex: -1,
       })
     }
-    // ===== WHAT WE DO ITEMS FADE IN ANIMATION =====
     whatWeDoRef.current.forEach((item, index) => {
       gsap.from(item, {
         scrollTrigger: {
@@ -44,7 +42,6 @@ export default function AboutUs() {
       })
     })
 
-    // ===== MISSION ITEMS SLIDE DOWN ANIMATION =====
     missionItemsRef.current.forEach((item, index) => {
       gsap.from(item, {
         scrollTrigger: {
@@ -62,7 +59,6 @@ export default function AboutUs() {
       })
     })
 
-    // ===== HOW IT WORKS CIRCULAR SCROLL ANIMATION =====
     howStepsRef.current.forEach((step, index) => {
       gsap.from(step, {
         scrollTrigger: {
@@ -88,9 +84,7 @@ export default function AboutUs() {
 
   return (
     <>
-      {/* HERO */}
       <section className="hero-section relative h-screen border-b border-(--border) overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           ref={heroImageRef}
           src="/aboutus.jpg"
@@ -106,7 +100,6 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* OUR MISSION */}
       <section className="border-b border-(--border) bg-[#FFFFFA]">
         <div className="about-mission-wrapper mission-items-container">
           <h2 className="about-mission-heading">
@@ -133,10 +126,7 @@ export default function AboutUs() {
             By centralizing resources and categorizing them by need, the hub empowers individuals to take control of their own journeys toward stability and growth. Whether someone is looking for food assistance, housing support, job training, or mental health services, they can quickly find what they need without confusion or frustration. The platform also fosters a sense of community by highlighting local organizations and encouraging collaboration among service providers.
           </p>
         </div>
-      </section>
-
-
-      {/* WHAT WE DO */}
+      </section>n      
       <section className="border-b border-(--border) bg-(--bg) py-24 px-6">
         <div className="about-section">
           <h2 className="about-section-heading text-center mb-8">
@@ -188,7 +178,6 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
       <section className="border-b border-(--border) bg-white py-24 px-6">
         <div className="about-section text-center">
           <h2 className="about-section-heading mb-6">
@@ -237,13 +226,6 @@ export default function AboutUs() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* SECTION 2 PLACEHOLDER */}
-      <section className="border-b border-(--border) bg-(--bg) py-24 px-6">
-        <h2 className="text-6xl font-bold text-center">
-          Attributions
-        </h2>
       </section>
     </>
   )

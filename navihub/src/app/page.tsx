@@ -60,8 +60,6 @@ function Stat({
   );
 } 
 
-/* ---------------- PAGE ---------------- */
-
 export default function Home() {
   const line1 = "Building Bridges,";
   const line2 = "Not Walls";
@@ -71,7 +69,6 @@ export default function Home() {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const section1Ref = useRef<HTMLElement | null>(null);
   const [statsStart, setStatsStart] = useState(false);
-  // slideProgress ranges 0..1 based on how far the user has scrolled past the hero
   const [slideProgress, setSlideProgress] = useState(0);
 
   useEffect(() => {
@@ -82,7 +79,6 @@ export default function Home() {
     fetchResources();
   }, []);
 
-  // Trigger stats when Section 1 becomes visible in the viewport
   useEffect(() => {
     const el = section1Ref.current;
     if (!el) return;
@@ -102,7 +98,6 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  // Update slide progress (0 → 1) while the user scrolls down from the hero
   useEffect(() => {
     const heroEl = heroRef.current;
     if (!heroEl) return;
@@ -115,7 +110,6 @@ export default function Home() {
       const height = rect.height || window.innerHeight;
       const bottom = rect.bottom;
 
-      // progress: 0 when hero bottom is at bottom of hero, 1 when it's gone
       let progress = 1 - bottom / height;
       progress = Math.min(Math.max(progress, 0), 1);
 
@@ -129,7 +123,6 @@ export default function Home() {
       requestAnimationFrame(update);
     };
 
-    // Init and attach
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", update);
@@ -140,25 +133,22 @@ export default function Home() {
     };
   }, []);
 
-  // Add a safe global shim for `stacked` in case other scripts reference it (prevents ReferenceError)
   useEffect(() => {
     if (typeof document === "undefined") return;
     const script = document.createElement("script");
     script.type = "text/javascript";
-    script.text = "var stacked = false;"; // creates a global var in page scope
+    script.text = "var stacked = false;";
     document.head.appendChild(script);
     return () => {
       document.head.removeChild(script);
     };
   }, []);
 
-  // Keep global `stacked` in sync with local slideProgress (so external scripts can read current state)
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       (window as unknown as { stacked?: boolean }).stacked = slideProgress > 0;
     } catch {
-      // ignore
     }
   }, [slideProgress]);
 
@@ -196,7 +186,6 @@ export default function Home() {
   const [activeQuoteId, setActiveQuoteId] = useState(1);
   const activeQuote = quotes.find(q => q.id === activeQuoteId) || quotes[0];
 
-  // Auto-cycle through quotes every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveQuoteId((prevId) => {

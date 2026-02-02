@@ -1,16 +1,14 @@
+/* Events Page - Modern Redesign */
+
+/* Base page styling */
 .events-page {
-  --bg: #BAC8B1;
-  --surface: #E6E6E6;
-  --thirdary-text: #404E3B;
-
-  --border: #6C8480
-
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Custom scrollbar for events page */
+/* Custom scrollbar */
 .events-page ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 .events-page ::-webkit-scrollbar-track {
@@ -18,16 +16,48 @@
 }
 
 .events-page ::-webkit-scrollbar-thumb {
-  background: var(--secondary-text);
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
 }
 
 .events-page ::-webkit-scrollbar-thumb:hover {
-  background: var(--thirdary-text);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* Firefox support */
 .events-page {
-  scrollbar-color: var(--secondary-text) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
   scrollbar-width: thin;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth transitions */
+.events-page * {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .events-page section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .events-page h1 {
+    font-size: 2.5rem !important;
+  }
 }

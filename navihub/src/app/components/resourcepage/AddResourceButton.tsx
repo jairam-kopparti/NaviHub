@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Loader } from "lucide-react";
+import { X, Loader, FileText, Tag, MapPin, Image as ImageIcon, AlignLeft, Plus, CheckCircle } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 const CATEGORIES = [
@@ -86,7 +86,6 @@ export default function AddResourceModal({
         console.error("Error code:", insertError.code);
         throw insertError;
       }
-      
       console.log("Insert successful, data:", data);
 
       setSuccess(true);
@@ -112,184 +111,191 @@ export default function AddResourceModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      {/* Modal Card */}
       <div
-        className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{
-          animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
-        }}
-        onScroll={(e) => {
-          const element = e.currentTarget;
-          const hasMoreContent = element.scrollHeight > element.clientHeight;
-          const isAtBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
-          setShowScrollIndicator(hasMoreContent && !isAtBottom);
+          animation: "modalSlideIn 0.3s cubic-bezier(.16,1,.3,1) forwards",
         }}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md cursor-pointer"
+        <div className="px-6 py-5 border-b border-gray-100 bg-linear-to-r from-[#997e67] to-[#8a6d5a]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-white">Add Resource</h2>
+                <p className="text-white/70 text-sm">Share a helpful resource with the community</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
+        </div>
+
+        <div 
+          className="flex-1 overflow-y-auto p-6"
+          onScroll={(e) => {
+            const element = e.currentTarget;
+            const hasMoreContent = element.scrollHeight > element.clientHeight;
+            const isAtBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
+            setShowScrollIndicator(hasMoreContent && !isAtBottom);
+          }}
         >
-          <X className="w-5 h-5 text-black" />
-        </button>
-
-        {/* Content */}
-        <div className="p-8">
-          <h2 className="text-3xl font-semibold mb-6" style={{ color: "#1F1F1F" }}>
-            Add Resource
-          </h2>
-
           {success ? (
-            <div className="text-center py-12">
-              <div className="text-5xl mb-4">✓</div>
-              <p className="text-lg font-semibold" style={{ color: "#997e67" }}>
-                Resource added successfully!
+            <div className="text-center py-16">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Success!</h3>
+              <p className="text-gray-600">
+                Your resource has been added successfully.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Title Input */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
+                <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                  <FileText className="w-4 h-4 text-[#997e67]" />
                   Resource Title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter resource title"
-                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-gray-400"
-                  style={{ color: "#1F1F1F" }}
+                  placeholder="Enter a descriptive title"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent placeholder:text-gray-400 bg-gray-50 hover:bg-white transition-colors"
+                  style={{ color: "#000000" }}
                 />
               </div>
 
-              {/* Category Dropdown */}
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
-                  Category
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] bg-white"
-                  style={{ color: "#1F1F1F" }}
-                >
-                  <option value="">Select a category</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                    <Tag className="w-4 h-4 text-[#997e67]" />
+                    Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent bg-gray-50 hover:bg-white transition-colors cursor-pointer appearance-none"
+                    style={{ color: category ? "#000000" : "#9ca3af", backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25em 1.25em', paddingRight: '2.5rem' }}
+                  >
+                    <option value="" className="text-gray-400">Select a category</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat} style={{ color: "#000000" }}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                    <MapPin className="w-4 h-4 text-[#997e67]" />
+                    Borough
+                  </label>
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent bg-gray-50 hover:bg-white transition-colors cursor-pointer appearance-none"
+                    style={{ color: "#000000", backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25em 1.25em', paddingRight: '2.5rem' }}
+                  >
+                    {BOROUGHS.map((borough) => (
+                      <option key={borough} value={borough} style={{ color: "#000000" }}>
+                        {borough}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* Location Dropdown */}
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
-                  NYC Borough Location
-                </label>
-                <select
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] bg-white"
-                  style={{ color: "#1F1F1F" }}
-                >
-                  {BOROUGHS.map((borough) => (
-                    <option key={borough} value={borough}>
-                      {borough}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Image URL Input */}
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
-                  Image URL <span className="text-gray-400">(Optional)</span>
+                <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                  <ImageIcon className="w-4 h-4 text-[#997e67]" />
+                  Image URL
+                  <span className="text-xs font-normal text-gray-500 ml-1">(Optional)</span>
                 </label>
                 <input
                   type="url"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-gray-400"
-                  style={{ color: "#1F1F1F" }}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent placeholder:text-gray-400 bg-gray-50 hover:bg-white transition-colors"
+                  style={{ color: "#000000" }}
                 />
               </div>
 
-              {/* Description Input */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-semibold" style={{ color: "#1F1F1F" }}>
+                  <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#000000" }}>
+                    <AlignLeft className="w-4 h-4 text-[#997e67]" />
                     Description
                   </label>
                   <span
-                    className="text-xs font-medium"
-                    style={{
-                      color: isDescriptionValid ? "#997e67" : "#999",
-                    }}
+                    className={`text-xs font-medium px-2 py-1 rounded-full ${
+                      isDescriptionValid 
+                        ? "bg-emerald-100 text-emerald-700" 
+                        : "bg-gray-100 text-gray-500"
+                    }`}
                   >
-                    {wordCount} words (min. 15)
+                    {wordCount}/15 words
                   </span>
                 </div>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter resource description (minimum 15 words)"
-                  className="w-full px-4 py-3 border border-(--border) rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] resize-none placeholder:text-gray-400 h-32"
-                  style={{ color: "#1F1F1F" }}
+                  placeholder="Describe this resource and how it can help community members (minimum 15 words)"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent resize-none placeholder:text-gray-400 bg-gray-50 hover:bg-white transition-colors h-32"
+                  style={{ color: "#000000" }}
                 />
               </div>
 
-              {/* Error Message */}
               {error && (
-                <p className="text-sm font-medium" style={{ color: "#d32f2f" }}>
-                  {error}
-                </p>
+                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                    <X className="w-3 h-3 text-red-600" />
+                  </div>
+                  <p className="text-sm font-medium text-red-700">{error}</p>
+                </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className={`w-full py-3 rounded-xl font-semibold transition-all mt-4 ${
+                className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
                   isFormValid && !loading
-                    ? "bg-[#997e67] text-white hover:bg-[#8a6d5a]"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    ? "bg-[#997e67] text-white hover:bg-[#8a6d5a] hover:shadow-lg active:scale-[0.98]"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
               >
                 {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader className="w-4 h-4 animate-spin" />
-                    Adding...
-                  </div>
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Adding Resource...
+                  </>
                 ) : (
-                  "Add Resource"
+                  <>
+                    <Plus className="w-5 h-5" />
+                    Add Resource
+                  </>
                 )}
               </button>
             </form>
           )}
         </div>
 
-        {/* Scroll Indicator */}
-        {showScrollIndicator && (
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none flex items-end justify-center pb-2">
-            <div className="animate-bounce">
-              <svg
-                className="w-5 h-5"
-                style={{ color: "#997e67" }}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        {showScrollIndicator && !success && (
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white via-white/80 to-transparent pointer-events-none flex items-end justify-center pb-3">
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded-full text-gray-500 text-xs font-medium animate-bounce">
+              <span>Scroll for more</span>
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />
               </svg>
             </div>
           </div>
@@ -297,24 +303,18 @@ export default function AddResourceModal({
       </div>
 
       <style jsx>{`
-        @keyframes zoomIn {
+        @keyframes modalSlideIn {
           0% {
             opacity: 0;
-            transform: scale(0.8);
+            transform: translateY(20px) scale(0.95);
           }
           100% {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0) scale(1);
           }
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
         }
       `}</style>
     </div>
   );
 }
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Check } from "lucide-react";
+import { Search, Check, ChevronDown, MapPin, Star, Eye, Grid3X3, SlidersHorizontal, X } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
 import { ResourcesCard } from "../../components/resourcepage/ResourcesCard";
@@ -51,7 +51,33 @@ export default function ResourcesPage() {
   const [showAuthError, setShowAuthError] = useState(false);
   const [userFavorites, setUserFavorites] = useState<Set<string>>(new Set());
   const [judgeOverrideMode, setJudgeOverrideMode] = useState(false);
+  const [showFilterScrollIndicator, setShowFilterScrollIndicator] = useState(true);
+  const [expandedSections, setExpandedSections] = useState({
+    categories: true,
+    locations: true,
+    rating: true,
+    views: true,
+  });
   const { user } = useUser();
+
+  const handleFilterScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget;
+    const isAtBottom = Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop) < 10;
+    setShowFilterScrollIndicator(!isAtBottom);
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedLocations([]);
+    setSelectedRating(0);
+    setSelectedView("Most Viewed");
+  };
+
+  const activeFilterCount = selectedCategories.length + selectedLocations.length + (selectedRating > 0 ? 1 : 0);
 
   // Fetch user's favorites
   useEffect(() => {
@@ -182,11 +208,7 @@ export default function ResourcesPage() {
   });
 
   const handleAddResourceClick = () => {
-    if (!user) {
-      setShowAuthError(true);
-    } else {
-      setShowAddModal(true);
-    }
+    setShowAddModal(true);
   };
 
   const handleResourceCardClick = async (resource: Resource) => {
@@ -216,8 +238,26 @@ export default function ResourcesPage() {
   };
 
   const handleResourcesUpdated = () => {
-    // Refetch resources after adding a new one
+    // Refetch resources after adding a new one or favoriting
     const fetchResources = async () => {
+      // Re-fetch favorites as well
+      if (user || judgeOverrideMode) {
+        try {
+          const userId = judgeOverrideMode ? "judge-override" : user?.id;
+          if (userId) {
+            const { data } = await supabase
+              .from("favorites")
+              .select("resource_id")
+              .eq("user_id", userId);
+            
+            const favoriteIds = new Set(data?.map(f => f.resource_id) || []);
+            setUserFavorites(favoriteIds);
+          }
+        } catch (err) {
+          console.error("Error refetching favorites:", err);
+        }
+      }
+
       try {
         let query = supabase.from("resources").select("*");
 
@@ -280,14 +320,28 @@ export default function ResourcesPage() {
             filtered.sort((a, b) => (a.views ?? 0) - (b.views ?? 0));
           }
 
-          const sorted = filtered.sort((a, b) => {
-            const aFavorited = userFavorites.has(a.id);
-            const bFavorited = userFavorites.has(b.id);
-            if (aFavorited && !bFavorited) return -1;
-            if (!aFavorited && bFavorited) return 1;
-            return 0;
-          });
-          setResources(sorted);
+          // IMPORTANT: Re-sort to apply favorite sorting with new favorite data
+          // We need access to the UPDATED userFavorites here, but state update is async
+          // So we re-fetch favorites above and use that promise chain or effect, 
+          // but for now let's rely on the useEffect dependency on userFavorites to trigger a re-sort
+          // OR manually sort here if we had the new set locally. 
+          // Since we update userFavorites state above, the main useEffect will run again.
+          // However, to be safe and immediate, let's just let the main useEffect handle it
+          // by triggering a re-run via some state change or just this function updates the resources directly.
+          
+          // Actually, the main useEffect depends on [userFavorites]. 
+          // So updating userFavorites state is enough to trigger a re-fetch/re-sort!
+          // But we also want to keep the current filters.
+          
+          // Let's just update the favorites state, and let the main useEffect do the work?
+          // The issue is that handleResourcesUpdated is called for "adding a resource" too where we might need to fetch new data.
+          
+          // Let's manually sort here using the LOCAL data we just fetched for favorites if possible, or just rely on state update.
+          // To simplify: we updated `setUserFavorites` above. React will trigger the main effect.
+          // BUT, we also want to ensure the list is updated immediately if we added a resource.
+          
+          // Let's just setResources here with the data we have, and let the next effect cycle fix the sort if needed.
+          setResources(filtered);
         }
       } catch (err) {
         console.error("Unexpected error refetching resources:", err);
@@ -319,95 +373,227 @@ export default function ResourcesPage() {
 
       {/* Section 2 + 3: Preferences + Resources */}
       <div className="container mx-auto px-4 py-8 flex gap-8 border-b border-(--border)">
-        {/* Preferences Panel */}
-        <aside className="w-96 shrink-0">
-          <div className="sticky top-8 bg-(--surface) border border-(--border) rounded-2xl p-6 shadow-sm flex flex-col gap-6 max-h-[95vh] overflow-y-auto">
-            {/* Categories */}
-            <div>
-              <h3 className="font-semibold text-xl mb-4 text-(--secondary-text)">Filter by Category</h3>
-              <div className="flex flex-col gap-2">
-                {CATEGORIES.map((category) => {
-                  const isSelected = selectedCategories.includes(category);
-                  return (
-                    <button
-                      key={category}
-                      onClick={() =>
-                        isSelected
-                          ? setSelectedCategories(selectedCategories.filter((c) => c !== category))
-                          : setSelectedCategories([...selectedCategories, category])
-                      }
-                      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors border cursor-pointer ${
-                        isSelected
-                          ? "bg-[#997e67] text-(--secondary-text) border-[#997e67]"
-                          : "border-(--border) hover:bg-(--bg) text-(--secondary-text)"
-                      }`}
-                    >
-                      {isSelected && <Check className="w-4 h-4" />}
-                      <span className="text-sm">{category}</span>
-                    </button>
-                  );
-                })}
+        {/* Preferences Panel - Modern Redesign */}
+        <aside className="w-80 shrink-0">
+          <div className="sticky top-8 bg-(--surface) rounded-2xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Panel Header */}
+            <div className="px-6 py-5 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <SlidersHorizontal className="w-5 h-5 text-white" />
+                  <h2 className="font-semibold text-lg text-white tracking-wide">Filters</h2>
+                </div>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white/90 hover:text-white bg-white/20 hover:bg-white/30 rounded-full transition-all cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                    Clear all ({activeFilterCount})
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Locations Filter */}
-            <div className="border-t border-(--border) pt-6">
-              <h3 className="font-semibold text-xl mb-4 text-(--secondary-text)">Filter by Location</h3>
-              <div className="flex flex-col gap-2">
-                {LOCATIONS.map((location) => {
-                  const isSelected = selectedLocations.includes(location);
-                  return (
-                    <button
-                      key={location}
-                      onClick={() =>
-                        isSelected
-                          ? setSelectedLocations(selectedLocations.filter((l) => l !== location))
-                          : setSelectedLocations([...selectedLocations, location])
-                      }
-                      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors border cursor-pointer ${
-                        isSelected
-                          ? "bg-[#997e67] text-(--secondary-text) border-[#997e67]"
-                          : "border-(--border) hover:bg-(--bg) text-(--secondary-text)"
-                      }`}
-                    >
-                      {isSelected && <Check className="w-4 h-4" />}
-                      <span className="text-sm">{location}</span>
-                    </button>
-                  );
-                })}
+            {/* Scrollable Filter Content */}
+            <div 
+              className="flex-1 overflow-y-auto p-5 space-y-1 scroll-smooth"
+              onScroll={handleFilterScroll}
+            >
+              {/* Categories Section */}
+              <div className="rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('categories')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Grid3X3 className="w-4 h-4 text-[#997e67]" />
+                    <span className="font-medium text-(--secondary-text) text-sm">Categories</span>
+                    {selectedCategories.length > 0 && (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+                        {selectedCategories.length}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.categories ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {expandedSections.categories && (
+                  <div className="px-3 pb-3 pt-2 space-y-1.5">
+                    {CATEGORIES.map((category) => {
+                      const isSelected = selectedCategories.includes(category);
+                      return (
+                        <button
+                          key={category}
+                          onClick={() =>
+                            isSelected
+                              ? setSelectedCategories(selectedCategories.filter((c) => c !== category))
+                              : setSelectedCategories([...selectedCategories, category])
+                          }
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
+                            isSelected
+                              ? "bg-[#997e67] text-white shadow-md"
+                              : "bg-(--surface) hover:bg-(--bg) text-(--secondary-text) border border-(--border) hover:border-[#997e67]/30"
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded flex items-center justify-center transition-all ${
+                            isSelected 
+                              ? "bg-white/20" 
+                              : "border border-(--border) group-hover:border-[#997e67]/50"
+                          }`}>
+                            {isSelected && <Check className="w-3 h-3" />}
+                          </div>
+                          <span className="text-xs leading-tight text-left flex-1">{category}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Locations Section */}
+              <div className="rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('locations')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <MapPin className="w-4 h-4 text-[#997e67]" />
+                    <span className="font-medium text-(--secondary-text) text-sm">Location</span>
+                    {selectedLocations.length > 0 && (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+                        {selectedLocations.length}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.locations ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {expandedSections.locations && (
+                  <div className="px-3 pb-3 pt-2">
+                    <div className="flex flex-wrap gap-2">
+                      {LOCATIONS.map((location) => {
+                        const isSelected = selectedLocations.includes(location);
+                        return (
+                          <button
+                            key={location}
+                            onClick={() =>
+                              isSelected
+                                ? setSelectedLocations(selectedLocations.filter((l) => l !== location))
+                                : setSelectedLocations([...selectedLocations, location])
+                            }
+                            className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                              isSelected
+                                ? "bg-[#997e67] text-white shadow-md"
+                                : "bg-(--surface) text-(--secondary-text) border border-(--border) hover:border-[#997e67] hover:text-[#997e67]"
+                            }`}
+                          >
+                            {location}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Rating Section */}
+              <div className="rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('rating')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Star className="w-4 h-4 text-[#997e67]" />
+                    <span className="font-medium text-(--secondary-text) text-sm">Rating</span>
+                    {selectedRating > 0 && (
+                      <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+                        {selectedRating}+
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.rating ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {expandedSections.rating && (
+                  <div className="px-3 pb-3 pt-2">
+                    <div className="flex flex-wrap gap-2">
+                      {RATING_OPTIONS.map((option) => {
+                        const isSelected = selectedRating === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => setSelectedRating(option.value)}
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                              isSelected
+                                ? "bg-[#997e67] text-white shadow-md"
+                                : "bg-(--surface) text-(--secondary-text) border border-(--border) hover:border-[#997e67] hover:text-[#997e67]"
+                            }`}
+                          >
+                            {option.value > 0 && (
+                              <Star className={`w-3 h-3 ${isSelected ? 'fill-white' : 'fill-amber-400 text-amber-400'}`} />
+                            )}
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sort by Views Section */}
+              <div className="rounded-xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('views')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Eye className="w-4 h-4 text-[#997e67]" />
+                    <span className="font-medium text-(--secondary-text) text-sm">Sort by Views</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.views ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {expandedSections.views && (
+                  <div className="px-3 pb-3 pt-2">
+                    <div className="flex gap-2">
+                      {VIEWS_OPTIONS.map((option) => {
+                        const isSelected = selectedView === option;
+                        return (
+                          <button
+                            key={option}
+                            onClick={() => setSelectedView(option)}
+                            className={`flex-1 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
+                              isSelected
+                                ? "bg-[#997e67] text-white shadow-md"
+                                : "bg-(--surface) text-(--secondary-text) border border-(--border) hover:border-[#997e67] hover:text-[#997e67]"
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Rating Filter */}
-            <div className="border-t border-(--border) pt-6">
-              <h3 className="font-semibold text-xl mb-2 text-(--secondary-text)">Filter by Rating</h3>
-              <select
-                value={selectedRating}
-                onChange={(e) => setSelectedRating(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-(--border) rounded-lg bg-(--surface) text-(--secondary-text) focus:outline-none focus:ring-2 focus:ring-[#997e67] cursor-pointer"
-              >
-                {RATING_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Scroll Indicator */}
+            {showFilterScrollIndicator && (
+              <div className="absolute bottom-14 left-0 right-0 flex justify-center pointer-events-none z-10 opacity-80">
+                <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-gray-200/50 animate-bounce">
+                  <ChevronDown className="w-4 h-4 text-[#997e67]" />
+                </div>
+              </div>
+            )}
 
-            {/* Views Dropdown */}
-            <div className="border-t border-(--border) pt-6">
-              <h3 className="font-semibold text-xl mb-2 text-(--secondary-text)">Sort by Views</h3>
-              <select
-                value={selectedView}
-                onChange={(e) => setSelectedView(e.target.value)}
-                className="w-full px-4 py-2 border border-(--border) rounded-lg bg-(--surface) text-(--secondary-text) focus:outline-none focus:ring-2 focus:ring-[#997e67] cursor-pointer"
-              >
-                {VIEWS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
+            {/* Panel Footer - Results Count */}
+            <div className="px-6 py-4 border-t border-(--border) bg-(--bg)/30">
+              <p className="text-sm font-medium text-center" style={{ color: "#000000" }}>
+                Showing <span className="font-bold" style={{ color: "#997e67" }}>{filteredResources.length}</span> results
+              </p>
             </div>
           </div>
         </aside>
@@ -447,6 +633,7 @@ export default function ResourcesPage() {
                   imageUrl={resource.imageUrl}
                   views={resource.views}
                   category={resource.category}
+                  isFavorited={userFavorites.has(resource.id)}
                 />
               </div>
             ))}
@@ -461,6 +648,7 @@ export default function ResourcesPage() {
         onClose={() => setSelectedCard(null)}
         user={user}
         onJudgeOverride={judgeOverrideMode}
+        onFavoriteToggled={handleResourcesUpdated}
       />
 
       {/* Modals */}

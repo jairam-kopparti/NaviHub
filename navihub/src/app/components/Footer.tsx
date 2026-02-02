@@ -3,9 +3,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-(--surface) text-(--secondary-text) text-sm">
-      {/* Main Footer Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-start md:items-center space-y-8 md:space-y-0">
-        {/* Column 1: Quick Links */}
         <div className="flex flex-col gap-2">
           <h4 className="font-semibold text-(--secondary-text) mb-2">Quick Links</h4>
           <Link href="/" className="hover:text-(--accent) transition">
@@ -25,7 +23,6 @@ export default function Footer() {
           </Link>
         </div>
 
-        {/* Column 2: Hours */}
         <div className="flex flex-col gap-2">
           <h4 className="font-semibold text-(--secondary-text) mb-2">Hours of Operation</h4>
           <span>Mon - Fri: 7:00 AM - 8:00 PM</span>
@@ -33,7 +30,6 @@ export default function Footer() {
           <span>Sun: 8:00 AM - 5:00 PM</span>
         </div>
 
-        {/* Column 3: Find Us */}
         <div className="flex flex-col gap-2 w-full md:w-auto">
           <h4 className="font-semibold text-(--secondary-text) mb-2">Find Us</h4>
           <div className="w-full md:w-64 h-36 rounded-lg overflow-hidden border border-(--border)">
@@ -49,7 +45,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-(--border) bg-(--surface) py-4">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-(--secondary-text) text-sm">
           <img src="/main_logo.png" alt="NaviHub Logo" className="h-10 mb-2 md:mb-0" />
@@ -59,3 +54,4 @@ export default function Footer() {
     </footer>
   );
 }
+

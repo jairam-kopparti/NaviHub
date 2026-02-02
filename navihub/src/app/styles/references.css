@@ -1,0 +1,189 @@
+/* ===== REFERENCE PAGE STYLES ===== */
+
+/* Hero Section */
+.references-hero {
+  position: relative;
+  height: 50vh;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1f1f1f 0%, #3d3d3d 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.references-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.references-hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+.references-hero-content h1 {
+  font-family: "Petrona", serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.references-hero-content p {
+  font-family: "Open Sans", sans-serif;
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Section Styles */
+.references-section {
+  padding: 5rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.references-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Headings */
+.references-heading {
+  font-family: "Petrona", serif;
+  font-weight: 500;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.references-heading .primary {
+  color: #1f1f1f;
+}
+
+.references-heading .secondary {
+  color: #997e67;
+}
+
+/* Divider */
+.references-divider {
+  width: 60px;
+  height: 2px;
+  background-color: #ccbeb1;
+  margin: 0 auto 2.5rem auto;
+}
+
+/* Intro Text */
+.references-intro {
+  font-family: "Open Sans", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #1f1f1f;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 2rem auto;
+}
+
+/* Lists */
+.references-list {
+  list-style: disc;
+  padding-left: 1.5rem;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1rem;
+  line-height: 2;
+  color: #1f1f1f;
+}
+
+.references-list li {
+  margin-bottom: 0.5rem;
+  color: #1f1f1f;
+}
+
+.references-list strong {
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+/* Links */
+.references-link {
+  color: #997e67;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.references-link:hover {
+  color: #7a6453;
+}
+
+/* Grid for Cards */
+.references-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Cards */
+.references-card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: #1f1f1f;
+}
+
+.references-card h3 {
+  font-family: "Petrona", serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #ccbeb1;
+}
+
+.references-card .references-list {
+  margin: 0;
+}
+
+.references-card .references-list li {
+  margin-bottom: 0.75rem;
+}
+
+/* Placeholder */
+.references-placeholder {
+  background: #f5f5f5;
+  border: 2px dashed #ccbeb1;
+  border-radius: 8px;
+  padding: 3rem;
+  text-align: center;
+}
+
+.references-placeholder p {
+  font-family: "Open Sans", sans-serif;
+  font-size: 1rem;
+  color: #666666;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .references-section {
+    padding: 3rem 1rem;
+  }
+
+  .references-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .references-hero {
+    height: 40vh;
+    min-height: 280px;
+  }
+}

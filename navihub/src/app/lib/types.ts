@@ -1,10 +1,10 @@
-// lib/types.ts
+
 export type Resource = {
   id: string;
   title: string;
   category: string;
-  description: string; // always string
-  imageUrl: string;     // always string
+  description: string; 
+  imageUrl: string;     
   views: number;
   location?: "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island";
   isFavorited?: boolean;

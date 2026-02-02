@@ -15,7 +15,7 @@ export default function Navbar() {
   const router = useRouter()
   const { user, loading } = useUser()
 
-  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources') || pathname.includes('/pages/events')
+  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -29,6 +29,7 @@ export default function Navbar() {
     { name: 'Events', href: '/pages/events' },
     { name: 'NaviLink', href: '/pages/NaviLink' },
     { name: 'About', href: '/pages/about' },
+    { name: 'Reference Page', href: '/pages/references' },
   ]
 
   const handleSignOut = async () => {
@@ -45,7 +46,6 @@ export default function Navbar() {
     >
       <div className="max-w-8xl mx-auto px-6 py-5 flex items-center gap-6">
 
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-white">
             <Image
@@ -60,12 +60,10 @@ export default function Navbar() {
           <span className="sr-only">NaviHub</span>
         </Link>
 
-        {/* Separator */}
         <span className="hidden md:block text-(--primary-text) text-2xl select-none">
           |
         </span>
 
-        {/* Navigation Links */}
         <nav className="hidden md:flex items-center gap-10">
           {links.map((link) => {
             const isActive =
@@ -96,7 +94,6 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Auth Area */}
         <div className="hidden md:flex items-center gap-4 ml-auto relative">
           {!loading && !user && (
             <>
@@ -200,7 +197,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <div className="ml-auto md:hidden">
           <button
             aria-label="Open menu"

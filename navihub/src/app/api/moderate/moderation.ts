@@ -1,14 +1,12 @@
-// moderation.ts
+
 
 export const bannedWords: string[] = [
-  // General profanity
   "fuck", "fucked", "fucking", "fucker", "fuckers",
   "shit", "shitty", "bullshit", "shithead",
   "ass", "asshole", "assholes", "dumbass", "jackass",
   "bitch", "bitches", "bitching",
   "bastard", "prick", "jerk", "moron", "idiot", "stupid",
 
-  // Sexual / explicit
   "sex", "sexual", "porn", "porno", "pornographic",
   "nude", "nudes", "naked",
   "boob", "boobs", "tits", "tit",
@@ -16,26 +14,21 @@ export const bannedWords: string[] = [
   "blowjob", "handjob", "cum", "orgasm",
   "masturbate", "masturbation",
 
-  // Harassment / insults
   "loser", "trash", "garbage", "scum",
   "hate", "hateful",
   "kill", "die", "dead",
   "ugly", "fat", "stupid",
   "retard", "retarded",
 
-  // Crude language / variations
   "wtf", "stfu", "omfg", "lmfao",
   "damn", "dammit", "hell",
 
-  // Common evasive spellings
   "fuk", "fuq", "f*ck", "f**k",
   "sh1t", "sh!t",
   "a$$", "biatch",
   "d1ck", "p*ssy"
-]
 
-
-function normalizeText(text: string) {
+]nfunction normalizeText(text: string) {
   return text
     .toLowerCase()
     .replace(/[@$!]/g, 'a')
@@ -65,7 +58,6 @@ export function moderateContent(text: string) {
     }
   }
 
-  // simple spam check (same character repeated)
   if (/(.)\1{10,}/.test(text)) {
     return {
       allowed: false,
@@ -75,3 +67,4 @@ export function moderateContent(text: string) {
 
   return { allowed: true }
 }
+

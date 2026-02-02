@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Heart, Star, ChevronDown } from "lucide-react";
+import { X, Heart, Star, ChevronDown, MapPin, Eye, MessageSquare, Calendar } from "lucide-react";
 import { Resource, Review } from "../../lib/types";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -11,6 +11,7 @@ interface ResourceDetailModalProps {
   onClose: () => void;
   user: { id: string } | null;
   onJudgeOverride?: boolean;
+  onFavoriteToggled?: () => void;
 }
 
 export default function ResourceDetailModal({
@@ -19,6 +20,7 @@ export default function ResourceDetailModal({
   onClose,
   user,
   onJudgeOverride = false,
+  onFavoriteToggled,
 }: ResourceDetailModalProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -117,6 +119,9 @@ export default function ResourceDetailModal({
       }
 
       setIsFavorited(!isFavorited);
+      if (onFavoriteToggled) {
+        onFavoriteToggled();
+      }
     } catch (err) {
       console.error("Error toggling favorite:", err);
       setError("Failed to update favorite status");
@@ -185,130 +190,156 @@ export default function ResourceDetailModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       {/* Modal Card */}
       <div
-        className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{
-          animation: "zoomIn 0.4s cubic-bezier(.34,.1,.68,1) forwards",
+          animation: "modalSlideIn 0.3s cubic-bezier(.16,1,.3,1) forwards",
         }}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md cursor-pointer"
-        >
-          <X className="w-5 h-5 text-black" />
-        </button>
+        {/* Hero Image Section */}
+        <div className="relative">
+          {resource.imageUrl ? (
+            <div
+              className="w-full h-72 bg-cover bg-center"
+              style={{ backgroundImage: `url(${resource.imageUrl})` }}
+            >
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+            </div>
+          ) : (
+            <div className="w-full h-72 bg-linear-to-br from-[#997e67] to-[#8a6d5a] flex items-center justify-center">
+              <span className="text-white/70 text-sm font-medium">No Image Available</span>
+            </div>
+          )}
+          
+          {/* Floating Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2.5 hover:bg-white transition-all shadow-lg cursor-pointer group"
+          >
+            <X className="w-5 h-5 text-gray-700 group-hover:text-gray-900 transition-colors" />
+          </button>
+
+          {/* Favorite Button - Floating */}
+          {(user || onJudgeOverride) && (
+            <button
+              onClick={handleToggleFavorite}
+              className={`absolute top-4 left-4 z-10 backdrop-blur-sm rounded-full p-2.5 transition-all shadow-lg cursor-pointer ${
+                isFavorited 
+                  ? "bg-red-500 hover:bg-red-600" 
+                  : "bg-white/90 hover:bg-white"
+              }`}
+            >
+              <Heart
+                className={`w-5 h-5 transition-colors ${
+                  isFavorited 
+                    ? "fill-white text-white" 
+                    : "text-gray-700 hover:text-red-500"
+                }`}
+              />
+            </button>
+          )}
+
+          {/* Category Badge - Floating on Image */}
+          <div className="absolute bottom-4 left-6">
+            <span className="px-4 py-1.5 bg-white/95 backdrop-blur-sm text-[#997e67] text-xs font-semibold uppercase tracking-wider rounded-full shadow-md">
+              {resource.category}
+            </span>
+          </div>
+        </div>
 
         {/* Scrollable Content */}
         <div className="overflow-y-auto flex-1">
-          {/* Image */}
-          {resource.imageUrl ? (
-            <div
-              className="w-full h-64 bg-cover bg-center"
-              style={{ backgroundImage: `url(${resource.imageUrl})` }}
-            />
-          ) : (
-            <div className="w-full h-64 bg-linear-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-              <span className="text-gray-500 text-sm font-medium">Image Not Available</span>
-            </div>
-          )}
-
           {/* Content */}
-          <div className="p-8">
-            {/* Header with Title and Favorite Button */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex-1">
-                <span className="text-xs font-semibold uppercase tracking-wide text-(--secondary-text) block mb-2">
-                  {resource.category}
-                </span>
-                <h2 className="text-3xl font-semibold" style={{ color: "#1F1F1F" }}>
-                  {resource.title}
-                </h2>
-              </div>
-              {(user || onJudgeOverride) && (
-                <button
-                  onClick={handleToggleFavorite}
-                  className="mt-2 p-3 rounded-full hover:bg-gray-100 transition-colors shrink-0"
-                >
-                  <Heart
-                    className="w-6 h-6"
-                    fill={isFavorited ? "#d32f2f" : "none"}
-                    stroke={isFavorited ? "#d32f2f" : "currentColor"}
-                  />
-                </button>
-              )}
-            </div>
+          <div className="p-6 md:p-8">
+            {/* Title */}
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
+              {resource.title}
+            </h2>
 
-            {/* Location and Stats */}
-            <div className="flex gap-4 mb-6 text-sm">
+            {/* Stats Row */}
+            <div className="flex flex-wrap gap-3 mb-6">
               {resource.location && (
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
-                  📍 {resource.location}
-                </span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium">
+                  <MapPin className="w-4 h-4" />
+                  {resource.location}
+                </div>
               )}
-              <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full">
-                👁️ {resource.views} views
-              </span>
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium">
+                <Eye className="w-4 h-4" />
+                {resource.views?.toLocaleString() || 0} views
+              </div>
+              {reviews.length > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium">
+                  <Star className="w-4 h-4 fill-amber-500" />
+                  {avgRating} ({reviews.length})
+                </div>
+              )}
             </div>
 
-            {/* Description */}
-            <p className="text-base mb-6" style={{ color: "#333" }}>
-              {resource.description}
-            </p>
+            {/* Description Card */}
+            <div className="bg-gray-50 rounded-xl p-5 mb-8">
+              <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: "#000000" }}>About this resource</h3>
+              <p className="leading-relaxed" style={{ color: "#000000" }}>
+                {resource.description}
+              </p>
+            </div>
 
             {/* Reviews Section */}
-            <div className="mt-8 pt-8 border-t border-(--border)">
-              <h3 className="text-2xl font-semibold mb-4" style={{ color: "#1F1F1F" }}>
-                Reviews ({reviews.length})
-              </h3>
-
-              {/* Rating Summary */}
-              {reviews.length > 0 && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex gap-1">
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#997e67] flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold" style={{ color: "#000000" }}>Reviews</h3>
+                    <p className="text-sm" style={{ color: "#000000" }}>{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</p>
+                  </div>
+                </div>
+                {reviews.length > 0 && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-xl">
+                    <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           className={`w-4 h-4 ${
                             i < Math.round(Number(avgRating))
-                              ? "fill-yellow-400 text-yellow-400"
+                              ? "fill-amber-400 text-amber-400"
                               : "text-gray-300"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="font-semibold">{avgRating}/5</span>
-                    <span className="text-gray-600">({reviews.length} reviews)</span>
+                    <span className="font-bold" style={{ color: "#000000" }}>{avgRating}</span>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Add Review Form */}
               {(user || onJudgeOverride) && !hasUserReviewed && (
-                <form onSubmit={handleSubmitReview} className="mb-6 p-4 bg-gray-50 rounded-xl">
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
+                <form onSubmit={handleSubmitReview} className="mb-6 p-5 bg-linear-to-br from-gray-50 to-gray-100/50 rounded-xl border border-gray-200">
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold mb-3" style={{ color: "#000000" }}>
                       Your Rating
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           type="button"
                           onClick={() => setNewRating(star)}
-                          className="p-1"
+                          className="p-1.5 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer"
                         >
                           <Star
-                            className={`w-6 h-6 cursor-pointer transition ${
+                            className={`w-7 h-7 transition-all duration-200 ${
                               star <= newRating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300"
+                                ? "fill-amber-400 text-amber-400 scale-110"
+                                : "text-gray-300 hover:text-amber-200"
                             }`}
                           />
                         </button>
@@ -316,32 +347,32 @@ export default function ResourceDetailModal({
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold mb-2" style={{ color: "#1F1F1F" }}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-semibold mb-3" style={{ color: "#000000" }}>
                       Your Review
                     </label>
                     <textarea
                       value={newReview}
                       onChange={(e) => setNewReview(e.target.value)}
                       placeholder="Share your experience with this resource (min. 10 characters)"
-                      className="w-full px-3 py-2 border border-(--border) rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] resize-none h-24"
-                      style={{ color: "#1F1F1F" }}
+                      style={{ color: "#000000" }}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent resize-none h-28 placeholder:text-gray-400 transition-shadow"
                     />
                   </div>
 
                   {error && (
-                    <p className="text-sm font-medium mb-3" style={{ color: "#d32f2f" }}>
-                      {error}
-                    </p>
+                    <div className="flex items-center gap-2 mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <span className="text-red-600 text-sm font-medium">{error}</span>
+                    </div>
                   )}
 
                   <button
                     type="submit"
                     disabled={loadingSubmit || newReview.trim().length < 10}
-                    className={`w-full py-2 rounded-lg font-semibold transition ${
+                    className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer ${
                       loadingSubmit || newReview.trim().length < 10
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-[#997e67] text-white hover:bg-[#8a6d5a]"
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-[#997e67] text-white hover:bg-[#8a6d5a] hover:shadow-lg active:scale-[0.98]"
                     }`}
                   >
                     {loadingSubmit ? "Submitting..." : "Submit Review"}
@@ -350,63 +381,82 @@ export default function ResourceDetailModal({
               )}
 
               {(user || onJudgeOverride) && hasUserReviewed && (
-                <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <p className="text-sm font-semibold" style={{ color: "#1976d2" }}>
-                    ✓ You&apos;ve already reviewed this resource
+                <div className="mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-700">
+                    You&apos;ve already reviewed this resource
                   </p>
                 </div>
               )}
 
               {/* Reviews List */}
               <div
-                className="space-y-4 max-h-96 overflow-y-auto pr-2 relative"
+                className="space-y-3 max-h-80 overflow-y-auto pr-1 relative"
                 onScroll={handleScrollReviews}
               >
                 {/* Scroll Indicator */}
                 {showScrollIndicator && reviews.length > 2 && (
-                  <div className="sticky top-0 left-0 right-0 flex justify-center py-2 bg-linear-to-b from-(--surface) to-transparent z-10">
-                    <div className="flex flex-col items-center gap-1 text-gray-500">
-                      <span className="text-xs font-medium">Scroll for reviews</span>
-                      <ChevronDown className="w-4 h-4 animate-bounce" />
+                  <div className="sticky top-0 left-0 right-0 flex justify-center py-2 bg-linear-to-b from-white to-transparent z-10">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full text-gray-500">
+                      <span className="text-xs font-medium">Scroll for more</span>
+                      <ChevronDown className="w-3 h-3 animate-bounce" />
                     </div>
                   </div>
                 )}
 
                 {loadingReviews ? (
-                  <p className="text-center text-gray-500 py-4">Loading reviews...</p>
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-[#997e67] border-t-transparent rounded-full animate-spin mb-3" />
+                    <p className="text-gray-500 text-sm">Loading reviews...</p>
+                  </div>
                 ) : reviews.length === 0 ? (
-                  <p className="text-center text-gray-500 py-4">No reviews yet. Be the first to review!</p>
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                      <MessageSquare className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="font-medium mb-1" style={{ color: "#000000" }}>No reviews yet</p>
+                    <p className="text-sm" style={{ color: "#000000" }}>Be the first to share your experience!</p>
+                  </div>
                 ) : (
                   reviews.map((review) => (
-                    <div key={review.id} className="p-4 border border-(--border) rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-[#997e67] rounded-full flex items-center justify-center text-white text-xs font-bold">
-                            {review.user_email?.charAt(0).toUpperCase() || "J"}
+                    <div key={review.id} className="p-4 bg-gray-50 hover:bg-gray-100/80 rounded-xl transition-colors">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-linear-to-br from-[#997e67] to-[#8a6d5a] rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                            {review.user_email?.charAt(0).toUpperCase() || "A"}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold" style={{ color: "#1F1F1F" }}>
+                            <p className="text-sm font-semibold" style={{ color: "#000000" }}>
                               {review.user_email || "Anonymous"}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(review.created_at).toLocaleDateString()}
-                            </p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(review.created_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric' 
+                              })}
+                            </div>
                           </div>
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex items-center gap-1 px-2.5 py-1 bg-white rounded-lg shadow-sm">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-3 h-3 ${
+                              className={`w-3.5 h-3.5 ${
                                 i < review.rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-gray-200"
                               }`}
                             />
                           ))}
                         </div>
                       </div>
-                      <p className="text-sm" style={{ color: "#333" }}>
+                      <p className="text-sm leading-relaxed pl-13" style={{ color: "#000000" }}>
                         {review.comment}
                       </p>
                     </div>
@@ -419,15 +469,18 @@ export default function ResourceDetailModal({
       </div>
 
       <style jsx>{`
-        @keyframes zoomIn {
+        @keyframes modalSlideIn {
           0% {
             opacity: 0;
-            transform: scale(0.8);
+            transform: translateY(20px) scale(0.95);
           }
           100% {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0) scale(1);
           }
+        }
+        .pl-13 {
+          padding-left: 3.25rem;
         }
       `}</style>
     </div>

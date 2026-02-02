@@ -14,13 +14,17 @@ import {
   BookOpen,
   Briefcase,
   Heart,
+  Search,
+  ArrowRight,
+  ChevronRight,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import "../../styles/navilink.css";
 import Link from "next/link";
 
-// Types
 interface Post {
   id: string;
   title: string;
@@ -46,43 +50,47 @@ interface Category {
   name: string;
   icon: React.ReactNode;
   description: string;
+  color: string;
 }
 
-// Categories with icons
 const CATEGORIES: Category[] = [
   {
     id: "sports",
     name: "Sports & Recreation",
-    icon: <Trophy size={20} />,
+    icon: <Trophy size={22} />,
     description: "Discuss local sports events, teams, and activities",
+    color: "#f59e0b",
   },
   {
     id: "education",
     name: "Education & Learning",
-    icon: <BookOpen size={20} />,
+    icon: <BookOpen size={22} />,
     description: "Share educational resources and learning opportunities",
+    color: "#3b82f6",
   },
   {
     id: "careers",
     name: "Careers & Jobs",
-    icon: <Briefcase size={20} />,
+    icon: <Briefcase size={22} />,
     description: "Job postings, career advice, and networking",
+    color: "#8b5cf6",
   },
   {
     id: "community",
     name: "Community Events",
-    icon: <Users size={20} />,
+    icon: <Users size={22} />,
     description: "Local meetups, gatherings, and community activities",
+    color: "#10b981",
   },
   {
     id: "wellness",
     name: "Health & Wellness",
-    icon: <Heart size={20} />,
+    icon: <Heart size={22} />,
     description: "Health tips, wellness programs, and support",
+    color: "#ef4444",
   },
 ];
 
-// Helper functions
 const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -101,10 +109,7 @@ const getInitials = (email: string): string => {
 
 const getDisplayName = (email: string): string => {
   return email.split("@")[0];
-};
-
-// Post Menu Component
-const PostMenu = ({
+}; const PostMenu = ({
   onEdit,
   onDelete,
 }: {
@@ -161,7 +166,6 @@ const PostMenu = ({
   );
 };
 
-// Create Post Modal
 const CreatePostModal = ({
   isOpen,
   onClose,
@@ -205,54 +209,41 @@ const CreatePostModal = ({
   return (
     <div className="navilink-modal-overlay" onClick={handleClose}>
       <div className="navilink-modal" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-          <h3 style={{ margin: 0 }}>Create Post in {categoryName}</h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: "0.5rem",
-            }}
-          >
+        <div className="navilink-modal-header">
+          <div>
+            <h3>Create Post</h3>
+            <p className="navilink-modal-subtitle">Share with {categoryName}</p>
+          </div>
+          <button onClick={handleClose} className="navilink-modal-close">
             <X size={20} />
           </button>
         </div>
         {moderationError && (
-          <div
-            style={{
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
-              borderRadius: "8px",
-              padding: "0.75rem 1rem",
-              marginBottom: "1rem",
-              color: "#dc2626",
-              fontSize: "0.9rem",
-            }}
-          >
+          <div className="navilink-error-banner">
             {moderationError}
           </div>
         )}
-        <input
-          type="text"
-          placeholder="Post Title"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            if (moderationError) onClearError();
-          }}
-          className="navilink-modal-input"
-        />
-        <textarea
-          placeholder="What would you like to share?"
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-            if (moderationError) onClearError();
-          }}
-          className="navilink-modal-textarea"
-        />
+        <div className="navilink-modal-body">
+          <input
+            type="text"
+            placeholder="Give your post a title..."
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (moderationError) onClearError();
+            }}
+            className="navilink-modal-input"
+          />
+          <textarea
+            placeholder="What would you like to share with the community?"
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (moderationError) onClearError();
+            }}
+            className="navilink-modal-textarea"
+          />
+        </div>
         <div className="navilink-modal-actions">
           <button className="navilink-modal-cancel" onClick={handleClose}>
             Cancel
@@ -262,7 +253,17 @@ const CreatePostModal = ({
             onClick={handleSubmit}
             disabled={loading || !title.trim() || !content.trim()}
           >
-            {loading ? "Checking & Posting..." : "Post"}
+            {loading ? (
+              <>
+                <span className="navilink-spinner"></span>
+                Posting...
+              </>
+            ) : (
+              <>
+                <Send size={16} />
+                Post
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -270,8 +271,6 @@ const CreatePostModal = ({
   );
 };
 
-// Edit Post Modal
-// Inner component that resets when post changes via key
 const EditPostModalContent = ({
   onClose,
   onSubmit,
@@ -307,54 +306,41 @@ const EditPostModalContent = ({
   return (
     <div className="navilink-modal-overlay" onClick={handleClose}>
       <div className="navilink-modal" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-          <h3 style={{ margin: 0 }}>Edit Post</h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: "0.5rem",
-            }}
-          >
+        <div className="navilink-modal-header">
+          <div>
+            <h3>Edit Post</h3>
+            <p className="navilink-modal-subtitle">Update your post</p>
+          </div>
+          <button onClick={handleClose} className="navilink-modal-close">
             <X size={20} />
           </button>
         </div>
         {moderationError && (
-          <div
-            style={{
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
-              borderRadius: "8px",
-              padding: "0.75rem 1rem",
-              marginBottom: "1rem",
-              color: "#dc2626",
-              fontSize: "0.9rem",
-            }}
-          >
+          <div className="navilink-error-banner">
             {moderationError}
           </div>
         )}
-        <input
-          type="text"
-          placeholder="Post Title"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            if (moderationError) onClearError();
-          }}
-          className="navilink-modal-input"
-        />
-        <textarea
-          placeholder="What would you like to share?"
-          value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-            if (moderationError) onClearError();
-          }}
-          className="navilink-modal-textarea"
-        />
+        <div className="navilink-modal-body">
+          <input
+            type="text"
+            placeholder="Post Title"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (moderationError) onClearError();
+            }}
+            className="navilink-modal-input"
+          />
+          <textarea
+            placeholder="What would you like to share?"
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (moderationError) onClearError();
+            }}
+            className="navilink-modal-textarea"
+          />
+        </div>
         <div className="navilink-modal-actions">
           <button className="navilink-modal-cancel" onClick={handleClose}>
             Cancel
@@ -364,7 +350,17 @@ const EditPostModalContent = ({
             onClick={handleSubmit}
             disabled={loading || !title.trim() || !content.trim()}
           >
-            {loading ? "Checking & Saving..." : "Save Changes"}
+            {loading ? (
+              <>
+                <span className="navilink-spinner"></span>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Edit2 size={16} />
+                Save Changes
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -389,7 +385,6 @@ const EditPostModal = ({
 }) => {
   if (!isOpen || !post) return null;
 
-  // Using key to reset component state when post changes
   return (
     <EditPostModalContent
       key={post.id}
@@ -402,7 +397,6 @@ const EditPostModal = ({
   );
 };
 
-// Delete Confirmation Modal
 const DeleteConfirmModal = ({
   isOpen,
   onClose,
@@ -419,47 +413,40 @@ const DeleteConfirmModal = ({
   return (
     <div className="navilink-modal-overlay" onClick={onClose}>
       <div 
-        className="navilink-modal" 
+        className="navilink-modal navilink-modal-small" 
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: "400px", textAlign: "center" }}
       >
-        <div style={{ marginBottom: "1.5rem" }}>
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "50%",
-              background: "#fef2f2",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 1rem",
-            }}
-          >
-            <Trash2 size={28} color="#dc2626" />
-          </div>
-          <h3 style={{ margin: "0 0 0.5rem", color: "var(--secondary-text)" }}>
-            Delete Post?
-          </h3>
-          <p style={{ margin: 0, color: "#666", fontSize: "0.95rem" }}>
-            This action cannot be undone. Are you sure you want to delete this post?
-          </p>
+        <div className="navilink-delete-icon">
+          <Trash2 size={28} />
         </div>
-        <div className="navilink-modal-actions" style={{ justifyContent: "center" }}>
+        <h3 className="navilink-delete-title">Delete Post?</h3>
+        <p className="navilink-delete-text">
+          This action cannot be undone. Are you sure you want to delete this post?
+        </p>
+        <div className="navilink-modal-actions navilink-delete-actions">
           <button 
-            className="navilink-modal-cancel navilink-delete-cancel-btn" 
+            className="navilink-modal-cancel" 
             onClick={onClose}
             disabled={loading}
           >
             Cancel
           </button>
           <button
-            className="navilink-modal-submit navilink-delete-confirm-btn"
+            className="navilink-modal-submit navilink-delete-btn"
             onClick={onConfirm}
             disabled={loading}
-            style={{ background: "#dc2626" }}
           >
-            {loading ? "Deleting..." : "Delete"}
+            {loading ? (
+              <>
+                <span className="navilink-spinner"></span>
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 size={16} />
+                Delete
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -467,7 +454,6 @@ const DeleteConfirmModal = ({
   );
 };
 
-// Post Card Component
 const PostCard = ({
   post,
   replies,
@@ -475,24 +461,32 @@ const PostCard = ({
   onReply,
   onEdit,
   onDelete,
+  category,
 }: {
   post: Post;
   replies: Reply[];
   currentUserId: string | null;
-  onReply: (postId: string, content: string) => void;
+  onReply: (postId: string, content: string) => Promise<{ success: boolean; error?: string }>;
   onEdit: (post: Post) => void;
   onDelete: (postId: string) => void;
+  category: Category;
 }) => {
   const [showReplies, setShowReplies] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
 
   const handleReplySubmit = async () => {
     if (!replyContent.trim()) return;
     setSubmitting(true);
-    await onReply(post.id, replyContent.trim());
-    setReplyContent("");
+    setReplyError(null);
+    const result = await onReply(post.id, replyContent.trim());
     setSubmitting(false);
+    if (result.success) {
+      setReplyContent("");
+    } else {
+      setReplyError(result.error || "Failed to post reply");
+    }
   };
 
   const isOwner = currentUserId === post.user_id;
@@ -500,9 +494,10 @@ const PostCard = ({
 
   return (
     <div className="navilink-post-card">
+      <div className="navilink-post-accent" style={{ backgroundColor: category.color }} />
       <div className="navilink-post-header">
         <div className="navilink-post-author">
-          <div className="navilink-author-avatar">
+          <div className="navilink-author-avatar" style={{ backgroundColor: category.color }}>
             {getInitials(post.user_email)}
           </div>
           <div className="navilink-author-info">
@@ -510,8 +505,9 @@ const PostCard = ({
               {getDisplayName(post.user_email)}
             </span>
             <span className="navilink-post-time">
+              <Clock size={12} />
               {formatTimeAgo(post.created_at)}
-              {post.updated_at !== post.created_at && " (edited)"}
+              {post.updated_at !== post.created_at && " • edited"}
             </span>
           </div>
         </div>
@@ -527,56 +523,73 @@ const PostCard = ({
       <h4 className="navilink-post-title">{post.title}</h4>
       <p className="navilink-post-content">{post.content}</p>
 
-      <div className="navilink-post-actions">
+      <div className="navilink-post-footer">
         <button
-          className="navilink-action-btn"
+          className={`navilink-reply-toggle ${showReplies ? 'active' : ''}`}
           onClick={() => setShowReplies(!showReplies)}
         >
           <MessageCircle size={18} />
-          {postReplies.length > 0
-            ? `${postReplies.length} ${postReplies.length === 1 ? "Reply" : "Replies"}`
-            : "Reply"}
+          <span>
+            {postReplies.length > 0
+              ? `${postReplies.length} ${postReplies.length === 1 ? "Reply" : "Replies"}`
+              : "Reply"}
+          </span>
+          <ChevronRight size={16} className={`navilink-chevron ${showReplies ? 'rotated' : ''}`} />
         </button>
       </div>
 
       {showReplies && (
-        <div className="navilink-replies-container">
-          {postReplies.map((reply) => (
-            <div key={reply.id} className="navilink-reply">
-              <div className="navilink-reply-avatar">
-                {getInitials(reply.user_email)}
-              </div>
-              <div className="navilink-reply-content">
-                <div className="navilink-reply-header">
-                  <span className="navilink-reply-author">
-                    {getDisplayName(reply.user_email)}
-                  </span>
-                  <span className="navilink-reply-time">
-                    {formatTimeAgo(reply.created_at)}
-                  </span>
+        <div className="navilink-replies-section">
+          {postReplies.length > 0 && (
+            <div className="navilink-replies-list">
+              {postReplies.map((reply) => (
+                <div key={reply.id} className="navilink-reply">
+                  <div className="navilink-reply-avatar">
+                    {getInitials(reply.user_email)}
+                  </div>
+                  <div className="navilink-reply-content">
+                    <div className="navilink-reply-header">
+                      <span className="navilink-reply-author">
+                        {getDisplayName(reply.user_email)}
+                      </span>
+                      <span className="navilink-reply-time">
+                        {formatTimeAgo(reply.created_at)}
+                      </span>
+                    </div>
+                    <p className="navilink-reply-text">{reply.content}</p>
+                  </div>
                 </div>
-                <p className="navilink-reply-text">{reply.content}</p>
-              </div>
+              ))}
             </div>
-          ))}
+          )}
 
           {currentUserId && (
-            <div className="navilink-reply-input-container">
-              <input
-                type="text"
-                placeholder="Write a reply..."
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                className="navilink-reply-input"
-                onKeyPress={(e) => e.key === "Enter" && handleReplySubmit()}
-              />
-              <button
-                className="navilink-reply-submit"
-                onClick={handleReplySubmit}
-                disabled={submitting || !replyContent.trim()}
-              >
-                <Send size={16} />
-              </button>
+            <div className="navilink-reply-input-wrapper">
+              {replyError && (
+                <div className="navilink-reply-error">
+                  {replyError}
+                </div>
+              )}
+              <div className="navilink-reply-input-container">
+                <input
+                  type="text"
+                  placeholder="Write a reply..."
+                  value={replyContent}
+                  onChange={(e) => {
+                    setReplyContent(e.target.value);
+                    if (replyError) setReplyError(null);
+                  }}
+                  className="navilink-reply-input"
+                  onKeyPress={(e) => e.key === "Enter" && handleReplySubmit()}
+                />
+                <button
+                  className="navilink-reply-submit"
+                  onClick={handleReplySubmit}
+                  disabled={submitting || !replyContent.trim()}
+                >
+                  <Send size={16} />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -585,7 +598,6 @@ const PostCard = ({
   );
 };
 
-// Main Page Component
 export default function NaviLinkPage() {
   const { user, loading: userLoading } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<Category>(CATEGORIES[0]);
@@ -599,8 +611,8 @@ export default function NaviLinkPage() {
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch posts for selected category
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -627,7 +639,6 @@ export default function NaviLinkPage() {
     fetchPosts();
   }, [selectedCategory]);
 
-  // Fetch all replies for current posts
   useEffect(() => {
     const fetchReplies = async () => {
       if (posts.length === 0) {
@@ -658,7 +669,6 @@ export default function NaviLinkPage() {
     fetchReplies();
   }, [posts]);
 
-  // Real-time subscription for posts
   useEffect(() => {
     const channel = supabase
       .channel("navilink_posts_changes")
@@ -691,7 +701,6 @@ export default function NaviLinkPage() {
     };
   }, [selectedCategory]);
 
-  // Real-time subscription for replies
   useEffect(() => {
     const channel = supabase
       .channel("navilink_replies_changes")
@@ -716,12 +725,10 @@ export default function NaviLinkPage() {
     };
   }, [posts]);
 
-  // Create post handler with moderation
   const handleCreatePost = async (title: string, content: string): Promise<boolean> => {
     if (!user) return false;
 
     try {
-      // Moderate content before saving (check both title and content)
       const moderationResponse = await fetch("/api/moderate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -735,7 +742,6 @@ export default function NaviLinkPage() {
         return false;
       }
 
-      // Content is safe, save to Supabase
       const { error } = await supabase.from("navilink_posts").insert([
         {
           title,
@@ -759,12 +765,10 @@ export default function NaviLinkPage() {
     }
   };
 
-  // Edit post handler with moderation
   const handleEditPost = async (title: string, content: string): Promise<boolean> => {
     if (!user || !editingPost) return false;
 
     try {
-      // Moderate content before saving (check both title and content)
       const moderationResponse = await fetch("/api/moderate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -778,7 +782,6 @@ export default function NaviLinkPage() {
         return false;
       }
 
-      // Content is safe, update in Supabase
       const { error } = await supabase
         .from("navilink_posts")
         .update({ title, content, updated_at: new Date().toISOString() })
@@ -798,13 +801,11 @@ export default function NaviLinkPage() {
     }
   };
 
-  // Open delete confirmation modal
   const handleDeleteClick = (postId: string) => {
     setDeletingPostId(postId);
     setShowDeleteModal(true);
   };
 
-  // Delete post handler
   const handleDeletePost = async () => {
     if (!user || !deletingPostId) return;
 
@@ -819,7 +820,6 @@ export default function NaviLinkPage() {
       if (error) {
         console.error("Error deleting post:", error);
       } else {
-        // Remove the post from local state immediately
         setPosts((prev) => prev.filter((p) => p.id !== deletingPostId));
       }
     } catch (err) {
@@ -831,11 +831,22 @@ export default function NaviLinkPage() {
     }
   };
 
-  // Reply handler
-  const handleReply = async (postId: string, content: string) => {
-    if (!user) return;
+  const handleReply = async (postId: string, content: string): Promise<{ success: boolean; error?: string }> => {
+    if (!user) return { success: false, error: "You must be signed in" };
 
     try {
+      const moderationResponse = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+
+      const moderationResult = await moderationResponse.json();
+
+      if (!moderationResult.safe) {
+        return { success: false, error: moderationResult.message || "Inappropriate content detected" };
+      }
+
       const { error } = await supabase.from("navilink_replies").insert([
         {
           post_id: postId,
@@ -847,168 +858,172 @@ export default function NaviLinkPage() {
 
       if (error) {
         console.error("Error creating reply:", error);
+        return { success: false, error: "Failed to save reply" };
       }
+
+      return { success: true };
     } catch (err) {
       console.error("Unexpected error:", err);
+      return { success: false, error: "Failed to check content. Please try again." };
     }
   };
 
+  const filteredPosts = posts.filter((p) => {
+    const q = searchTerm.toLowerCase();
+    return p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q);
+  });
+
   return (
-    <div className="navilink-page min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
-      {/* Hero Section */}
-      <section
-        className="relative border-b"
-        style={{
-          height: "60vh",
-          borderColor: "var(--border)",
-          overflow: "hidden",
-        }}
-      >
-        <img
-          src="/navilink.jpg"
-          alt="NaviLink"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
+    <div className="navilink-page">
+      <section className="navilink-hero">
+        <div 
+          className="navilink-hero-bg"
+          style={{ backgroundImage: "url('/navilink.jpg')" }}
         />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.4)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "white",
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "clamp(48px, 8vw, 80px)",
-              fontWeight: 700,
-              marginBottom: "0.5rem",
-            }}
-          >
-            NAVILINK
-          </h1>
-          <p
-            style={{
-              fontSize: "1.25rem",
-              opacity: 0.9,
-              maxWidth: "600px",
-              textAlign: "center",
-              padding: "0 1rem",
-            }}
-          >
-            Connect, share, and engage with your community
+        <div className="navilink-hero-overlay" />
+        <div className="navilink-hero-content">
+          <div className="navilink-hero-badge">
+            <Sparkles size={14} />
+            Community Forum
+          </div>
+          <h1 className="navilink-hero-title">NaviLink</h1>
+          <p className="navilink-hero-subtitle">
+            Connect, share, and engage with your community in meaningful discussions
           </p>
+          <div className="navilink-search-container">
+            <Search className="navilink-search-icon" size={20} />
+            <input
+              type="text"
+              placeholder="Search discussions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="navilink-search-input"
+            />
+          </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <div
-        className="container mx-auto px-4 py-8"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "280px 1fr",
-          gap: "2rem",
-          maxWidth: "1400px",
-        }}
-      >
-        {/* Categories Sidebar */}
+      <div className="navilink-mobile-categories">
+        <div className="navilink-mobile-categories-scroll">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category.id}
+              className={`navilink-category-pill ${selectedCategory.id === category.id ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category)}
+              style={{ 
+                '--category-color': category.color 
+              } as React.CSSProperties}
+            >
+              {category.icon}
+              <span>{category.name.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="navilink-main">
         <aside className="navilink-sidebar">
-          <h3
-            style={{
-              color: "var(--secondary-text)",
-              fontSize: "1.1rem",
-              fontWeight: 600,
-              marginBottom: "1rem",
-            }}
-          >
-            Discussion Categories
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <div className="navilink-sidebar-header">
+            <h3>Categories</h3>
+            <p>Choose a topic to explore</p>
+          </div>
+          <div className="navilink-categories-list">
             {CATEGORIES.map((category) => (
               <button
                 key={category.id}
-                className={`navilink-category-btn ${
-                  selectedCategory.id === category.id ? "active" : ""
-                }`}
+                className={`navilink-category-btn ${selectedCategory.id === category.id ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(category)}
               >
-                <span className="navilink-category-icon">{category.icon}</span>
-                {category.name}
+                <div 
+                  className="navilink-category-icon"
+                  style={{ backgroundColor: `${category.color}15`, color: category.color }}
+                >
+                  {category.icon}
+                </div>
+                <div className="navilink-category-info">
+                  <span className="navilink-category-name">{category.name}</span>
+                  <span className="navilink-category-desc">{category.description}</span>
+                </div>
+                <ChevronRight size={16} className="navilink-category-arrow" />
               </button>
             ))}
           </div>
         </aside>
 
-        {/* Chat Interface */}
-        <div className="navilink-chat-container">
-          {/* Header */}
-          <div className="navilink-chat-header">
-            <div>
-              <h2>{selectedCategory.name}</h2>
-              <p
-                style={{
-                  color: "#888",
-                  fontSize: "0.9rem",
-                  margin: "0.25rem 0 0",
-                }}
+        <div className="navilink-content">
+          <div className="navilink-content-header">
+            <div className="navilink-content-title">
+              <div 
+                className="navilink-content-icon"
+                style={{ backgroundColor: `${selectedCategory.color}15`, color: selectedCategory.color }}
               >
-                {selectedCategory.description}
-              </p>
+                {selectedCategory.icon}
+              </div>
+              <div>
+                <h2>{selectedCategory.name}</h2>
+                <p>{selectedCategory.description}</p>
+              </div>
             </div>
-            {user ? (
+            {user && (
               <button
-                className="navilink-create-post-btn"
+                className="navilink-create-btn"
                 onClick={() => setShowCreateModal(true)}
               >
                 <Plus size={18} />
-                Create Post
+                <span>New Post</span>
               </button>
-            ) : null}
+            )}
           </div>
 
-          {/* Auth Prompt for non-signed in users */}
           {!userLoading && !user && (
-            <div className="navilink-auth-prompt" style={{ margin: "1rem 1.5rem 0" }}>
-              <p>
-                <Link href="/pages/signin">Sign in</Link> to create posts and join the discussion.
-              </p>
+            <div className="navilink-auth-prompt">
+              <div className="navilink-auth-content">
+                <MessageCircle size={24} />
+                <div>
+                  <p className="navilink-auth-title">Join the conversation</p>
+                  <p className="navilink-auth-text">
+                    <Link href="/pages/signin">Sign in</Link> to create posts and participate in discussions.
+                  </p>
+                </div>
+              </div>
+              <Link href="/pages/signin" className="navilink-auth-btn">
+                Sign In
+                <ArrowRight size={16} />
+              </Link>
             </div>
           )}
 
-          {/* Posts Container */}
-          <div className="navilink-posts-container">
+          <div className="navilink-posts-list">
             {loading ? (
-              <div className="navilink-empty-state">
-                <p>Loading posts...</p>
+              <div className="navilink-loading">
+                <div className="navilink-loading-spinner" />
+                <p>Loading discussions...</p>
               </div>
-            ) : posts.length === 0 ? (
-              <div className="navilink-empty-state">
-                <MessageCircle size={48} />
-                <h4>No posts yet</h4>
+            ) : filteredPosts.length === 0 ? (
+              <div className="navilink-empty">
+                <div className="navilink-empty-icon">
+                  <MessageCircle size={48} />
+                </div>
+                <h4>No discussions yet</h4>
                 <p>
-                  {user
+                  {searchTerm 
+                    ? "No posts match your search. Try different keywords."
+                    : user
                     ? "Be the first to start a discussion in this category!"
                     : "Sign in to be the first to start a discussion!"}
                 </p>
+                {user && !searchTerm && (
+                  <button 
+                    className="navilink-empty-btn"
+                    onClick={() => setShowCreateModal(true)}
+                  >
+                    <Plus size={18} />
+                    Create First Post
+                  </button>
+                )}
               </div>
             ) : (
-              posts.map((post) => (
+              filteredPosts.map((post) => (
                 <PostCard
                   key={post.id}
                   post={post}
@@ -1020,6 +1035,7 @@ export default function NaviLinkPage() {
                     setShowEditModal(true);
                   }}
                   onDelete={handleDeleteClick}
+                  category={selectedCategory}
                 />
               ))
             )}
@@ -1027,7 +1043,6 @@ export default function NaviLinkPage() {
         </div>
       </div>
 
-      {/* Modals */}
       <CreatePostModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -1059,3 +1074,4 @@ export default function NaviLinkPage() {
     </div>
   );
 }
+

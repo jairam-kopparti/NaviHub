@@ -13,7 +13,6 @@ export async function POST(req: Request) {
       )
     }
 
-    // Use local moderation (banned words, spam detection)
     const moderation = moderateContent(content)
 
     if (!moderation.allowed) {
@@ -23,7 +22,6 @@ export async function POST(req: Request) {
       })
     }
 
-    // Content passed moderation
     return NextResponse.json({ safe: true })
   } catch (error) {
     console.error('Moderation error:', error)
@@ -33,3 +31,4 @@ export async function POST(req: Request) {
     )
   }
 }
+

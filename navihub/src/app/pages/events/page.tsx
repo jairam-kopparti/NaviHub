@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, Calendar } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import "../../styles/events.css";
@@ -36,713 +36,160 @@ interface Event {
 
 const BOROUGHS: Borough[] = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
 
-const CATEGORY_DISPLAY: Record<Category, string> = {
+const CATEGORIES: Category[] = [
+  "sports",
+  "social",
+  "education",
+  "volunteer",
+  "workshops",
+  "community_meetings",
+  "other",
+];
+
+const CATEGORY_LABELS: Record<Category, string> = {
   sports: "Sports",
   social: "Social",
   education: "Education",
   volunteer: "Volunteer",
   workshops: "Workshops",
-  community_meetings: "Community Meetings",
+  community_meetings: "Community",
   other: "Other",
-} as const;
-
-const getCategoryColor = (category: Category): string => {
-  const colors: Record<Category, string> = {
-    sports: "#3b82f6",
-    social: "#ef4444",
-    education: "#10b981",
-    volunteer: "#f59e0b",
-    workshops: "#8b5cf6",
-    community_meetings: "#0ea5e9",
-    other: "#6b7280",
-  };
-  return colors[category];
 };
 
-const formatDateLabel = (iso: string) => {
+const formatDate = (iso: string) => {
   const d = new Date(iso + "T00:00:00");
-  const day = d.getDate();
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? "st"
-      : day % 10 === 2 && day !== 12
-      ? "nd"
-      : day % 10 === 3 && day !== 13
-      ? "rd"
-      : "th";
-  const month = d.toLocaleString("default", { month: "long" });
-  const year = d.getFullYear();
-  return `${day}${suffix} ${month}, ${year}`;
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 };
 
-const formatTimeRange = (startTime: string, endTime: string) => {
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(":");
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
-  return `${formatTime(startTime)} - ${formatTime(endTime)}`;
-};
-
-// ---------- Calendar Component ----------
-
-const Calendar = ({ signedUpDates }: { signedUpDates: string[] }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  const monthName = currentMonth.toLocaleString("default", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-  const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-  const daysInMonth = lastDay.getDate();
-  const startingDayOfWeek = firstDay.getDay();
-
-  const days = [];
-  for (let i = 0; i < startingDayOfWeek; i++) {
-    days.push(null);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i);
-  }
-
-  const hasSignup = (day: number | null) => {
-    if (!day) return false;
-    const dateStr = `${currentMonth.getFullYear()}-${String(
-      currentMonth.getMonth() + 1
-    ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return signedUpDates.includes(dateStr);
-  };
-
-  const isToday = (day: number | null) => {
-    if (!day) return false;
-    const today = new Date();
-    return (
-      day === today.getDate() &&
-      currentMonth.getMonth() === today.getMonth() &&
-      currentMonth.getFullYear() === today.getFullYear()
-    );
-  };
-
-  const previousMonth = () => {
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-    );
-  };
-
-  const nextMonth = () => {
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
-    );
-  };
-
-  return (
-    <div
-      style={{
-        backgroundColor: "var(--surface)",
-        borderRadius: "8px",
-        padding: "1rem",
-        border: "1px solid var(--border)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1rem",
-        }}
-      >
-        <h3 style={{ color: "var(--secondary-text)", margin: 0, fontSize: "1rem" }}>
-          {monthName}
-        </h3>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button
-            onClick={previousMonth}
-            style={{
-              backgroundColor: "var(--bg)",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-              padding: "0.25rem 0.5rem",
-              cursor: "pointer",
-              color: "var(--secondary-text)",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            onClick={nextMonth}
-            style={{
-              backgroundColor: "var(--bg)",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
-              padding: "0.25rem 0.5rem",
-              cursor: "pointer",
-              color: "var(--secondary-text)",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          gap: "0.25rem",
-          marginBottom: "0.5rem",
-        }}
-      >
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div
-            key={day}
-            style={{
-              textAlign: "center",
-              color: "var(--thirdary-text)",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              padding: "0.25rem",
-            }}
-          >
-            {day}
-          </div>
-        ))}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(7, 1fr)",
-          gap: "0.25rem",
-        }}
-      >
-        {days.map((day, index) => (
-          <div
-            key={index}
-            style={{
-              aspectRatio: "1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "4px",
-              backgroundColor: day && hasSignup(day) ? "var(--secondary-text)" : "transparent",
-              color: day && hasSignup(day) ? "var(--surface)" : "var(--secondary-text)",
-              fontSize: "0.85rem",
-              cursor: day ? "default" : "default",
-              opacity: day ? 1 : 0.3,
-              border: day && isToday(day) ? "2px solid var(--secondary-text)" : "none",
-            }}
-          >
-            {day}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+const formatTime = (time: string) => {
+  const [hours, minutes] = time.split(":");
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+  return `${displayHour}:${minutes} ${ampm}`;
 };
 
 // ---------- Event Detail Modal ----------
 
-const EventDetailModal = ({
+const EventModal = ({
   event,
   onClose,
-  userSignups,
+  isSignedUp,
   onSignupChange,
 }: {
   event: Event;
   onClose: () => void;
-  userSignups: string[];
+  isSignedUp: boolean;
   onSignupChange: (eventId: string, signed: boolean) => void;
 }) => {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isUserSignedUp = userSignups.includes(event.id);
   const spotsAvailable = event.capacity ? event.capacity - event.spots_taken : null;
   const isFull = spotsAvailable !== null && spotsAvailable <= 0;
 
   const handleSignup = async () => {
     if (!user) {
-      setError("Please sign in to register for events");
+      setError("Please sign in to register");
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
-      if (isUserSignedUp) {
-        // Remove signup
-        const { error: deleteError } = await supabase
-          .from("event_signups")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("event_id", event.id);
-
-        if (deleteError) throw deleteError;
-
-        // Decrement spots_taken
-        await supabase
-          .from("events")
-          .update({ spots_taken: Math.max(0, event.spots_taken - 1) })
-          .eq("id", event.id);
-
+      if (isSignedUp) {
+        await supabase.from("event_signups").delete().eq("user_id", user.id).eq("event_id", event.id);
+        await supabase.from("events").update({ spots_taken: Math.max(0, event.spots_taken - 1) }).eq("id", event.id);
         onSignupChange(event.id, false);
       } else {
-        // Add signup
-        const { error: insertError } = await supabase
-          .from("event_signups")
-          .insert([{ user_id: user.id, event_id: event.id }]);
-
-        if (insertError) throw insertError;
-
-        // Increment spots_taken
-        await supabase
-          .from("events")
-          .update({ spots_taken: event.spots_taken + 1 })
-          .eq("id", event.id);
-
+        await supabase.from("event_signups").insert([{ user_id: user.id, event_id: event.id }]);
+        await supabase.from("events").update({ spots_taken: event.spots_taken + 1 }).eq("id", event.id);
         onSignupChange(event.id, true);
       }
     } catch (err) {
-      console.error("Signup error:", err);
-      setError(err instanceof Error ? err.message : "Failed to update signup");
+      setError(err instanceof Error ? err.message : "Failed to update");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          backgroundColor: "var(--surface)",
-          borderRadius: "12px",
-          padding: "2rem",
-          maxWidth: "600px",
-          width: "90%",
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
-          maxHeight: "80vh",
-          overflowY: "auto",
-        }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70" />
+      <div 
+        className="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "start",
-            marginBottom: "1rem",
-          }}
-        >
-          <h2
-            style={{
-              color: "var(--secondary-text)",
-              margin: 0,
-              fontSize: "1.5rem",
-              flex: 1,
-            }}
-          >
-            {event.title}
-          </h2>
-          <button
-            onClick={onClose}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: "0.5rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <X size={24} color="var(--secondary-text)" />
+        {/* Header with gradient */}
+        <div className="bg-[#997e67] p-8 text-white">
+          <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
+            <X size={20} />
           </button>
-        </div>
-
-        <span
-          style={{
-            backgroundColor: getCategoryColor(event.category),
-            color: "#ffffff",
-            padding: "0.25rem 0.75rem",
-            borderRadius: "20px",
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            display: "inline-block",
-            marginBottom: "1rem",
-          }}
-        >
-          {CATEGORY_DISPLAY[event.category]}
-        </span>
-
-        <div style={{ marginBottom: "1.5rem" }}>
-          <h3
-            style={{
-              color: "var(--secondary-text)",
-              fontSize: "0.95rem",
-              fontWeight: 600,
-              marginBottom: "0.25rem",
-            }}
-          >
-            Description
-          </h3>
-          <p
-            style={{
-              color: "var(--secondary-text)",
-              margin: 0,
-              lineHeight: 1.6,
-            }}
-          >
-            {event.description || "No description provided"}
-          </p>
-        </div>
-
-        <div style={{ marginBottom: "1.5rem" }}>
-          <h3
-            style={{
-              color: "var(--secondary-text)",
-              fontSize: "0.95rem",
-              fontWeight: 600,
-              marginBottom: "0.25rem",
-            }}
-          >
-            Date & Time
-          </h3>
-          <p
-            style={{
-              color: "var(--secondary-text)",
-              margin: 0,
-            }}
-          >
-            {formatDateLabel(event.event_date)}
-          </p>
-          <p
-            style={{
-              color: "var(--secondary-text)",
-              margin: "0.25rem 0 0 0",
-            }}
-          >
-            {formatTimeRange(event.start_time, event.end_time)}
-          </p>
-        </div>
-
-        <div style={{ marginBottom: "1.5rem" }}>
-          <h3
-            style={{
-              color: "var(--secondary-text)",
-              fontSize: "0.95rem",
-              fontWeight: 600,
-              marginBottom: "0.25rem",
-            }}
-          >
-            Location
-          </h3>
-          <p
-            style={{
-              color: "var(--secondary-text)",
-              margin: 0,
-            }}
-          >
-            {event.is_virtual ? "Virtual Event" : event.location_name || "TBD"}
-          </p>
-          {event.address && !event.is_virtual && (
-            <p
-              style={{
-                color: "var(--thirdary-text)",
-                margin: "0.25rem 0 0 0",
-                fontSize: "0.9rem",
-              }}
-            >
-              {event.address}
-            </p>
-          )}
-        </div>
-
-        {event.capacity && (
-          <div style={{ marginBottom: "1.5rem" }}>
-            <h3
-              style={{
-                color: "var(--secondary-text)",
-                fontSize: "0.95rem",
-                fontWeight: 600,
-                marginBottom: "0.25rem",
-              }}
-            >
-              Capacity
-            </h3>
-            <p
-              style={{
-                color: "var(--secondary-text)",
-                margin: 0,
-              }}
-            >
-              {spotsAvailable !== null
-                ? `${spotsAvailable} spots available (${event.spots_taken}/${event.capacity} filled)`
-                : `${event.spots_taken} registered`}
-            </p>
-          </div>
-        )}
-
-        {error && (
-          <div
-            style={{
-              backgroundColor: "#fee",
-              color: "#c00",
-              padding: "0.75rem",
-              borderRadius: "4px",
-              marginBottom: "1rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {event.signup_required && (
-          <button
-            onClick={handleSignup}
-            disabled={loading || (isFull && !isUserSignedUp)}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              backgroundColor:
-                isFull && !isUserSignedUp
-                  ? "var(--thirdary-text)"
-                  : isUserSignedUp
-                  ? "#ef4444"
-                  : "var(--secondary-text)",
-              color: "var(--surface)",
-              border: "none",
-              borderRadius: "8px",
-              cursor:
-                loading || (isFull && !isUserSignedUp)
-                  ? "not-allowed"
-                  : "pointer",
-              fontWeight: 600,
-              fontSize: "1rem",
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading
-              ? "Processing..."
-              : isFull && !isUserSignedUp
-              ? "Event Full"
-              : isUserSignedUp
-              ? "Cancel Registration"
-              : "Sign Up"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ---------- Mini Event Card (for signed-up events) ----------
-
-const MiniEventCard = ({
-  event,
-  onClick,
-}: {
-  event: Event;
-  onClick: (event: Event) => void;
-}) => {
-  return (
-    <div
-      onClick={() => onClick(event)}
-      style={{
-        backgroundColor: "var(--surface)",
-        borderRadius: "6px",
-        padding: "0.75rem",
-        marginBottom: "0.5rem",
-        cursor: "pointer",
-        border: "1px solid var(--border)",
-        transition: "all 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--shadow-depth)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          marginBottom: "0.25rem",
-        }}
-      >
-        <h5
-          style={{
-            color: "var(--secondary-text)",
-            margin: 0,
-            fontSize: "0.9rem",
-            fontWeight: 600,
-            flex: 1,
-          }}
-        >
-          {event.title}
-        </h5>
-        <span
-          style={{
-            backgroundColor: getCategoryColor(event.category),
-            color: "#ffffff",
-            padding: "0.15rem 0.4rem",
-            borderRadius: "10px",
-            fontSize: "0.65rem",
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {CATEGORY_DISPLAY[event.category]}
-        </span>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "0.75rem",
-          fontSize: "0.8rem",
-          color: "var(--thirdary-text)",
-        }}
-      >
-        <span>{formatDateLabel(event.event_date)}</span>
-        <span>{formatTimeRange(event.start_time, event.end_time)}</span>
-      </div>
-
-      {event.location_name && (
-        <p
-          style={{
-            color: "var(--thirdary-text)",
-            margin: "0.25rem 0 0 0",
-            fontSize: "0.8rem",
-          }}
-        >
-          {event.location_name}
-        </p>
-      )}
-    </div>
-  );
-};
-
-// ---------- Event Card ----------
-
-const EventCard = ({
-  event,
-  onClick,
-}: {
-  event: Event;
-  onClick: (event: Event) => void;
-}) => {
-  return (
-    <div
-      onClick={() => onClick(event)}
-      style={{
-        backgroundColor: "var(--surface)",
-        borderRadius: "8px",
-        padding: "1rem",
-        marginBottom: "0.75rem",
-        cursor: "pointer",
-        border: "1px solid var(--border)",
-        transition: "all 0.2s ease",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        gap: "1rem",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--shadow-depth)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-      }}
-    >
-      <div style={{ flex: 1 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <h4
-            style={{
-              color: "var(--secondary-text)",
-              margin: 0,
-              fontSize: "1rem",
-              fontWeight: 600,
-            }}
-          >
-            {event.title}
-          </h4>
-          <span
-            style={{
-              backgroundColor: getCategoryColor(event.category),
-              color: "#ffffff",
-              padding: "0.2rem 0.5rem",
-              borderRadius: "12px",
-              fontSize: "0.7rem",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {CATEGORY_DISPLAY[event.category]}
+          <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium mb-4">
+            {CATEGORY_LABELS[event.category]}
           </span>
+          <h2 className="text-2xl font-bold mb-2">{event.title}</h2>
+          <p className="text-white/90 text-sm">{formatDate(event.event_date)}</p>
         </div>
 
-        <p
-          style={{
-            color: "var(--secondary-text)",
-            margin: "0 0 0.5rem 0",
-            fontSize: "0.9rem",
-            lineHeight: 1.4,
-          }}
-        >
-          {event.description && event.description.length > 100
-            ? event.description.substring(0, 100) + "..."
-            : event.description}
-        </p>
+        {/* Content */}
+        <div className="p-8">
+          {event.description && (
+            <p className="!text-gray-600 mb-6 leading-relaxed">{event.description}</p>
+          )}
 
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            fontSize: "0.85rem",
-            color: "var(--thirdary-text)",
-          }}
-        >
-          <span>{formatTimeRange(event.start_time, event.end_time)}</span>
-          {event.location_name && <span>{event.location_name}</span>}
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
+                <Clock size={18} className="text-[#997e67]" />
+              </div>
+              <div>
+                <p className="!text-gray-400 text-xs uppercase tracking-wide">Time</p>
+                <p className="!text-gray-800 font-medium">{formatTime(event.start_time)} - {formatTime(event.end_time)}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
+                <MapPin size={18} className="text-[#997e67]" />
+              </div>
+              <div>
+                <p className="!text-gray-400 text-xs uppercase tracking-wide">Location</p>
+                <p className="!text-gray-800 font-medium">{event.is_virtual ? "Virtual Event" : event.location_name || "TBD"}</p>
+                {event.address && !event.is_virtual && <p className="!text-gray-500 text-sm">{event.address}</p>}
+              </div>
+            </div>
+
+            {event.capacity && (
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
+                  <Users size={18} className="text-[#997e67]" />
+                </div>
+                <div>
+                  <p className="!text-gray-400 text-xs uppercase tracking-wide">Availability</p>
+                  <p className="!text-gray-800 font-medium">{spotsAvailable} of {event.capacity} spots available</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+          {event.signup_required && (
+            <button
+              onClick={handleSignup}
+              disabled={loading || (isFull && !isSignedUp)}
+              className={`w-full py-4 rounded-2xl font-semibold transition-all cursor-pointer ${
+                isFull && !isSignedUp
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : isSignedUp
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-[#1F1F1F] text-white hover:bg-black"
+              } ${loading ? "opacity-60" : ""}`}
+            >
+              {loading ? "Processing..." : isFull && !isSignedUp ? "Fully Booked" : isSignedUp ? "Cancel Registration" : "Register Now"}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -756,615 +203,422 @@ export default function CommunityEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [selectedBoroughs, setSelectedBoroughs] = useState<Borough[]>([]);
-  const [selectedCapacity, setSelectedCapacity] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<Category | "all">("all");
+  const [activeBorough, setActiveBorough] = useState<Borough | "all">("all");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [userSignups, setUserSignups] = useState<string[]>([]);
-  const [userSignedUpEvents, setUserSignedUpEvents] = useState<Event[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch user's signups
   useEffect(() => {
     if (!user || userLoading) return;
-
     const fetchUserSignups = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("event_signups")
-          .select("event_id")
-          .eq("user_id", user.id);
-
-        if (error) {
-          console.error("Error fetching user signups:", error);
-          return;
-        }
-
-        if (data) {
-          const signupIds = data.map((signup) => signup.event_id);
-          setUserSignups(signupIds);
-        }
-      } catch (err) {
-        console.error("Unexpected error fetching user signups:", err);
-      }
+      const { data } = await supabase.from("event_signups").select("event_id").eq("user_id", user.id);
+      if (data) setUserSignups(data.map((s) => s.event_id));
     };
-
     fetchUserSignups();
   }, [user, userLoading]);
 
-  // Fetch events and filter user's signed-up events
   useEffect(() => {
     const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        let query = supabase
-          .from("events")
-          .select("*")
-          .order("event_date", { ascending: true })
-          .order("start_time", { ascending: true });
-
-        // Filter by categories
-        if (selectedCategories.length > 0) {
-          query = query.in("category", selectedCategories);
-        }
-
-        // Filter by boroughs (matching location_name)
-        if (selectedBoroughs.length > 0) {
-          query = query.in("location_name", selectedBoroughs);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          console.error("Error fetching events:", error);
-          console.error("Error details:", error.message, error.code);
-          setEvents([]);
-          return;
-        }
-
-        console.log("Events fetched successfully:", data);
-        if (data) {
-          // Filter by capacity if needed
-          let filteredEvents = data as Event[];
-
-          if (selectedCapacity !== "all") {
-            filteredEvents = filteredEvents.filter((event) => {
-              if (!event.capacity) return selectedCapacity === "unlimited";
-              const spotsAvailable = event.capacity - event.spots_taken;
-
-              if (selectedCapacity === "available") {
-                return spotsAvailable > 0;
-              } else if (selectedCapacity === "full") {
-                return spotsAvailable === 0;
-              }
-              return true;
-            });
-          }
-
-          setEvents(filteredEvents);
-
-          // Update user's signed-up events
-          if (userSignups.length > 0) {
-            const signedUpEvents = filteredEvents.filter((event) =>
-              userSignups.includes(event.id)
-            );
-            setUserSignedUpEvents(signedUpEvents);
-          } else {
-            setUserSignedUpEvents([]);
-          }
-        }
-      } catch (err) {
-        console.error("Unexpected error fetching events:", err);
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      let query = supabase.from("events").select("*").order("event_date", { ascending: true });
+      if (activeCategory !== "all") query = query.eq("category", activeCategory);
+      if (activeBorough !== "all") query = query.eq("location_name", activeBorough);
+      const { data } = await query;
+      setEvents((data as Event[]) || []);
+      setLoading(false);
     };
-
     fetchEvents();
-  }, [selectedCategories, selectedBoroughs, selectedCapacity, userSignups]);
+  }, [activeCategory, activeBorough]);
 
-  // Filter by search term
-  const filteredEvents = events.filter((event) => {
-    const queryLower = searchTerm.trim().toLowerCase();
-    return (
-      event.title.toLowerCase().includes(queryLower) ||
-      (event.description && event.description.toLowerCase().includes(queryLower)) ||
-      (event.location_name && event.location_name.toLowerCase().includes(queryLower))
-    );
+  const filteredEvents = events.filter((e) => {
+    const q = searchTerm.toLowerCase();
+    return e.title.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q) || e.location_name?.toLowerCase().includes(q);
   });
 
-  // Group events by date
-  const groupedByDate: { [date: string]: Event[] } = {};
-  filteredEvents.forEach((event) => {
-    if (!groupedByDate[event.event_date]) {
-      groupedByDate[event.event_date] = [];
-    }
-    groupedByDate[event.event_date].push(event);
-  });
-
-  const sortedDates = Object.keys(groupedByDate).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
-
-  const toggleCategory = (category: Category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  const toggleBorough = (borough: Borough) => {
-    setSelectedBoroughs((prev) =>
-      prev.includes(borough)
-        ? prev.filter((b) => b !== borough)
-        : [...prev, borough]
-    );
-  };
+  const upcomingEvents = filteredEvents.slice(0, 3);
+  const myEvents = filteredEvents.filter((e) => userSignups.includes(e.id));
 
   const handleSignupChange = (eventId: string, signed: boolean) => {
-    if (signed) {
-      setUserSignups((prev) => [...prev, eventId]);
-    } else {
-      setUserSignups((prev) => prev.filter((id) => id !== eventId));
+    setUserSignups((prev) => signed ? [...prev, eventId] : prev.filter((id) => id !== eventId));
+    
+    // Update the specific event in the events list to reflect new spots
+    setEvents((prevEvents) => 
+      prevEvents.map((e) => 
+        e.id === eventId 
+          ? { ...e, spots_taken: signed ? e.spots_taken + 1 : Math.max(0, e.spots_taken - 1) } 
+          : e
+      )
+    );
+
+    // If the selected event in the modal is this one, update it too
+    if (selectedEvent && selectedEvent.id === eventId) {
+      setSelectedEvent((prev) => prev ? ({
+        ...prev,
+        spots_taken: signed ? prev.spots_taken + 1 : Math.max(0, prev.spots_taken - 1)
+      }) : null);
     }
-    
-    // Refetch events to update spots_taken
-    const refetchEvents = async () => {
-      try {
-        let query = supabase
-          .from("events")
-          .select("*")
-          .order("event_date", { ascending: true })
-          .order("start_time", { ascending: true });
-
-        if (selectedCategories.length > 0) {
-          query = query.in("category", selectedCategories);
-        }
-
-        if (selectedBoroughs.length > 0) {
-          query = query.in("location_name", selectedBoroughs);
-        }
-
-        const { data } = await query;
-        if (data) {
-          let filteredEvents = data as Event[];
-          if (selectedCapacity !== "all") {
-            filteredEvents = filteredEvents.filter((event) => {
-              if (!event.capacity) return selectedCapacity === "unlimited";
-              const spotsAvailable = event.capacity - event.spots_taken;
-              if (selectedCapacity === "available") {
-                return spotsAvailable > 0;
-              } else if (selectedCapacity === "full") {
-                return spotsAvailable === 0;
-              }
-              return true;
-            });
-          }
-          setEvents(filteredEvents);
-        }
-      } catch (err) {
-        console.error("Error refetching events:", err);
-      }
-    };
-    
-    refetchEvents();
   };
 
-  const allCategories: Category[] = [
-    "sports",
-    "social",
-    "education",
-    "volunteer",
-    "workshops",
-    "community_meetings",
-    "other",
-  ];
-
-  const signedUpDates = userSignedUpEvents.map((event) => event.event_date);
-
   return (
-    <div
-      className="events-page"
-      style={{
-        backgroundColor: "var(--bg)",
-        minHeight: "100vh",
-        fontFamily: "var(--font-body)",
-        color: "var(--secondary-text)",
-      }}
-    >
-      {/* HERO */}
-      <div
-        style={{
-          backgroundImage: "url('/events.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          width: "100%",
-          height: "80vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "0",
-          textAlign: "center",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "rgba(0,0,0,0.5)",
-            padding: "3rem 2rem",
-            borderRadius: "12px",
-            display: "inline-block",
-          }}
-        >
-          <h1 style={{ fontSize: "2.75rem", color: "var(--primary-text)", margin: 0 }}>
-            Community Events
-          </h1>
-          <p style={{ fontSize: "1.25rem", color: "var(--primary-text)", margin: "0.5rem 0 0 0" }}>
-            Browse the schedule and sign up for events happening in your community.
-          </p>
-        </div>
-      </div>
-
-      {/* MY EVENTS SECTION */}
-      {user && (
-        <div style={{ padding: "2rem", backgroundColor: "var(--bg)" }}>
-          <h2
-            style={{
-              color: "var(--secondary-text)",
-              margin: "0 0 1.5rem 0",
-              fontSize: "1.5rem",
-            }}
-          >
-            My Events
-          </h2>
-          <div
-            style={{
-              display: "flex",
-              gap: "2rem",
-              backgroundColor: "var(--surface)",
-              padding: "2rem",
-              borderRadius: "12px",
-              boxShadow: "var(--shadow-subtle)",
-            }}
-          >
-            {/* CALENDAR (LEFT) */}
-            <div style={{ width: "35%", flexShrink: 0 }}>
-              <Calendar signedUpDates={signedUpDates} />
-            </div>
-
-            {/* SIGNED-UP EVENTS (RIGHT) */}
-            <div
-              style={{
-                flex: 1,
-                backgroundColor: "var(--bg)",
-                padding: "1.5rem",
-                borderRadius: "8px",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <h3
-                style={{
-                  color: "var(--secondary-text)",
-                  margin: "0 0 1rem 0",
-                  fontSize: "1.1rem",
-                }}
-              >
-                Registered Events ({userSignedUpEvents.length})
-              </h3>
-              <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                {userSignedUpEvents.length === 0 ? (
-                  <p style={{ color: "var(--thirdary-text)", textAlign: "center", padding: "2rem 0" }}>
-                    No events signed up
-                  </p>
-                ) : (
-                  userSignedUpEvents.map((event) => (
-                    <MiniEventCard
-                      key={event.id}
-                      event={event}
-                      onClick={() => setSelectedEvent(event)}
-                    />
-                  ))
-                )}
+    <div className="events-page min-h-screen bg-[var(--surface)]">
+      {/* Hero Section - Minimal & Bold */}
+      <section className="relative min-h-[60vh] bg-black overflow-hidden flex flex-col justify-center">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-60"
+          style={{ backgroundImage: "url('/events.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30" />
+        
+        <div className="relative max-w-6xl mx-auto px-6 py-32 md:py-40 w-full">
+          <div className="max-w-2xl mt-10">
+            <p className="text-[#CCBEB1] font-medium mb-6 tracking-wide uppercase text-sm">Community Events</p>
+            <h1 className="text-white text-5xl md:text-6xl font-bold leading-tight mb-8">
+              Connect, Learn & Grow Together
+            </h1>
+            <p className="text-gray-200 text-lg mb-12 leading-relaxed max-w-xl">
+              Join local events, workshops, and meetups that bring our community together.
+            </p>
+            
+            {/* Search Bar */}
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-16 pr-6 py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-lg"
+                />
               </div>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className="px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-white/20 transition cursor-pointer flex items-center gap-2 font-medium"
+              >
+                <Filter size={20} />
+                <span className="hidden md:inline">Filters</span>
+              </button>
             </div>
+
+            {/* Filter Pills Sidebar */}
+            {showFilters && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+                  onClick={() => setShowFilters(false)}
+                />
+                <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[#1F1F1F] z-50 p-8 shadow-2xl border-l border-white/10 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-bold text-white">Filter Events</h3>
+                    <button 
+                      onClick={() => setShowFilters(false)}
+                      className="p-2 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  <div className="mb-8">
+                    <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Category</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setActiveCategory("all")}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                          activeCategory === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                        }`}
+                      >
+                        All
+                      </button>
+                      {CATEGORIES.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setActiveCategory(cat)}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                            activeCategory === cat ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                          }`}
+                        >
+                          {CATEGORY_LABELS[cat]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-8">
+                    <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Location</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setActiveBorough("all")}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                          activeBorough === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                        }`}
+                      >
+                        All Boroughs
+                      </button>
+                      {BOROUGHS.map((b) => (
+                        <button
+                          key={b}
+                          onClick={() => setActiveBorough(b)}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                            activeBorough === b ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                          }`}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-12 pt-8 border-t border-white/10">
+                    <button 
+                      onClick={() => {
+                        setActiveCategory("all");
+                        setActiveBorough("all");
+                      }}
+                      className="w-full py-4 rounded-xl border border-white/10 text-white font-medium hover:bg-white/5 transition mb-3 cursor-pointer"
+                    >
+                      Reset Filters
+                    </button>
+                    <button 
+                      onClick={() => setShowFilters(false)}
+                      className="w-full py-4 rounded-xl bg-[#997e67] text-white font-bold hover:bg-[#8a715c] transition cursor-pointer"
+                    >
+                      Show Results
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
+      </section>
+
+      {/* My Events Section */}
+      {user && myEvents.length > 0 && (
+        <section className="py-20 px-6 bg-[var(--surface)] border-b border-gray-100">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <h2 className="!text-black text-3xl font-bold">My Registered Events</h2>
+                <p className="!text-gray-500 mt-2">Events you&apos;ve signed up for</p>
+              </div>
+              <span className="px-4 py-2 bg-[#1F1F1F] text-white rounded-full text-sm font-medium">
+                {myEvents.length} event{myEvents.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {myEvents.map((event) => (
+                <div
+                  key={event.id}
+                  onClick={() => setSelectedEvent(event)}
+                  className="group bg-[#F5F0EB] border border-[#E5E0DB] rounded-3xl p-6 cursor-pointer hover:border-[#997e67] transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="px-3 py-1 bg-white rounded-full text-[#997e67] text-xs font-medium border border-[#E5E0DB]">
+                      {CATEGORY_LABELS[event.category]}
+                    </span>
+                    <span className="text-green-600 text-sm font-medium flex items-center gap-1">
+                       Registered <span className="text-xs">✓</span>
+                    </span>
+                  </div>
+                  <h3 className="text-[#1F1F1F] font-bold text-lg mb-2 group-hover:text-[#997e67] transition">
+                    {event.title}
+                  </h3>
+                  <div className="flex items-center gap-4 text-gray-500 text-sm">
+                    <span className="flex items-center gap-1">
+                      <Clock size={14} />
+                      {formatDate(event.event_date)}
+                    </span>
+                    {event.location_name && (
+                      <span className="flex items-center gap-1">
+                        <MapPin size={14} />
+                        {event.location_name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
-      {/* EVENT SELECTION SECTION */}
-      <div style={{ padding: "2rem", backgroundColor: "var(--bg)" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "2rem",
-            backgroundColor: "var(--surface)",
-            padding: "2rem",
-            borderRadius: "12px",
-            boxShadow: "var(--shadow-subtle)",
-          }}
-        >
-          {/* FILTERS (LEFT) */}
-          <div
-            style={{
-              width: "22%",
-              backgroundColor: "var(--bg)",
-              padding: "1.5rem",
-              borderRadius: "8px",
-              height: "fit-content",
-              border: "1px solid var(--border)",
-            }}
-          >
-            {/* Category Filter */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <h3
-                style={{
-                  color: "var(--secondary-text)",
-                  fontSize: "0.95rem",
-                  fontWeight: 700,
-                  margin: "0 0 0.75rem 0",
-                }}
-              >
-                Category
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {allCategories.map((cat) => (
-                  <label
-                    key={cat}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      cursor: "pointer",
-                      color: "var(--secondary-text)",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(cat)}
-                      onChange={() => toggleCategory(cat)}
-                      style={{
-                        cursor: "pointer",
-                        width: "16px",
-                        height: "16px",
-                      }}
-                    />
-                    {CATEGORY_DISPLAY[cat]}
-                  </label>
-                ))}
+      {/* Featured / Upcoming Events */}
+      {!loading && upcomingEvents.length > 0 && (
+        <section className="py-20 px-6 bg-[var(--surface)]">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <h2 className="!text-black text-3xl font-bold">Featured Events</h2>
+                <p className="!text-gray-500 mt-2">Don&apos;t miss out on these upcoming events</p>
               </div>
             </div>
 
-            {/* Location Filter */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <h3
-                style={{
-                  color: "var(--secondary-text)",
-                  fontSize: "0.95rem",
-                  fontWeight: 700,
-                  margin: "0 0 0.75rem 0",
-                }}
-              >
-                Location
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {BOROUGHS.map((borough) => (
-                  <label
-                    key={borough}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      cursor: "pointer",
-                      color: "var(--secondary-text)",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedBoroughs.includes(borough)}
-                      onChange={() => toggleBorough(borough)}
-                      style={{
-                        cursor: "pointer",
-                        width: "16px",
-                        height: "16px",
-                      }}
-                    />
-                    {borough}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Capacity Filter */}
-            <div>
-              <h3
-                style={{
-                  color: "var(--secondary-text)",
-                  fontSize: "0.95rem",
-                  fontWeight: 700,
-                  margin: "0 0 0.75rem 0",
-                }}
-              >
-                Availability
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    cursor: "pointer",
-                    color: "var(--secondary-text)",
-                    fontSize: "0.9rem",
-                  }}
+            <div className="grid lg:grid-cols-3 gap-8">
+              {upcomingEvents.map((event, index) => (
+                <div
+                  key={event.id}
+                  onClick={() => setSelectedEvent(event)}
+                  className={`group cursor-pointer ${index === 0 ? "lg:col-span-2 lg:row-span-2" : ""}`}
                 >
-                  <input
-                    type="radio"
-                    name="capacity"
-                    checked={selectedCapacity === "all"}
-                    onChange={() => setSelectedCapacity("all")}
-                    style={{
-                      cursor: "pointer",
-                      width: "16px",
-                      height: "16px",
-                    }}
-                  />
-                  All Events
-                </label>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    cursor: "pointer",
-                    color: "var(--secondary-text)",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="capacity"
-                    checked={selectedCapacity === "available"}
-                    onChange={() => setSelectedCapacity("available")}
-                    style={{
-                      cursor: "pointer",
-                      width: "16px",
-                      height: "16px",
-                    }}
-                  />
-                  Spots Available
-                </label>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    cursor: "pointer",
-                    color: "var(--secondary-text)",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="capacity"
-                    checked={selectedCapacity === "full"}
-                    onChange={() => setSelectedCapacity("full")}
-                    style={{
-                      cursor: "pointer",
-                      width: "16px",
-                      height: "16px",
-                    }}
-                  />
-                  Full Events
-                </label>
-              </div>
-            </div>
-          </div>
+                  <div className={`relative bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow h-full flex flex-col`}>
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#997e67] to-[#CCBEB1] z-10" />
+                    
+                    <div className="p-8 flex flex-col flex-1">
+                      <div className="flex items-start justify-between mb-4">
+                        <span className="px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-xs font-medium">
+                          {CATEGORY_LABELS[event.category]}
+                        </span>
+                        {event.capacity && (
+                          <span className={`text-sm font-medium ${event.capacity - event.spots_taken <= 5 ? "text-orange-500" : "text-gray-400"}`}>
+                            {event.capacity - event.spots_taken} spots left
+                          </span>
+                        )}
+                      </div>
 
-          {/* EVENT LIST (RIGHT) */}
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: "var(--bg)",
-              padding: "1.5rem",
-              borderRadius: "8px",
-              border: "1px solid var(--border)",
-              display: "flex",
-              flexDirection: "column",
-              maxHeight: "644px",
-            }}
-          >
-            <h2
-              style={{
-                color: "var(--secondary-text)",
-                margin: "0 0 1rem 0",
-                fontSize: "1.25rem",
-              }}
-            >
-              Upcoming Events
-            </h2>
+                      <h3 className={`!text-black font-bold mb-3 group-hover:text-[#997e67] transition ${index === 0 ? "text-3xl" : "text-lg"}`}>
+                        {event.title}
+                      </h3>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "0.5rem",
-                alignItems: "center",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  borderRadius: "6px",
-                  border: "1px solid var(--border)",
-                  color: "var(--secondary-text)",
-                  backgroundColor: "var(--surface)",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.95rem",
-                }}
-              />
-            </div>
+                      {event.description && (
+                        <p className={`!text-gray-500 mb-6 ${index === 0 ? "text-lg line-clamp-3" : "text-sm line-clamp-2"}`}>
+                          {event.description}
+                        </p>
+                      )}
 
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                border: "2px solid var(--border)",
-                borderRadius: "6px",
-                padding: "0.5rem",
-              }}
-            >
-              {loading ? (
-                <p style={{ color: "var(--thirdary-text)", textAlign: "center" }}>
-                  Loading events...
-                </p>
-              ) : sortedDates.length === 0 ? (
-                <p style={{ color: "var(--thirdary-text)", textAlign: "center" }}>
-                  No events found matching your filters.
-                </p>
-              ) : (
-                sortedDates.map((date) => (
-                  <div key={date} style={{ marginBottom: "2rem" }}>
-                    <h3
-                      style={{
-                        color: "var(--secondary-text)",
-                        fontSize: "1rem",
-                        fontWeight: 600,
-                        borderBottom: "2px solid var(--border)",
-                        paddingBottom: "0.5rem",
-                        margin: "0 0 1rem 0",
-                      }}
-                    >
-                      {formatDateLabel(date)}
-                    </h3>
-                    {groupedByDate[date].map((event) => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        onClick={() => setSelectedEvent(event)}
-                      />
-                    ))}
+                      {/* Featured Event Image */}
+                      {index === 0 && (
+                        <div className="w-full h-96 xl:h-[450px] mb-6 rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner">
+                           <div 
+                              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+                              style={{ backgroundImage: "url('/featuredevent.jpg')" }} 
+                           />
+                        </div>
+                      )}
+
+                      <div className="mt-auto">
+                        <div className="flex items-center gap-6 text-sm !text-gray-500 mb-4">
+                          <span className="flex items-center gap-2">
+                            <Clock size={16} className="text-[#997e67]" />
+                            {formatDate(event.event_date)} • {formatTime(event.start_time)}
+                          </span>
+                        </div>
+                        {event.location_name && (
+                          <div className="flex items-center gap-2 text-sm !text-gray-500">
+                            <MapPin size={16} className="text-[#997e67]" />
+                            {event.location_name}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-6 flex items-center text-[#997e67] font-medium group-hover:gap-3 gap-2 transition-all">
+                        View Details <ArrowRight size={16} />
+                      </div>
+                    </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      )}
 
-      {/* Event Detail Modal */}
+      {/* All Events List */}
+      <section className="py-20 px-6 bg-[var(--surface)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-10">
+            <h2 className="!text-black text-3xl font-bold">All Events</h2>
+            <p className="!text-gray-500 mt-2">{filteredEvents.length} events available</p>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-10 h-10 border-4 border-[#997e67] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+                <Search size={32} className="text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold !text-gray-900 mb-2">No events found</h3>
+              <p className="!text-gray-500">Try adjusting your search or filters</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredEvents.map((event) => {
+                const isSignedUp = userSignups.includes(event.id);
+                return (
+                  <div
+                    key={event.id}
+                    onClick={() => setSelectedEvent(event)}
+                    className="group flex items-center gap-6 p-6 bg-white border border-gray-100 rounded-2xl hover:border-[#CCBEB1] hover:shadow-md transition-all cursor-pointer"
+                  >
+                    {/* Date Block */}
+                    <div className="hidden md:flex flex-col items-center justify-center w-20 h-20 bg-[#F5F0EB] rounded-2xl">
+                      <span className="text-[#997e67] text-sm font-medium">
+                        {new Date(event.event_date + "T00:00:00").toLocaleDateString("en-US", { month: "short" })}
+                      </span>
+                      <span className="text-2xl font-bold !text-black">
+                        {new Date(event.event_date + "T00:00:00").getDate()}
+                      </span>
+                    </div>
+
+                    {/* Event Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium !text-gray-600">
+                          {CATEGORY_LABELS[event.category]}
+                        </span>
+                        {isSignedUp && (
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">
+                            Registered
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-semibold !text-black group-hover:text-[#997e67] transition truncate">
+                        {event.title}
+                      </h3>
+                      <div className="flex items-center gap-4 mt-2 text-sm !text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Clock size={14} />
+                          {formatTime(event.start_time)}
+                        </span>
+                        {event.location_name && (
+                          <span className="flex items-center gap-1 truncate">
+                            <MapPin size={14} />
+                            {event.location_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Capacity & Arrow */}
+                    <div className="hidden sm:flex items-center gap-6">
+                      {event.capacity && (
+                        <div className="text-right">
+                          <p className="text-sm font-medium !text-black">{event.capacity - event.spots_taken}/{event.capacity}</p>
+                          <p className="text-xs !text-gray-500">spots available</p>
+                        </div>
+                      )}
+                      <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#997e67] group-hover:border-[#997e67] transition">
+                        <ArrowRight size={18} className="text-gray-400 group-hover:text-white transition" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Modal */}
       {selectedEvent && (
-        <EventDetailModal
+        <EventModal
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
-          userSignups={userSignups}
+          isSignedUp={userSignups.includes(selectedEvent.id)}
           onSignupChange={handleSignupChange}
         />
       )}
