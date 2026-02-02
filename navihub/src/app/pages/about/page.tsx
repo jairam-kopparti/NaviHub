@@ -126,7 +126,7 @@ export default function AboutUs() {
             By centralizing resources and categorizing them by need, the hub empowers individuals to take control of their own journeys toward stability and growth. Whether someone is looking for food assistance, housing support, job training, or mental health services, they can quickly find what they need without confusion or frustration. The platform also fosters a sense of community by highlighting local organizations and encouraging collaboration among service providers.
           </p>
         </div>
-      </section>n      
+      </section>
       <section className="border-b border-(--border) bg-(--bg) py-24 px-6">
         <div className="about-section">
           <h2 className="about-section-heading text-center mb-8">

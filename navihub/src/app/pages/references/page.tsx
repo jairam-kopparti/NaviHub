@@ -71,6 +71,10 @@ export default function ReferencePage() {
             All code for this website was our own creation. No templates or quick design websites (such as WordPress, Wix, or Shopify) were used.
           </p>
 
+          <p className="references-intro" style={{ marginTop: '1rem' }}>
+            Find the plan of work log and the copyright checklist <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
+          </p>
+
           <div className="references-grid">
             {/* Core Framework */}
             <div className="references-card">
@@ -220,7 +224,17 @@ export default function ReferencePage() {
             All images and media are from free-to-use websites or are of our own design. This website has not been built for, and never will be used for, commercial purposes.
           </p>
           <div className="references-placeholder">
-            <p>Image attributions will be added here.</p>
+            <p className="mb-4">
+               For the full list of image attributions and sources, please visit the link below:
+            </p>
+            <a 
+              href="https://docs.google.com/document/d/1Ntv8zLt3jxJyMwhDjgEDjv20RzNaDfbZfp18XKQquKQ/copy"
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="references-link text-lg font-semibold"
+            >
+              View Image Resources
+            </a>
           </div>
         </div>
       </section>
