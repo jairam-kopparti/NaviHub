@@ -52,6 +52,7 @@ export default function ResourcesPage() {
   const [userFavorites, setUserFavorites] = useState<Set<string>>(new Set());
   const [judgeOverrideMode, setJudgeOverrideMode] = useState(false);
   const [showFilterScrollIndicator, setShowFilterScrollIndicator] = useState(true);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     locations: true,
@@ -367,22 +368,267 @@ export default function ResourcesPage() {
   return (
     <div className="min-h-screen bg-(--bg)">
       {/* Section 1: Hero Image */}
-      <section className="relative h-[60vh] border-b border-(--border) overflow-hidden">
+      <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] border-b border-(--border) overflow-hidden">
         <div
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{ backgroundImage: 'url(/resources.jpg)' }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-white text-6xl font-(--font-heading)">
+          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-(--font-heading)">
             RESOURCES
           </h1>
         </div>
       </section>
 
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden sticky top-0 z-30 bg-(--bg) border-b border-(--border) p-3">
+        <button
+          onClick={() => setMobileFiltersOpen(true)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-(--surface) border border-(--border) rounded-xl font-medium text-(--secondary-text) cursor-pointer"
+        >
+          <SlidersHorizontal className="w-5 h-5" />
+          <span>Filters</span>
+          {activeFilterCount > 0 && (
+            <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Filter Drawer Overlay */}
+      {mobileFiltersOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setMobileFiltersOpen(false)}
+        />
+      )}
+
+      {/* Mobile Filter Drawer */}
+      <div
+        className={`
+          fixed top-0 left-0 h-full w-[85%] max-w-[350px] z-50
+          bg-(--surface) shadow-2xl
+          transform transition-transform duration-300 ease-out
+          lg:hidden
+          ${mobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <div className="flex flex-col h-full">
+          {/* Mobile Filter Header */}
+          <div className="px-5 py-4 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <SlidersHorizontal className="w-5 h-5 text-white" />
+              <h2 className="font-semibold text-lg text-white">Filters</h2>
+            </div>
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="p-2 text-white/80 hover:text-white transition"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Mobile Filter Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-1">
+            {/* Categories */}
+            <div className="rounded-xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('categories')}
+                className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Grid3X3 className="w-4 h-4 text-[#997e67]" />
+                  <span className="font-medium text-(--secondary-text) text-sm">Categories</span>
+                  {selectedCategories.length > 0 && (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+                      {selectedCategories.length}
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.categories ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSections.categories && (
+                <div className="px-3 pb-3 pt-2 space-y-1.5">
+                  {CATEGORIES.map((category) => {
+                    const isSelected = selectedCategories.includes(category);
+                    return (
+                      <button
+                        key={category}
+                        onClick={() =>
+                          isSelected
+                            ? setSelectedCategories(selectedCategories.filter((c) => c !== category))
+                            : setSelectedCategories([...selectedCategories, category])
+                        }
+                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
+                          isSelected
+                            ? "bg-[#997e67] text-white shadow-md"
+                            : "bg-(--surface) hover:bg-(--bg) text-(--secondary-text) border border-(--border) hover:border-[#997e67]/30"
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded flex items-center justify-center transition-all ${
+                          isSelected ? "bg-white/20" : "border border-(--border) group-hover:border-[#997e67]/50"
+                        }`}>
+                          {isSelected && <Check className="w-3 h-3" />}
+                        </div>
+                        <span className="text-xs leading-tight text-left flex-1">{category}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Locations */}
+            <div className="rounded-xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('locations')}
+                className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <MapPin className="w-4 h-4 text-[#997e67]" />
+                  <span className="font-medium text-(--secondary-text) text-sm">Location</span>
+                  {selectedLocations.length > 0 && (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+                      {selectedLocations.length}
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.locations ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSections.locations && (
+                <div className="px-3 pb-3 pt-2">
+                  <div className="flex flex-wrap gap-2">
+                    {LOCATIONS.map((location) => {
+                      const isSelected = selectedLocations.includes(location);
+                      return (
+                        <button
+                          key={location}
+                          onClick={() =>
+                            isSelected
+                              ? setSelectedLocations(selectedLocations.filter((l) => l !== location))
+                              : setSelectedLocations([...selectedLocations, location])
+                          }
+                          className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? "bg-[#997e67] text-white shadow-md"
+                              : "bg-(--surface) text-(--secondary-text) border border-(--border) hover:border-[#997e67] hover:text-[#997e67]"
+                          }`}
+                        >
+                          {location}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Rating */}
+            <div className="rounded-xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('rating')}
+                className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Star className="w-4 h-4 text-[#997e67]" />
+                  <span className="font-medium text-(--secondary-text) text-sm">Rating</span>
+                  {selectedRating > 0 && (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+                      {selectedRating}+
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.rating ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSections.rating && (
+                <div className="px-3 pb-3 pt-2">
+                  <div className="flex flex-wrap gap-2">
+                    {RATING_OPTIONS.map((option) => {
+                      const isSelected = selectedRating === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => setSelectedRating(option.value)}
+                          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? "bg-[#997e67] text-white shadow-md"
+                              : "bg-(--surface) text-(--secondary-text) border border-(--border) hover:border-[#997e67] hover:text-[#997e67]"
+                          }`}
+                        >
+                          {option.value > 0 && (
+                            <Star className={`w-3 h-3 ${isSelected ? 'fill-white' : 'fill-amber-400 text-amber-400'}`} />
+                          )}
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Views */}
+            <div className="rounded-xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('views')}
+                className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Eye className="w-4 h-4 text-[#997e67]" />
+                  <span className="font-medium text-(--secondary-text) text-sm">Sort by Views</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.views ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSections.views && (
+                <div className="px-3 pb-3 pt-2">
+                  <div className="flex gap-2">
+                    {VIEWS_OPTIONS.map((option) => {
+                      const isSelected = selectedView === option;
+                      return (
+                        <button
+                          key={option}
+                          onClick={() => setSelectedView(option)}
+                          className={`flex-1 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? "bg-[#997e67] text-white shadow-md"
+                              : "bg-(--surface) text-(--secondary-text) border border-(--border) hover:border-[#997e67] hover:text-[#997e67]"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Filter Footer */}
+          <div className="p-4 border-t border-(--border) space-y-3">
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearAllFilters}
+                className="w-full px-4 py-3 text-sm font-medium text-[#997e67] border border-[#997e67] rounded-xl hover:bg-[#997e67]/10 transition cursor-pointer"
+              >
+                Clear all filters
+              </button>
+            )}
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="w-full px-4 py-3 text-sm font-semibold text-white bg-[#997e67] rounded-xl hover:bg-[#8a6d5a] transition cursor-pointer"
+            >
+              Show {filteredResources.length} results
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Section 2 + 3: Preferences + Resources */}
-      <div className="container mx-auto px-4 py-8 flex gap-8 border-b border-(--border)">
-        {/* Preferences Panel - Modern Redesign */}
-        <aside className="w-80 shrink-0">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 flex flex-col lg:flex-row gap-6 lg:gap-8 border-b border-(--border)">
+        {/* Preferences Panel - Hidden on mobile, shown on desktop */}
+        <aside className="hidden lg:block w-80 shrink-0">
           <div className="sticky top-8 bg-(--surface) rounded-2xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
             {/* Panel Header */}
             <div className="px-6 py-5 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a]">
@@ -607,29 +853,34 @@ export default function ResourcesPage() {
         </aside>
 
         {/* Resource Cards Section */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Search Bar + Add Resource Button */}
-          <div className="mb-6 flex gap-4 items-center">
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-(--secondary-text) w-5 h-5" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-(--secondary-text) w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-(--secondary-text)"
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-(--secondary-text) text-base"
                 style={{ color: "#4a4a4a" }}
               />
             </div>
             <button 
               onClick={handleAddResourceClick}
-              className="px-6 py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap cursor-pointer">
+              className="px-4 sm:px-6 py-3 sm:py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap cursor-pointer text-sm sm:text-base">
               Add resource
             </button>
           </div>
 
+          {/* Results count - mobile only */}
+          <div className="lg:hidden mb-4 text-sm text-(--secondary-text)">
+            Showing <span className="font-semibold text-[#997e67]">{filteredResources.length}</span> results
+          </div>
+
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {filteredResources.map((resource) => (
               <div
                 key={resource.id}

@@ -64,16 +64,16 @@ export default function HighlightsCarousel({ resources }: Props) {
 
   return (
     <div
-      className="relative w-full max-w-7xl mx-auto mt-12"
+      className="relative w-full max-w-7xl mx-auto mt-8 sm:mt-12 px-4 sm:px-0"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ---------- CAROUSEL TRACK ---------- */}
-      <div className="relative h-[520px] flex items-center justify-center overflow-visible pb-16">
+      <div className="relative h-[420px] sm:h-[480px] md:h-[520px] flex items-center justify-center overflow-visible pb-12 sm:pb-16">
         {visibleCards.map(({ resource, position }) => (
           <motion.div
             key={resource.id}
-            className="absolute w-[280px]"
+            className="absolute w-[240px] sm:w-[260px] md:w-[280px]"
             variants={variants}
             animate={position}
             transition={{ type: "spring", stiffness: 260, damping: 30 }}
@@ -84,7 +84,7 @@ export default function HighlightsCarousel({ resources }: Props) {
       </div>
 
       {/* ---------- DOTS ---------- */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {resources.map((_, i) => (
           <button
             key={i}
@@ -102,18 +102,18 @@ export default function HighlightsCarousel({ resources }: Props) {
       {/* ---------- ARROWS ---------- */}
       <button
         onClick={prev}
-        className="absolute left-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-125 hover:border-2 hover:border-black transition-all cursor-pointer"
+        className="absolute left-0 sm:left-4 md:left-10 top-1/2 -translate-y-1/2 z-10 p-2 sm:p-3 rounded-full bg-white shadow-md hover:scale-110 sm:hover:scale-125 hover:border-2 hover:border-black transition-all cursor-pointer"
         aria-label="Previous"
       >
-        <ChevronLeft className="w-6 h-6 text-black" />
+        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
       </button>
 
       <button
         onClick={next}
-        className="absolute right-10 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white shadow-md hover:scale-125 hover:border-2 hover:border-black transition-all cursor-pointer"
+        className="absolute right-0 sm:right-4 md:right-10 top-1/2 -translate-y-1/2 z-10 p-2 sm:p-3 rounded-full bg-white shadow-md hover:scale-110 sm:hover:scale-125 hover:border-2 hover:border-black transition-all cursor-pointer"
         aria-label="Next"
       >
-        <ChevronRight className="w-6 h-6 text-black" />
+        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
       </button>
     </div>
   );

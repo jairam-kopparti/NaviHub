@@ -246,3 +246,82 @@ body {
 .animate-slideUpFade {
   animation: slideUpFade 0.8s ease-out forwards;
 }
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Navbar mobile adjustments */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0;
+  }
+
+  .navbar .max-w-8xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .navbar .nav-link {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 8vw, 64px);
+  }
+
+  h2 {
+    font-size: clamp(18px, 4vw, 24px);
+  }
+
+  p, li, dd, dt, label {
+    font-size: clamp(14px, 3.5vw, 18px);
+  }
+
+  .stat-number {
+    font-size: clamp(24px, 6vw, 32px);
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  h1 {
+    font-size: clamp(28px, 7vw, 48px);
+  }
+
+  .navbar .max-w-8xl {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Footer responsive */
+@media (max-width: 768px) {
+  footer .max-w-7xl {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  footer .flex-col.md\\:flex-row {
+    gap: 2rem;
+  }
+
+  footer iframe {
+    height: 180px;
+  }
+}
+
+/* Touch-friendly buttons and inputs on mobile */
+@media (max-width: 768px) {
+  button, .button, input, select, textarea {
+    min-height: 44px;
+  }
+
+  /* Ensure modals are properly sized on mobile */
+  .modal-content {
+    max-height: 90vh;
+    margin: 1rem;
+  }
+}

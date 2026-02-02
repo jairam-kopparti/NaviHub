@@ -61,3 +61,69 @@
     font-size: 2.5rem !important;
   }
 }
+
+/* Additional mobile responsive styles for events */
+@media (max-width: 640px) {
+  .events-page section {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .events-page h1 {
+    font-size: 2rem !important;
+  }
+
+  .events-page h2 {
+    font-size: 1.25rem !important;
+  }
+
+  /* Event cards on mobile */
+  .events-page .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Event modal mobile styles */
+  .events-page .fixed.inset-0 .relative {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+    overflow-y: auto;
+  }
+
+  /* Search and filter section */
+  .events-page input[type="text"] {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Filter pills */
+  .events-page .flex.gap-2.flex-wrap {
+    gap: 0.5rem;
+  }
+
+  .events-page .flex.gap-2.flex-wrap button,
+  .events-page .flex.gap-2.flex-wrap span {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .events-page h1 {
+    font-size: 1.75rem !important;
+  }
+
+  /* Tighter spacing on small screens */
+  .events-page section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  /* Event modal adjustments */
+  .events-page .rounded-3xl {
+    border-radius: 1rem;
+  }
+
+  .events-page .p-8 {
+    padding: 1.25rem;
+  }
+}

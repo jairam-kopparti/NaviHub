@@ -263,41 +263,41 @@ export default function CommunityEvents() {
   return (
     <div className="events-page min-h-screen bg-[var(--surface)]">
       {/* Hero Section - Minimal & Bold */}
-      <section className="relative min-h-[60vh] bg-black overflow-hidden flex flex-col justify-center">
+      <section className="relative min-h-[50vh] sm:min-h-[60vh] bg-black overflow-hidden flex flex-col justify-center">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-60"
           style={{ backgroundImage: "url('/events.jpg')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30" />
         
-        <div className="relative max-w-6xl mx-auto px-6 py-32 md:py-40 w-full">
-          <div className="max-w-2xl mt-10">
-            <p className="text-[#CCBEB1] font-medium mb-6 tracking-wide uppercase text-sm">Community Events</p>
-            <h1 className="text-white text-5xl md:text-6xl font-bold leading-tight mb-8">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-32 md:py-40 w-full">
+          <div className="max-w-2xl mt-6 sm:mt-10">
+            <p className="text-[#CCBEB1] font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Community Events</p>
+            <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 sm:mb-8">
               Connect, Learn & Grow Together
             </h1>
-            <p className="text-gray-200 text-lg mb-12 leading-relaxed max-w-xl">
+            <p className="text-gray-200 text-base sm:text-lg mb-8 sm:mb-12 leading-relaxed max-w-xl">
               Join local events, workshops, and meetups that bring our community together.
             </p>
             
             {/* Search Bar */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   placeholder="Search events..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-16 pr-6 py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-lg"
+                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
                 />
               </div>
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-white/20 transition cursor-pointer flex items-center gap-2 font-medium"
+                className="px-6 sm:px-8 py-4 sm:py-auto bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white hover:bg-white/20 transition cursor-pointer flex items-center justify-center gap-2 font-medium"
               >
                 <Filter size={20} />
-                <span className="hidden md:inline">Filters</span>
+                <span>Filters</span>
               </button>
             </div>
 
@@ -308,7 +308,7 @@ export default function CommunityEvents() {
                   className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
                   onClick={() => setShowFilters(false)}
                 />
-                <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[#1F1F1F] z-50 p-8 shadow-2xl border-l border-white/10 overflow-y-auto">
+                <div className="fixed top-0 right-0 h-full w-full max-w-[320px] sm:max-w-md bg-[#1F1F1F] z-50 p-5 sm:p-8 shadow-2xl border-l border-white/10 overflow-y-auto">
                   <div className="flex items-center justify-between mb-8">
                     <h3 className="text-2xl font-bold text-white">Filter Events</h3>
                     <button 
@@ -395,19 +395,19 @@ export default function CommunityEvents() {
 
       {/* My Events Section */}
       {user && myEvents.length > 0 && (
-        <section className="py-20 px-6 bg-[var(--surface)] border-b border-gray-100">
+        <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)] border-b border-gray-100">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10">
               <div>
-                <h2 className="!text-black text-3xl font-bold">My Registered Events</h2>
-                <p className="!text-gray-500 mt-2">Events you&apos;ve signed up for</p>
+                <h2 className="!text-black text-2xl sm:text-3xl font-bold">My Registered Events</h2>
+                <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">Events you&apos;ve signed up for</p>
               </div>
-              <span className="px-4 py-2 bg-[#1F1F1F] text-white rounded-full text-sm font-medium">
+              <span className="px-4 py-2 bg-[#1F1F1F] text-white rounded-full text-sm font-medium w-fit">
                 {myEvents.length} event{myEvents.length !== 1 ? "s" : ""}
               </span>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {myEvents.map((event) => (
                 <div
                   key={event.id}
@@ -446,50 +446,50 @@ export default function CommunityEvents() {
 
       {/* Featured / Upcoming Events */}
       {!loading && upcomingEvents.length > 0 && (
-        <section className="py-20 px-6 bg-[var(--surface)]">
+        <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)]">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10">
               <div>
-                <h2 className="!text-black text-3xl font-bold">Featured Events</h2>
-                <p className="!text-gray-500 mt-2">Don&apos;t miss out on these upcoming events</p>
+                <h2 className="!text-black text-2xl sm:text-3xl font-bold">Featured Events</h2>
+                <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">Don&apos;t miss out on these upcoming events</p>
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {upcomingEvents.map((event, index) => (
                 <div
                   key={event.id}
                   onClick={() => setSelectedEvent(event)}
-                  className={`group cursor-pointer ${index === 0 ? "lg:col-span-2 lg:row-span-2" : ""}`}
+                  className={`group cursor-pointer ${index === 0 ? "sm:col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}
                 >
-                  <div className={`relative bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow h-full flex flex-col`}>
+                  <div className={`relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow h-full flex flex-col`}>
                     <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#997e67] to-[#CCBEB1] z-10" />
                     
-                    <div className="p-8 flex flex-col flex-1">
-                      <div className="flex items-start justify-between mb-4">
+                    <div className="p-5 sm:p-8 flex flex-col flex-1">
+                      <div className="flex items-start justify-between mb-3 sm:mb-4">
                         <span className="px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-xs font-medium">
                           {CATEGORY_LABELS[event.category]}
                         </span>
                         {event.capacity && (
-                          <span className={`text-sm font-medium ${event.capacity - event.spots_taken <= 5 ? "text-orange-500" : "text-gray-400"}`}>
+                          <span className={`text-xs sm:text-sm font-medium ${event.capacity - event.spots_taken <= 5 ? "text-orange-500" : "text-gray-400"}`}>
                             {event.capacity - event.spots_taken} spots left
                           </span>
                         )}
                       </div>
 
-                      <h3 className={`!text-black font-bold mb-3 group-hover:text-[#997e67] transition ${index === 0 ? "text-3xl" : "text-lg"}`}>
+                      <h3 className={`!text-black font-bold mb-2 sm:mb-3 group-hover:text-[#997e67] transition ${index === 0 ? "text-xl sm:text-2xl lg:text-3xl" : "text-base sm:text-lg"}`}>
                         {event.title}
                       </h3>
 
                       {event.description && (
-                        <p className={`!text-gray-500 mb-6 ${index === 0 ? "text-lg line-clamp-3" : "text-sm line-clamp-2"}`}>
+                        <p className={`!text-gray-500 mb-4 sm:mb-6 ${index === 0 ? "text-base sm:text-lg line-clamp-2 sm:line-clamp-3" : "text-xs sm:text-sm line-clamp-2"}`}>
                           {event.description}
                         </p>
                       )}
 
                       {/* Featured Event Image */}
                       {index === 0 && (
-                        <div className="w-full h-96 xl:h-[450px] mb-6 rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner">
+                        <div className="w-full h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[450px] mb-4 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner">
                            <div 
                               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
                               style={{ backgroundImage: "url('/featuredevent.jpg')" }} 
@@ -525,37 +525,37 @@ export default function CommunityEvents() {
       )}
 
       {/* All Events List */}
-      <section className="py-20 px-6 bg-[var(--surface)]">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)]">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-10">
-            <h2 className="!text-black text-3xl font-bold">All Events</h2>
-            <p className="!text-gray-500 mt-2">{filteredEvents.length} events available</p>
+          <div className="mb-6 sm:mb-10">
+            <h2 className="!text-black text-2xl sm:text-3xl font-bold">All Events</h2>
+            <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">{filteredEvents.length} events available</p>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-20">
+            <div className="flex items-center justify-center py-12 sm:py-20">
               <div className="w-10 h-10 border-4 border-[#997e67] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
-                <Search size={32} className="text-gray-400" />
+            <div className="text-center py-12 sm:py-20">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+                <Search size={28} className="text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold !text-gray-900 mb-2">No events found</h3>
-              <p className="!text-gray-500">Try adjusting your search or filters</p>
+              <h3 className="text-lg sm:text-xl font-semibold !text-gray-900 mb-2">No events found</h3>
+              <p className="!text-gray-500 text-sm sm:text-base">Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredEvents.map((event) => {
                 const isSignedUp = userSignups.includes(event.id);
                 return (
                   <div
                     key={event.id}
                     onClick={() => setSelectedEvent(event)}
-                    className="group flex items-center gap-6 p-6 bg-white border border-gray-100 rounded-2xl hover:border-[#CCBEB1] hover:shadow-md transition-all cursor-pointer"
+                    className="group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-white border border-gray-100 rounded-xl sm:rounded-2xl hover:border-[#CCBEB1] hover:shadow-md transition-all cursor-pointer"
                   >
-                    {/* Date Block */}
-                    <div className="hidden md:flex flex-col items-center justify-center w-20 h-20 bg-[#F5F0EB] rounded-2xl">
+                    {/* Date Block - Hidden on mobile, shown inline */}
+                    <div className="hidden md:flex flex-col items-center justify-center w-20 h-20 bg-[#F5F0EB] rounded-2xl shrink-0">
                       <span className="text-[#997e67] text-sm font-medium">
                         {new Date(event.event_date + "T00:00:00").toLocaleDateString("en-US", { month: "short" })}
                       </span>
@@ -566,7 +566,7 @@ export default function CommunityEvents() {
 
                     {/* Event Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
+                      <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
                         <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium !text-gray-600">
                           {CATEGORY_LABELS[event.category]}
                         </span>
@@ -575,11 +575,15 @@ export default function CommunityEvents() {
                             Registered
                           </span>
                         )}
+                        {/* Mobile date display */}
+                        <span className="md:hidden text-xs !text-gray-500">
+                          {formatDate(event.event_date)}
+                        </span>
                       </div>
-                      <h3 className="font-semibold !text-black group-hover:text-[#997e67] transition truncate">
+                      <h3 className="font-semibold !text-black group-hover:text-[#997e67] transition text-sm sm:text-base line-clamp-1">
                         {event.title}
                       </h3>
-                      <div className="flex items-center gap-4 mt-2 text-sm !text-gray-500">
+                      <div className="flex items-center gap-3 sm:gap-4 mt-2 text-xs sm:text-sm !text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock size={14} />
                           {formatTime(event.start_time)}
@@ -594,15 +598,15 @@ export default function CommunityEvents() {
                     </div>
 
                     {/* Capacity & Arrow */}
-                    <div className="hidden sm:flex items-center gap-6">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 mt-2 sm:mt-0">
                       {event.capacity && (
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <p className="text-sm font-medium !text-black">{event.capacity - event.spots_taken}/{event.capacity}</p>
                           <p className="text-xs !text-gray-500">spots available</p>
                         </div>
                       )}
-                      <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#997e67] group-hover:border-[#997e67] transition">
-                        <ArrowRight size={18} className="text-gray-400 group-hover:text-white transition" />
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#997e67] group-hover:border-[#997e67] transition shrink-0">
+                        <ArrowRight size={16} className="text-gray-400 group-hover:text-white transition" />
                       </div>
                     </div>
                   </div>

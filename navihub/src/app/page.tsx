@@ -211,9 +211,9 @@ export default function Home() {
         />
         <div className="absolute inset-0" />
 
-        <div className="relative z-10 flex flex-col justify-center min-h-screen px-8 sm:px-12">
+        <div className="relative z-10 flex flex-col justify-center min-h-screen px-4 sm:px-8 md:px-12">
           <h1
-            className="text-(--thirdary-text) font-bold leading-[1.05] max-w-3xl text-[clamp(64px,8vw,120px)]"
+            className="text-(--thirdary-text) font-bold leading-[1.05] max-w-3xl text-[clamp(40px,10vw,120px)]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             <span className="block overflow-hidden leading-[1.2]">
@@ -245,7 +245,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="mt-6 max-w-2xl text-[clamp(18px,2.2vw,28px)] text-white opacity-0 animate-slideUp">
+          <p className="mt-4 sm:mt-6 max-w-2xl text-[clamp(14px,3.5vw,28px)] text-white opacity-0 animate-slideUp px-1">
             A centralized hub for trusted community resources, programs, and
             organizations across New York City.
           </p>
@@ -257,11 +257,11 @@ export default function Home() {
           >
             <Link
               href="/pages/resources"
-              className="group inline-flex items-center gap-4 mt-8 px-7 py-3.5 bg-white text-black rounded-full font-semibold shadow-md hover:shadow-lg transition w-max"
+              className="group inline-flex items-center gap-3 sm:gap-4 mt-6 sm:mt-8 px-5 sm:px-7 py-3 sm:py-3.5 bg-white text-black rounded-full font-semibold shadow-md hover:shadow-lg transition w-max text-sm sm:text-base"
             >
               <span>Browse Community Resources</span>
-              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-black">
-                <ArrowRight className="w-4 h-4 text-white rotate-[-45deg] transition-transform duration-300 group-hover:rotate-0" />
+              <span className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black">
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-white rotate-[-45deg] transition-transform duration-300 group-hover:rotate-0" />
               </span>
             </Link>
           </motion.div>
@@ -292,10 +292,10 @@ export default function Home() {
         }}
       >
         {/* ================= SECTION 1 ================= */}
-        <section ref={section1Ref} className="min-h-screen bg-(--bg) flex items-center py-24 relative z-20">
-          <div className="max-w-6xl mx-auto px-6 w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-              <p className="text-lg sm:text-xl md:text-2xl max-w-xl text-(--secondary-text)">
+        <section ref={section1Ref} className="min-h-screen bg-(--bg) flex items-center py-12 sm:py-24 relative z-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl max-w-xl text-(--secondary-text)">
                 NaviHub is dedicated to helping residents easily find local support
                 and services. We bring together trusted non-profits, community
                 programs, and organizations in one place, making it simpler
@@ -308,12 +308,12 @@ export default function Home() {
                   alt="Community hands"
                   width={1200}
                   height={800}
-                  className="object-cover w-full h-96"
+                  className="object-cover w-full h-64 sm:h-80 md:h-96"
                 />
               </div>
             </div>
 
-            <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="mt-12 sm:mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10">
               <Stat value={100} suffix="+" label="Community Resources" start={statsStart} />
               <Stat value={50} suffix="+" label="Local Organizations" start={statsStart} />
               <Stat value={5} label="Boroughs Served" start={statsStart} />
@@ -349,8 +349,8 @@ export default function Home() {
 
 
       {/* ================= QUOTES SECTION ================= */}
-      <section className="w-full py-24 bg-(--bg) flex flex-col items-center relative">
-        {/* Left Marquee */}
+      <section className="w-full py-12 sm:py-24 bg-(--bg) flex flex-col items-center relative overflow-hidden">
+        {/* Left Marquee - Hidden on mobile */}
         <div className="absolute left-0 top-0 h-full w-32 overflow-hidden hidden lg:flex items-center justify-center">
           <div className="marquee-vertical-stacked flex flex-col gap-12 text-[48px] font-bold uppercase">
             {Array.from({ length: 30 }).map((_, i) => {
@@ -373,7 +373,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right Marquee */}
+        {/* Right Marquee - Hidden on mobile */}
         <div className="absolute right-0 top-0 h-full w-40 overflow-hidden hidden lg:flex items-center justify-center">
           <div className="marquee-vertical-stacked flex flex-col gap-12 text-[48px] font-bold uppercase">
             {Array.from({ length: 30 }).map((_, i) => {
@@ -396,9 +396,9 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-4xl w-full text-center px-6 relative z-10">
+        <div className="max-w-4xl w-full text-center px-4 sm:px-6 relative z-10">
           {/* Star Rating */}
-          <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-6 sm:mb-8">
             {[...Array(5)].map((_, i) => {
               const isFilled = i < activeQuote.rating;
               const isHalf = i === Math.floor(activeQuote.rating) && activeQuote.rating % 1 !== 0;
@@ -425,15 +425,15 @@ export default function Home() {
           </div>
 
           {/* Quote Text */}
-          <blockquote className="text-[clamp(22px,2.2vw,32px)] italic font-semibold text-(--primary-text)/95 mb-4">
+          <blockquote className="text-[clamp(16px,4vw,32px)] italic font-semibold text-(--primary-text)/95 mb-4 leading-relaxed">
             {activeQuote.text}
           </blockquote>
-          <p className="text-lg md:text-xl font-semibold text-(--primary-text)/80 mb-12">
+          <p className="text-base sm:text-lg md:text-xl font-semibold text-(--primary-text)/80 mb-8 sm:mb-12">
             — {activeQuote.name}
           </p>
 
           {/* Profile Pictures */}
-          <div className="flex items-center justify-center gap-6 h-10">
+          <div className="flex items-center justify-center gap-3 sm:gap-6 h-10">
             {quotes.map((quote) => {
               const isActive = quote.id === activeQuoteId;
               return (
@@ -442,8 +442,8 @@ export default function Home() {
                   onClick={() => setActiveQuoteId(quote.id)}
                   className={`rounded-full overflow-hidden border-4 transition-all duration-300 cursor-pointer ${
                     isActive
-                      ? "w-20 h-20 border-[#997e67]"
-                      : "w-16 h-16 border-gray-300 grayscale hover:grayscale-0"
+                      ? "w-14 h-14 sm:w-20 sm:h-20 border-[#997e67]"
+                      : "w-10 h-10 sm:w-16 sm:h-16 border-gray-300 grayscale hover:grayscale-0"
                   }`}
                 >
                   <div className="relative w-full h-full">

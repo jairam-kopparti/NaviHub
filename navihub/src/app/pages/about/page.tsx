@@ -84,7 +84,7 @@ export default function AboutUs() {
 
   return (
     <>
-      <section className="hero-section relative h-screen border-b border-(--border) overflow-hidden">
+      <section className="hero-section relative h-[50vh] sm:h-screen border-b border-(--border) overflow-hidden">
         <img
           ref={heroImageRef}
           src="/aboutus.jpg"
@@ -93,8 +93,8 @@ export default function AboutUs() {
         />
         <div className="absolute inset-0 bg-black/50" />
 
-        <div className="relative z-10 flex items-center justify-center h-full text-center px-6">
-          <h1 className="text-white text-5xl md:text-7xl font-bold tracking-tight">
+        <div className="relative z-10 flex items-center justify-center h-full text-center px-4 sm:px-6">
+          <h1 className="text-white text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight">
             About NaviHub
           </h1>
         </div>
@@ -127,9 +127,9 @@ export default function AboutUs() {
           </p>
         </div>
       </section>
-      <section className="border-b border-(--border) bg-(--bg) py-24 px-6">
+      <section className="border-b border-(--border) bg-(--bg) py-12 sm:py-24 px-4 sm:px-6">
         <div className="about-section">
-          <h2 className="about-section-heading text-center mb-8">
+          <h2 className="about-section-heading text-center mb-6 sm:mb-8">
             <span className="primary">What</span> <span className="secondary">We Do</span>
           </h2>
 
@@ -142,8 +142,8 @@ export default function AboutUs() {
                 if (el) whatWeDoRef.current[0] = el
               }}
             >
-              <Search className="w-10 h-10 text-(--accent) mx-auto" />
-              <h4 className="mt-4">Centralize Resources</h4>
+              <Search className="w-8 h-8 sm:w-10 sm:h-10 text-(--accent) mx-auto" />
+              <h4 className="mt-3 sm:mt-4">Centralize Resources</h4>
               <p className="about-section-text mt-2">
                 We centralize resources by bringing local organizations, services, programs, and events into one reliable hub where community members can easily find what they need in one place.
               </p>
@@ -155,8 +155,8 @@ export default function AboutUs() {
                 if (el) whatWeDoRef.current[1] = el
               }}
             >
-              <Layers className="w-10 h-10 text-(--accent) mx-auto" />
-              <h4 className="mt-4">Organize by Need</h4>
+              <Layers className="w-8 h-8 sm:w-10 sm:h-10 text-(--accent) mx-auto" />
+              <h4 className="mt-3 sm:mt-4">Organize by Need</h4>
               <p className="about-section-text mt-2">
                 We organize by need by grouping resources into clear, purposeful categories that help people quickly identify relevant support without feeling overwhelmed.
               </p>
@@ -168,8 +168,8 @@ export default function AboutUs() {
                 if (el) whatWeDoRef.current[2] = el
               }}
             >
-              <Users className="w-10 h-10 text-(--accent) mx-auto" />
-              <h4 className="mt-4">Support Communities</h4>
+              <Users className="w-8 h-8 sm:w-10 sm:h-10 text-(--accent) mx-auto" />
+              <h4 className="mt-3 sm:mt-4">Support Communities</h4>
               <p className="about-section-text mt-2">
                 We support communities by connecting residents with trusted organizations, encouraging involvement, and strengthening access to support that helps communities grow and thrive.
               </p>
@@ -178,14 +178,14 @@ export default function AboutUs() {
         </div>
       </section>
 
-      <section className="border-b border-(--border) bg-white py-24 px-6">
+      <section className="border-b border-(--border) bg-white py-12 sm:py-24 px-4 sm:px-6">
         <div className="about-section text-center">
-          <h2 className="about-section-heading mb-6">
+          <h2 className="about-section-heading mb-4 sm:mb-6">
             <span className="primary">How It</span> <span className="tertiary">Works</span>
           </h2>
           <div className="about-mission-divider" />
 
-          <div className="how-it-works-list mx-auto mt-8">
+          <div className="how-it-works-list mx-auto mt-6 sm:mt-8">
             <div
               className="how-step"
               ref={(el) => {

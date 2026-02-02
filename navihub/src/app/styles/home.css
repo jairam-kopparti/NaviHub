@@ -92,3 +92,34 @@
 .animate-colorReveal {
   animation: colorReveal 5s ease-in-out forwards;
 }
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES - HOME PAGE
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Marquee adjustments for mobile */
+  .marquee {
+    font-size: 36px;
+    gap: 8px;
+    animation-duration: 20s;
+  }
+
+  .marquee-vertical,
+  .marquee-vertical-stacked {
+    font-size: 28px;
+  }
+
+  /* Hide vertical marquees on mobile */
+  .marquee-vertical-stacked {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .marquee {
+    font-size: 28px;
+    gap: 6px;
+    animation-duration: 15s;
+  }
+}

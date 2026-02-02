@@ -191,12 +191,12 @@ export default function ResourceDetailModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4"
       onClick={onClose}
     >
       {/* Modal Card */}
       <div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{
           animation: "modalSlideIn 0.3s cubic-bezier(.16,1,.3,1) forwards",
@@ -205,7 +205,7 @@ export default function ResourceDetailModal({
         {/* Hero Image Section */}
         <div className="relative">
           {resource.imageUrl ? (
-            <div className="relative w-full h-72">
+            <div className="relative w-full h-48 sm:h-72">
               <Image
                 src={resource.imageUrl}
                 alt={resource.title}
@@ -217,10 +217,10 @@ export default function ResourceDetailModal({
               <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
             </div>
           ) : (
-            <div className="w-full h-72 bg-linear-to-br from-[#997e67] to-[#8a6d5a] flex items-center justify-center">
+            <div className="w-full h-48 sm:h-72 bg-linear-to-br from-[#997e67] to-[#8a6d5a] flex items-center justify-center">
               <span className="text-white/70 text-sm font-medium">No Image Available</span>
             </div>
-          )}
+          )}}
           
           {/* Floating Close Button */}
           <button
@@ -251,8 +251,8 @@ export default function ResourceDetailModal({
           )}
 
           {/* Category Badge - Floating on Image */}
-          <div className="absolute bottom-4 left-6">
-            <span className="px-4 py-1.5 bg-white/95 backdrop-blur-sm text-[#997e67] text-xs font-semibold uppercase tracking-wider rounded-full shadow-md">
+          <div className="absolute bottom-4 left-4 sm:left-6">
+            <span className="px-3 sm:px-4 py-1 sm:py-1.5 bg-white/95 backdrop-blur-sm text-[#997e67] text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-full shadow-md">
               {resource.category}
             </span>
           </div>
@@ -261,59 +261,59 @@ export default function ResourceDetailModal({
         {/* Scrollable Content */}
         <div className="overflow-y-auto flex-1">
           {/* Content */}
-          <div className="p-6 md:p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             {/* Title */}
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 leading-tight" style={{ color: "#000000" }}>
               {resource.title}
             </h2>
 
             {/* Stats Row */}
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
               {resource.location && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-medium">
-                  <MapPin className="w-4 h-4" />
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50 text-blue-700 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium">
+                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   {resource.location}
                 </div>
               )}
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium">
-                <Eye className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium">
+                <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {resource.views?.toLocaleString() || 0} views
               </div>
               {reviews.length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium">
-                  <Star className="w-4 h-4 fill-amber-500" />
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-amber-50 text-amber-700 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium">
+                  <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-500" />
                   {avgRating} ({reviews.length})
                 </div>
               )}
             </div>
 
             {/* Description Card */}
-            <div className="bg-gray-50 rounded-xl p-5 mb-8">
-              <h3 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: "#000000" }}>About this resource</h3>
-              <p className="leading-relaxed" style={{ color: "#000000" }}>
+            <div className="bg-gray-50 rounded-xl p-4 sm:p-5 mb-6 sm:mb-8">
+              <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2 sm:mb-3" style={{ color: "#000000" }}>About this resource</h3>
+              <p className="leading-relaxed text-sm sm:text-base" style={{ color: "#000000" }}>
                 {resource.description}
               </p>
             </div>
 
             {/* Reviews Section */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#997e67] flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-white" />
+            <div className="border-t border-gray-200 pt-4 sm:pt-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#997e67] flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold" style={{ color: "#000000" }}>Reviews</h3>
-                    <p className="text-sm" style={{ color: "#000000" }}>{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</p>
+                    <h3 className="text-base sm:text-lg font-bold" style={{ color: "#000000" }}>Reviews</h3>
+                    <p className="text-xs sm:text-sm" style={{ color: "#000000" }}>{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</p>
                   </div>
                 </div>
                 {reviews.length > 0 && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-xl">
+                  <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-amber-50 rounded-lg sm:rounded-xl">
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
+                          className={`w-3 h-3 sm:w-4 sm:h-4 ${
                             i < Math.round(Number(avgRating))
                               ? "fill-amber-400 text-amber-400"
                               : "text-gray-300"
@@ -321,28 +321,28 @@ export default function ResourceDetailModal({
                         />
                       ))}
                     </div>
-                    <span className="font-bold" style={{ color: "#000000" }}>{avgRating}</span>
+                    <span className="font-bold text-sm sm:text-base" style={{ color: "#000000" }}>{avgRating}</span>
                   </div>
                 )}
               </div>
 
               {/* Add Review Form */}
               {(user || onJudgeOverride) && !hasUserReviewed && (
-                <form onSubmit={handleSubmitReview} className="mb-6 p-5 bg-linear-to-br from-gray-50 to-gray-100/50 rounded-xl border border-gray-200">
-                  <div className="mb-4">
-                    <label className="block text-sm font-semibold mb-3" style={{ color: "#000000" }}>
+                <form onSubmit={handleSubmitReview} className="mb-4 sm:mb-6 p-4 sm:p-5 bg-linear-to-br from-gray-50 to-gray-100/50 rounded-xl border border-gray-200">
+                  <div className="mb-3 sm:mb-4">
+                    <label className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3" style={{ color: "#000000" }}>
                       Your Rating
                     </label>
-                    <div className="flex gap-1">
+                    <div className="flex gap-0.5 sm:gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           type="button"
                           onClick={() => setNewRating(star)}
-                          className="p-1.5 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer"
+                          className="p-1 sm:p-1.5 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer"
                         >
                           <Star
-                            className={`w-7 h-7 transition-all duration-200 ${
+                            className={`w-6 h-6 sm:w-7 sm:h-7 transition-all duration-200 ${
                               star <= newRating
                                 ? "fill-amber-400 text-amber-400 scale-110"
                                 : "text-gray-300 hover:text-amber-200"
