@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollProgressBar from "./components/ScrollProgressBar";
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
   title: "NaviHub",
   description: "Team #2014-1",
 };
@@ -25,4 +25,3 @@ export default function RootLayout({
     </html>
   );
 }
-
