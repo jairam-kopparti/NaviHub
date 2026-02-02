@@ -28,7 +28,9 @@ export const bannedWords: string[] = [
   "a$$", "biatch",
   "d1ck", "p*ssy"
 
-]nfunction normalizeText(text: string) {
+]
+
+function normalizeText(text: string) {
   return text
     .toLowerCase()
     .replace(/[@$!]/g, 'a')

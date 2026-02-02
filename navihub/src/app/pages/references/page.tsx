@@ -148,19 +148,6 @@ export default function ReferencePage() {
               </ul>
             </div>
 
-            {/* AI & APIs */}
-            <div className="references-card">
-              <h3>AI & APIs</h3>
-              <ul className="references-list">
-                <li>
-                  <a href="https://platform.openai.com/" target="_blank" rel="noopener noreferrer" className="references-link">
-                    OpenAI
-                  </a>{" "}
-                  - AI-powered moderation and features (v6.17.0)
-                </li>
-              </ul>
-            </div>
-
             {/* UI Components */}
             <div className="references-card">
               <h3>UI Components</h3>
