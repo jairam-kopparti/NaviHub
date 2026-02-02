@@ -151,14 +151,17 @@ export default function ResourcesPage() {
               ratingMap[review.resource_id].count += 1;
             });
           }
-
-          // Add average rating to resources
-          let filtered = (data as Resource[]).map((resource) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let filtered = (data as any[]).map((resource) => {
+            const mappedResource = {
+              ...resource,
+              imageUrl: resource.image_url || resource.imageUrl,
+            };
             if (ratingMap[resource.id]) {
               const avg = ratingMap[resource.id].total / ratingMap[resource.id].count;
-              return { ...resource, avgRating: parseFloat(avg.toFixed(1)) };
+              return { ...mappedResource, avgRating: parseFloat(avg.toFixed(1)) };
             }
-            return { ...resource, avgRating: 0 };
+            return { ...mappedResource, avgRating: 0 };
           });
 
           // Filter by rating
@@ -299,12 +302,17 @@ export default function ResourcesPage() {
           }
 
           // Add average rating to resources
-          let filtered = (data as Resource[]).map((resource) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let filtered = (data as any[]).map((resource) => {
+            const mappedResource = {
+              ...resource,
+              imageUrl: resource.image_url || resource.imageUrl,
+            };
             if (ratingMap[resource.id]) {
               const avg = ratingMap[resource.id].total / ratingMap[resource.id].count;
-              return { ...resource, avgRating: parseFloat(avg.toFixed(1)) };
+              return { ...mappedResource, avgRating: parseFloat(avg.toFixed(1)) };
             }
-            return { ...resource, avgRating: 0 };
+            return { ...mappedResource, avgRating: 0 };
           });
 
           if (selectedRating > 0) {

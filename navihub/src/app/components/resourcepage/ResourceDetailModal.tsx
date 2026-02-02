@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { X, Heart, Star, ChevronDown, MapPin, Eye, MessageSquare, Calendar } from "lucide-react";
 import { Resource, Review } from "../../lib/types";
 import { supabase } from "../../lib/supabaseClient";
@@ -204,10 +205,15 @@ export default function ResourceDetailModal({
         {/* Hero Image Section */}
         <div className="relative">
           {resource.imageUrl ? (
-            <div
-              className="w-full h-72 bg-cover bg-center"
-              style={{ backgroundImage: `url(${resource.imageUrl})` }}
-            >
+            <div className="relative w-full h-72">
+              <Image
+                src={resource.imageUrl}
+                alt={resource.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 800px" 
+                priority
+              />
               <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
             </div>
           ) : (

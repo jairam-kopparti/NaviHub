@@ -150,7 +150,7 @@ export default function ReferencePage() {
 
             {/* UI Components */}
             <div className="references-card">
-              <h3>UI Components</h3>
+              <h3>UI Components & Others</h3>
               <ul className="references-list">
                 <li>
                   <a href="https://lucide.dev/" target="_blank" rel="noopener noreferrer" className="references-link">
@@ -163,6 +163,12 @@ export default function ReferencePage() {
                     React Intersection Observer
                   </a>{" "}
                   - React implementation of Intersection Observer API (v10.0.0)
+                </li>
+                <li>
+                  <a href="https://sharp.pixelplumbing.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Sharp
+                  </a>{" "}
+                  - High performance Node.js image processing
                 </li>
               </ul>
             </div>

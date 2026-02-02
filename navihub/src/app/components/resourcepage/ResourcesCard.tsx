@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, Heart } from "lucide-react";
+import Image from "next/image";
 
 interface ResourcesCardProps {
   category: string;
@@ -21,15 +22,17 @@ export function ResourcesCard({
 }: ResourcesCardProps) {
   return (
     <div className="relative border border-(--border) rounded-xl bg-(--surface) p-4 flex flex-col gap-3 hover:shadow-sm transition h-full">
-      <div className="relative">
+      <div className="relative h-32 w-full">
         {imageUrl ? (
-          <img
+          <Image
             src={imageUrl}
             alt={title}
-            className="w-full h-30 object-cover rounded-lg"
+            fill
+            className="object-cover rounded-lg"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
-          <div className="w-full h-30 bg-linear-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
+          <div className="w-full h-full bg-linear-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
             <span className="text-gray-500 text-sm font-medium">Image Not Available</span>
           </div>
         )}

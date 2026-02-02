@@ -1,4 +1,5 @@
 import { Eye } from "lucide-react";
+import Image from "next/image";
 
 interface HighlightsCardProps {
   category: string;
@@ -25,11 +26,15 @@ export default function HighlightsCard({
 
         <div className="mb-4">
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={title}
-              className="w-full h-[160px] object-cover rounded-2xl"
-            />
+            <div className="relative w-full h-[160px]">
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                className="object-cover rounded-2xl"
+                sizes="(max-width: 768px) 100vw, 300px" 
+              />
+            </div>
           ) : (
             <div className="w-full h-[160px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center">
               <span className="text-gray-500 text-sm font-medium">Image Not Available</span>
