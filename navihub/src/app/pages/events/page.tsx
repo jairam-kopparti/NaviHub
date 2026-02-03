@@ -1,9 +1,32 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, Calendar } from "lucide-react";
+import { X, MapPin, Clock, Users, Search, Filter, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import "../../styles/events.css";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1 }
+};
 
 type Category =
   | "sports"
@@ -115,31 +138,70 @@ const EventModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70" />
-      <div 
+      <motion.div 
+        className="absolute inset-0 bg-black/70"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      />
+      <motion.div 
         className="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
       >
         {/* Header with gradient */}
         <div className="bg-[#997e67] p-8 text-white">
           <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
             <X size={20} />
           </button>
-          <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium mb-4">
+          <motion.span 
+            className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium mb-4"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15 }}
+          >
             {CATEGORY_LABELS[event.category]}
-          </span>
-          <h2 className="text-2xl font-bold mb-2">{event.title}</h2>
-          <p className="text-white/90 text-sm">{formatDate(event.event_date)}</p>
+          </motion.span>
+          <motion.h2 
+            className="text-2xl font-bold mb-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            {event.title}
+          </motion.h2>
+          <motion.p 
+            className="text-white/90 text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.25 }}
+          >
+            {formatDate(event.event_date)}
+          </motion.p>
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <motion.div 
+          className="p-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           {event.description && (
             <p className="!text-gray-600 mb-6 leading-relaxed">{event.description}</p>
           )}
 
           <div className="space-y-4 mb-6">
-            <div className="flex items-center gap-4">
+            <motion.div 
+              className="flex items-center gap-4"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.35 }}
+            >
               <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
                 <Clock size={18} className="text-[#997e67]" />
               </div>
@@ -147,9 +209,14 @@ const EventModal = ({
                 <p className="!text-gray-400 text-xs uppercase tracking-wide">Time</p>
                 <p className="!text-gray-800 font-medium">{formatTime(event.start_time)} - {formatTime(event.end_time)}</p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center gap-4">
+            <motion.div 
+              className="flex items-center gap-4"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
                 <MapPin size={18} className="text-[#997e67]" />
               </div>
@@ -158,10 +225,15 @@ const EventModal = ({
                 <p className="!text-gray-800 font-medium">{event.is_virtual ? "Virtual Event" : event.location_name || "TBD"}</p>
                 {event.address && !event.is_virtual && <p className="!text-gray-500 text-sm">{event.address}</p>}
               </div>
-            </div>
+            </motion.div>
 
             {event.capacity && (
-              <div className="flex items-center gap-4">
+              <motion.div 
+                className="flex items-center gap-4"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.45 }}
+              >
                 <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
                   <Users size={18} className="text-[#997e67]" />
                 </div>
@@ -169,14 +241,14 @@ const EventModal = ({
                   <p className="!text-gray-400 text-xs uppercase tracking-wide">Availability</p>
                   <p className="!text-gray-800 font-medium">{spotsAvailable} of {event.capacity} spots available</p>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
           {event.signup_required && (
-            <button
+            <motion.button
               onClick={handleSignup}
               disabled={loading || (isFull && !isSignedUp)}
               className={`w-full py-4 rounded-2xl font-semibold transition-all cursor-pointer ${
@@ -186,12 +258,17 @@ const EventModal = ({
                   ? "bg-red-500 text-white hover:bg-red-600"
                   : "bg-[#1F1F1F] text-white hover:bg-black"
               } ${loading ? "opacity-60" : ""}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: isFull && !isSignedUp ? 1 : 1.02 }}
+              whileTap={{ scale: isFull && !isSignedUp ? 1 : 0.98 }}
             >
               {loading ? "Processing..." : isFull && !isSignedUp ? "Fully Booked" : isSignedUp ? "Cancel Registration" : "Register Now"}
-            </button>
+            </motion.button>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
@@ -264,24 +341,49 @@ export default function CommunityEvents() {
     <div className="events-page min-h-screen bg-[var(--surface)]">
       {/* Hero Section - Minimal & Bold */}
       <section className="relative min-h-[50vh] sm:min-h-[60vh] bg-black overflow-hidden flex flex-col justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-60"
+        <motion.div 
+          className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/events.jpg')" }}
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.6 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-32 md:py-40 w-full">
           <div className="max-w-2xl mt-6 sm:mt-10">
-            <p className="text-[#CCBEB1] font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm">Community Events</p>
-            <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 sm:mb-8">
+            <motion.p 
+              className="text-[#CCBEB1] font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Community Events
+            </motion.p>
+            <motion.h1 
+              className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 sm:mb-8"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.4 }}
+            >
               Connect, Learn & Grow Together
-            </h1>
-            <p className="text-gray-200 text-base sm:text-lg mb-8 sm:mb-12 leading-relaxed max-w-xl">
+            </motion.h1>
+            <motion.p 
+              className="text-gray-200 text-base sm:text-lg mb-8 sm:mb-12 leading-relaxed max-w-xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
               Join local events, workshops, and meetups that bring our community together.
-            </p>
+            </motion.p>
             
             {/* Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
               <div className="flex-1 relative">
                 <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -299,7 +401,7 @@ export default function CommunityEvents() {
                 <Filter size={20} />
                 <span>Filters</span>
               </button>
-            </div>
+            </motion.div>
 
             {/* Filter Pills Sidebar */}
             {showFilters && (
@@ -397,22 +499,44 @@ export default function CommunityEvents() {
       {user && myEvents.length > 0 && (
         <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)] border-b border-gray-100">
           <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10">
+            <motion.div 
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+              transition={{ duration: 0.6 }}
+            >
               <div>
                 <h2 className="!text-black text-2xl sm:text-3xl font-bold">My Registered Events</h2>
                 <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">Events you&apos;ve signed up for</p>
               </div>
-              <span className="px-4 py-2 bg-[#1F1F1F] text-white rounded-full text-sm font-medium w-fit">
+              <motion.span 
+                className="px-4 py-2 bg-[#1F1F1F] text-white rounded-full text-sm font-medium w-fit"
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.3, type: "spring", stiffness: 200 }}
+              >
                 {myEvents.length} event{myEvents.length !== 1 ? "s" : ""}
-              </span>
-            </div>
+              </motion.span>
+            </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <motion.div 
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={staggerContainer}
+            >
               {myEvents.map((event) => (
-                <div
+                <motion.div
                   key={event.id}
                   onClick={() => setSelectedEvent(event)}
                   className="group bg-[#F5F0EB] border border-[#E5E0DB] rounded-3xl p-6 cursor-pointer hover:border-[#997e67] transition-colors"
+                  variants={fadeInUp}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <span className="px-3 py-1 bg-white rounded-full text-[#997e67] text-xs font-medium border border-[#E5E0DB]">
@@ -437,9 +561,9 @@ export default function CommunityEvents() {
                       </span>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
       )}
@@ -448,22 +572,44 @@ export default function CommunityEvents() {
       {!loading && upcomingEvents.length > 0 && (
         <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)]">
           <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10">
+            <motion.div 
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+              transition={{ duration: 0.6 }}
+            >
               <div>
                 <h2 className="!text-black text-2xl sm:text-3xl font-bold">Featured Events</h2>
                 <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">Don&apos;t miss out on these upcoming events</p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <motion.div 
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={staggerContainer}
+            >
               {upcomingEvents.map((event, index) => (
-                <div
+                <motion.div
                   key={event.id}
                   onClick={() => setSelectedEvent(event)}
                   className={`group cursor-pointer ${index === 0 ? "sm:col-span-2 lg:col-span-2 lg:row-span-2" : ""}`}
+                  variants={index === 0 ? scaleIn : fadeInUp}
+                  transition={{ duration: 0.6 }}
+                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 >
                   <div className={`relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow h-full flex flex-col`}>
-                    <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#997e67] to-[#CCBEB1] z-10" />
+                    <motion.div 
+                      className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#997e67] to-[#CCBEB1] z-10"
+                      initial={{ scaleX: 0, transformOrigin: "left" }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: index * 0.1 }}
+                    />
                     
                     <div className="p-5 sm:p-8 flex flex-col flex-1">
                       <div className="flex items-start justify-between mb-3 sm:mb-4">
@@ -489,12 +635,18 @@ export default function CommunityEvents() {
 
                       {/* Featured Event Image */}
                       {index === 0 && (
-                        <div className="w-full h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[450px] mb-4 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner">
+                        <motion.div 
+                          className="w-full h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[450px] mb-4 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 relative shadow-inner"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.7, delay: 0.2 }}
+                        >
                            <div 
                               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
                               style={{ backgroundImage: "url('/featuredevent.jpg')" }} 
                            />
-                        </div>
+                        </motion.div>
                       )}
 
                       <div className="mt-auto">
@@ -512,14 +664,17 @@ export default function CommunityEvents() {
                         )}
                       </div>
 
-                      <div className="mt-6 flex items-center text-[#997e67] font-medium group-hover:gap-3 gap-2 transition-all">
+                      <motion.div 
+                        className="mt-6 flex items-center text-[#997e67] font-medium group-hover:gap-3 gap-2 transition-all"
+                        whileHover={{ x: 5 }}
+                      >
                         View Details <ArrowRight size={16} />
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
       )}
@@ -527,32 +682,57 @@ export default function CommunityEvents() {
       {/* All Events List */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)]">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-6 sm:mb-10">
+          <motion.div 
+            className="mb-6 sm:mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeInUp}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="!text-black text-2xl sm:text-3xl font-bold">All Events</h2>
             <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">{filteredEvents.length} events available</p>
-          </div>
+          </motion.div>
 
           {loading ? (
             <div className="flex items-center justify-center py-12 sm:py-20">
-              <div className="w-10 h-10 border-4 border-[#997e67] border-t-transparent rounded-full animate-spin" />
+              <motion.div 
+                className="w-10 h-10 border-4 border-[#997e67] border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="text-center py-12 sm:py-20">
+            <motion.div 
+              className="text-center py-12 sm:py-20"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
               <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-gray-100 flex items-center justify-center">
                 <Search size={28} className="text-gray-400" />
               </div>
               <h3 className="text-lg sm:text-xl font-semibold !text-gray-900 mb-2">No events found</h3>
               <p className="!text-gray-500 text-sm sm:text-base">Try adjusting your search or filters</p>
-            </div>
+            </motion.div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <motion.div 
+              className="space-y-3 sm:space-y-4"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={staggerContainer}
+            >
               {filteredEvents.map((event) => {
                 const isSignedUp = userSignups.includes(event.id);
                 return (
-                  <div
+                  <motion.div
                     key={event.id}
                     onClick={() => setSelectedEvent(event)}
                     className="group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-white border border-gray-100 rounded-xl sm:rounded-2xl hover:border-[#CCBEB1] hover:shadow-md transition-all cursor-pointer"
+                    variants={fadeInUp}
+                    transition={{ duration: 0.4 }}
+                    whileHover={{ x: 5, transition: { duration: 0.2 } }}
                   >
                     {/* Date Block - Hidden on mobile, shown inline */}
                     <div className="hidden md:flex flex-col items-center justify-center w-20 h-20 bg-[#F5F0EB] rounded-2xl shrink-0">
@@ -605,26 +785,36 @@ export default function CommunityEvents() {
                           <p className="text-xs !text-gray-500">spots available</p>
                         </div>
                       )}
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#997e67] group-hover:border-[#997e67] transition shrink-0">
+                      <motion.div 
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#997e67] group-hover:border-[#997e67] transition shrink-0"
+                        whileHover={{ scale: 1.1 }}
+                      >
                         <ArrowRight size={16} className="text-gray-400 group-hover:text-white transition" />
-                      </div>
+                      </motion.div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
 
       {/* Modal */}
       {selectedEvent && (
-        <EventModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          isSignedUp={userSignups.includes(selectedEvent.id)}
-          onSignupChange={handleSignupChange}
-        />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <EventModal
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            isSignedUp={userSignups.includes(selectedEvent.id)}
+            onSignupChange={handleSignupChange}
+          />
+        </motion.div>
       )}
     </div>
   );

@@ -20,10 +20,55 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import "../../styles/navilink.css";
 import Link from "next/link";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const fadeInLeft = {
+  hidden: { opacity: 0, x: -30 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const fadeInRight = {
+  hidden: { opacity: 0, x: 30 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1 }
+};
+
+const modalOverlay = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 }
+};
+
+const modalContent = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  visible: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.9, y: 20 }
+};
 
 interface Post {
   id: string;
@@ -207,23 +252,53 @@ const CreatePostModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="navilink-modal-overlay" onClick={handleClose}>
-      <div className="navilink-modal" onClick={(e) => e.stopPropagation()}>
+    <motion.div 
+      className="navilink-modal-overlay" 
+      onClick={handleClose}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={modalOverlay}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div 
+        className="navilink-modal" 
+        onClick={(e) => e.stopPropagation()}
+        variants={modalContent}
+        transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
+      >
         <div className="navilink-modal-header">
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             <h3>Create Post</h3>
             <p className="navilink-modal-subtitle">Share with {categoryName}</p>
-          </div>
+          </motion.div>
           <button onClick={handleClose} className="navilink-modal-close">
             <X size={20} />
           </button>
         </div>
-        {moderationError && (
-          <div className="navilink-error-banner">
-            {moderationError}
-          </div>
-        )}
-        <div className="navilink-modal-body">
+        <AnimatePresence>
+          {moderationError && (
+            <motion.div 
+              className="navilink-error-banner"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {moderationError}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <motion.div 
+          className="navilink-modal-body"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
           <input
             type="text"
             placeholder="Give your post a title..."
@@ -243,15 +318,22 @@ const CreatePostModal = ({
             }}
             className="navilink-modal-textarea"
           />
-        </div>
-        <div className="navilink-modal-actions">
+        </motion.div>
+        <motion.div 
+          className="navilink-modal-actions"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <button className="navilink-modal-cancel" onClick={handleClose}>
             Cancel
           </button>
-          <button
+          <motion.button
             className="navilink-modal-submit"
             onClick={handleSubmit}
             disabled={loading || !title.trim() || !content.trim()}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loading ? (
               <>
@@ -264,10 +346,10 @@ const CreatePostModal = ({
                 Post
               </>
             )}
-          </button>
-        </div>
-      </div>
-    </div>
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -304,23 +386,53 @@ const EditPostModalContent = ({
   };
 
   return (
-    <div className="navilink-modal-overlay" onClick={handleClose}>
-      <div className="navilink-modal" onClick={(e) => e.stopPropagation()}>
+    <motion.div 
+      className="navilink-modal-overlay" 
+      onClick={handleClose}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={modalOverlay}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div 
+        className="navilink-modal" 
+        onClick={(e) => e.stopPropagation()}
+        variants={modalContent}
+        transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
+      >
         <div className="navilink-modal-header">
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             <h3>Edit Post</h3>
             <p className="navilink-modal-subtitle">Update your post</p>
-          </div>
+          </motion.div>
           <button onClick={handleClose} className="navilink-modal-close">
             <X size={20} />
           </button>
         </div>
-        {moderationError && (
-          <div className="navilink-error-banner">
-            {moderationError}
-          </div>
-        )}
-        <div className="navilink-modal-body">
+        <AnimatePresence>
+          {moderationError && (
+            <motion.div 
+              className="navilink-error-banner"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {moderationError}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <motion.div 
+          className="navilink-modal-body"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
           <input
             type="text"
             placeholder="Post Title"
@@ -340,15 +452,22 @@ const EditPostModalContent = ({
             }}
             className="navilink-modal-textarea"
           />
-        </div>
-        <div className="navilink-modal-actions">
+        </motion.div>
+        <motion.div 
+          className="navilink-modal-actions"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <button className="navilink-modal-cancel" onClick={handleClose}>
             Cancel
           </button>
-          <button
+          <motion.button
             className="navilink-modal-submit"
             onClick={handleSubmit}
             disabled={loading || !title.trim() || !content.trim()}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loading ? (
               <>
@@ -361,10 +480,10 @@ const EditPostModalContent = ({
                 Save Changes
               </>
             )}
-          </button>
-        </div>
-      </div>
-    </div>
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -411,19 +530,51 @@ const DeleteConfirmModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="navilink-modal-overlay" onClick={onClose}>
-      <div 
+    <motion.div 
+      className="navilink-modal-overlay" 
+      onClick={onClose}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={modalOverlay}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div 
         className="navilink-modal navilink-modal-small" 
         onClick={(e) => e.stopPropagation()}
+        variants={modalContent}
+        transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
       >
-        <div className="navilink-delete-icon">
+        <motion.div 
+          className="navilink-delete-icon"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 400, damping: 15 }}
+        >
           <Trash2 size={28} />
-        </div>
-        <h3 className="navilink-delete-title">Delete Post?</h3>
-        <p className="navilink-delete-text">
+        </motion.div>
+        <motion.h3 
+          className="navilink-delete-title"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          Delete Post?
+        </motion.h3>
+        <motion.p 
+          className="navilink-delete-text"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           This action cannot be undone. Are you sure you want to delete this post?
-        </p>
-        <div className="navilink-modal-actions navilink-delete-actions">
+        </motion.p>
+        <motion.div 
+          className="navilink-modal-actions navilink-delete-actions"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
           <button 
             className="navilink-modal-cancel" 
             onClick={onClose}
@@ -431,10 +582,12 @@ const DeleteConfirmModal = ({
           >
             Cancel
           </button>
-          <button
+          <motion.button
             className="navilink-modal-submit navilink-delete-btn"
             onClick={onConfirm}
             disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loading ? (
               <>
@@ -447,10 +600,10 @@ const DeleteConfirmModal = ({
                 Delete
               </>
             )}
-          </button>
-        </div>
-      </div>
-    </div>
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -493,13 +646,25 @@ const PostCard = ({
   const postReplies = replies.filter((r) => r.post_id === post.id);
 
   return (
-    <div className="navilink-post-card">
+    <motion.div 
+      className="navilink-post-card"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="navilink-post-accent" style={{ backgroundColor: category.color }} />
       <div className="navilink-post-header">
         <div className="navilink-post-author">
-          <div className="navilink-author-avatar" style={{ backgroundColor: category.color }}>
+          <motion.div 
+            className="navilink-author-avatar" 
+            style={{ backgroundColor: category.color }}
+            whileHover={{ scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
             {getInitials(post.user_email)}
-          </div>
+          </motion.div>
           <div className="navilink-author-info">
             <span className="navilink-author-name">
               {getDisplayName(post.user_email)}
@@ -524,9 +689,11 @@ const PostCard = ({
       <p className="navilink-post-content">{post.content}</p>
 
       <div className="navilink-post-footer">
-        <button
+        <motion.button
           className={`navilink-reply-toggle ${showReplies ? 'active' : ''}`}
           onClick={() => setShowReplies(!showReplies)}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <MessageCircle size={18} />
           <span>
@@ -535,19 +702,32 @@ const PostCard = ({
               : "Reply"}
           </span>
           <ChevronRight size={16} className={`navilink-chevron ${showReplies ? 'rotated' : ''}`} />
-        </button>
+        </motion.button>
       </div>
 
-      {showReplies && (
-        <div className="navilink-replies-section">
-          {postReplies.length > 0 && (
-            <div className="navilink-replies-list">
-              {postReplies.map((reply) => (
-                <div key={reply.id} className="navilink-reply">
-                  <div className="navilink-reply-avatar">
-                    {getInitials(reply.user_email)}
-                  </div>
-                  <div className="navilink-reply-content">
+      <AnimatePresence>
+        {showReplies && (
+          <motion.div 
+            className="navilink-replies-section"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {postReplies.length > 0 && (
+              <div className="navilink-replies-list">
+                {postReplies.map((reply, index) => (
+                  <motion.div 
+                    key={reply.id} 
+                    className="navilink-reply"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <div className="navilink-reply-avatar">
+                      {getInitials(reply.user_email)}
+                    </div>
+                    <div className="navilink-reply-content">
                     <div className="navilink-reply-header">
                       <span className="navilink-reply-author">
                         {getDisplayName(reply.user_email)}
@@ -558,18 +738,25 @@ const PostCard = ({
                     </div>
                     <p className="navilink-reply-text">{reply.content}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
 
           {currentUserId && (
             <div className="navilink-reply-input-wrapper">
-              {replyError && (
-                <div className="navilink-reply-error">
-                  {replyError}
-                </div>
-              )}
+              <AnimatePresence>
+                {replyError && (
+                  <motion.div 
+                    className="navilink-reply-error"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    {replyError}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="navilink-reply-input-container">
                 <input
                   type="text"
@@ -582,19 +769,22 @@ const PostCard = ({
                   className="navilink-reply-input"
                   onKeyPress={(e) => e.key === "Enter" && handleReplySubmit()}
                 />
-                <button
+                <motion.button
                   className="navilink-reply-submit"
                   onClick={handleReplySubmit}
                   disabled={submitting || !replyContent.trim()}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <Send size={16} />
-                </button>
+                </motion.button>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
@@ -876,21 +1066,46 @@ export default function NaviLinkPage() {
   return (
     <div className="navilink-page">
       <section className="navilink-hero">
-        <div 
+        <motion.div 
           className="navilink-hero-bg"
           style={{ backgroundImage: "url('/navilink.jpg')" }}
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
         />
         <div className="navilink-hero-overlay" />
         <div className="navilink-hero-content">
-          <div className="navilink-hero-badge">
+          <motion.div 
+            className="navilink-hero-badge"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <Sparkles size={14} />
             Community Forum
-          </div>
-          <h1 className="navilink-hero-title">NaviLink</h1>
-          <p className="navilink-hero-subtitle">
+          </motion.div>
+          <motion.h1 
+            className="navilink-hero-title"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            NaviLink
+          </motion.h1>
+          <motion.p 
+            className="navilink-hero-subtitle"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
             Connect, share, and engage with your community in meaningful discussions
-          </p>
-          <div className="navilink-search-container">
+          </motion.p>
+          <motion.div 
+            className="navilink-search-container"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
             <Search className="navilink-search-icon" size={20} />
             <input
               type="text"
@@ -899,40 +1114,64 @@ export default function NaviLinkPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="navilink-search-input"
             />
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      <div className="navilink-mobile-categories">
+      <motion.div 
+        className="navilink-mobile-categories"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
         <div className="navilink-mobile-categories-scroll">
-          {CATEGORIES.map((category) => (
-            <button
+          {CATEGORIES.map((category, index) => (
+            <motion.button
               key={category.id}
               className={`navilink-category-pill ${selectedCategory.id === category.id ? 'active' : ''}`}
               onClick={() => setSelectedCategory(category)}
               style={{ 
                 '--category-color': category.color 
               } as React.CSSProperties}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 + index * 0.05 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {category.icon}
               <span>{category.name.split(' ')[0]}</span>
-            </button>
+            </motion.button>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <div className="navilink-main">
-        <aside className="navilink-sidebar">
+        <motion.aside 
+          className="navilink-sidebar"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInLeft}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <div className="navilink-sidebar-header">
             <h3>Categories</h3>
             <p>Choose a topic to explore</p>
           </div>
-          <div className="navilink-categories-list">
-            {CATEGORIES.map((category) => (
-              <button
+          <motion.div 
+            className="navilink-categories-list"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {CATEGORIES.map((category, index) => (
+              <motion.button
                 key={category.id}
                 className={`navilink-category-btn ${selectedCategory.id === category.id ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(category)}
+                variants={fadeInUp}
+                transition={{ duration: 0.3 }}
+                whileHover={{ x: 5, transition: { duration: 0.2 } }}
               >
                 <div 
                   className="navilink-category-icon"
@@ -945,38 +1184,67 @@ export default function NaviLinkPage() {
                   <span className="navilink-category-desc">{category.description}</span>
                 </div>
                 <ChevronRight size={16} className="navilink-category-arrow" />
-              </button>
+              </motion.button>
             ))}
-          </div>
-        </aside>
+          </motion.div>
+        </motion.aside>
 
-        <div className="navilink-content">
-          <div className="navilink-content-header">
+        <motion.div 
+          className="navilink-content"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInRight}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <motion.div 
+            className="navilink-content-header"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
             <div className="navilink-content-title">
-              <div 
+              <motion.div 
                 className="navilink-content-icon"
                 style={{ backgroundColor: `${selectedCategory.color}15`, color: selectedCategory.color }}
+                key={selectedCategory.id}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
               >
                 {selectedCategory.icon}
-              </div>
+              </motion.div>
               <div>
-                <h2>{selectedCategory.name}</h2>
+                <motion.h2
+                  key={selectedCategory.name}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {selectedCategory.name}
+                </motion.h2>
                 <p>{selectedCategory.description}</p>
               </div>
             </div>
             {user && (
-              <button
+              <motion.button
                 className="navilink-create-btn"
                 onClick={() => setShowCreateModal(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Plus size={18} />
                 <span>New Post</span>
-              </button>
+              </motion.button>
             )}
-          </div>
+          </motion.div>
 
           {!userLoading && !user && (
-            <div className="navilink-auth-prompt">
+            <motion.div 
+              className="navilink-auth-prompt"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+            >
               <div className="navilink-auth-content">
                 <MessageCircle size={24} />
                 <div>
@@ -986,24 +1254,45 @@ export default function NaviLinkPage() {
                   </p>
                 </div>
               </div>
-              <Link href="/pages/signin" className="navilink-auth-btn">
-                Sign In
-                <ArrowRight size={16} />
-              </Link>
-            </div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link href="/pages/signin" className="navilink-auth-btn">
+                  Sign In
+                  <ArrowRight size={16} />
+                </Link>
+              </motion.div>
+            </motion.div>
           )}
 
           <div className="navilink-posts-list">
             {loading ? (
-              <div className="navilink-loading">
-                <div className="navilink-loading-spinner" />
+              <motion.div 
+                className="navilink-loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.div 
+                  className="navilink-loading-spinner"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
                 <p>Loading discussions...</p>
-              </div>
+              </motion.div>
             ) : filteredPosts.length === 0 ? (
-              <div className="navilink-empty">
-                <div className="navilink-empty-icon">
+              <motion.div 
+                className="navilink-empty"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <motion.div 
+                  className="navilink-empty-icon"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 15 }}
+                >
                   <MessageCircle size={48} />
-                </div>
+                </motion.div>
                 <h4>No discussions yet</h4>
                 <p>
                   {searchTerm 
@@ -1013,64 +1302,86 @@ export default function NaviLinkPage() {
                     : "Sign in to be the first to start a discussion!"}
                 </p>
                 {user && !searchTerm && (
-                  <button 
+                  <motion.button 
                     className="navilink-empty-btn"
                     onClick={() => setShowCreateModal(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     <Plus size={18} />
                     Create First Post
-                  </button>
+                  </motion.button>
                 )}
-              </div>
+              </motion.div>
             ) : (
-              filteredPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  replies={replies}
-                  currentUserId={user?.id || null}
-                  onReply={handleReply}
-                  onEdit={(p) => {
-                    setEditingPost(p);
-                    setShowEditModal(true);
-                  }}
-                  onDelete={handleDeleteClick}
-                  category={selectedCategory}
-                />
-              ))
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+              >
+                <AnimatePresence>
+                  {filteredPosts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      replies={replies}
+                      currentUserId={user?.id || null}
+                      onReply={handleReply}
+                      onEdit={(p) => {
+                        setEditingPost(p);
+                        setShowEditModal(true);
+                      }}
+                      onDelete={handleDeleteClick}
+                      category={selectedCategory}
+                    />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <CreatePostModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSubmit={handleCreatePost}
-        categoryName={selectedCategory.name}
-        moderationError={moderationError}
-        onClearError={() => setModerationError(null)}
-      />
-      <EditPostModal
-        isOpen={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingPost(null);
-        }}
-        onSubmit={handleEditPost}
-        post={editingPost}
-        moderationError={moderationError}
-        onClearError={() => setModerationError(null)}
-      />
-      <DeleteConfirmModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setDeletingPostId(null);
-        }}
-        onConfirm={handleDeletePost}
-        loading={deleteLoading}
-      />
+      <AnimatePresence>
+        {showCreateModal && (
+          <CreatePostModal
+            isOpen={showCreateModal}
+            onClose={() => setShowCreateModal(false)}
+            onSubmit={handleCreatePost}
+            categoryName={selectedCategory.name}
+            moderationError={moderationError}
+            onClearError={() => setModerationError(null)}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showEditModal && (
+          <EditPostModal
+            isOpen={showEditModal}
+            onClose={() => {
+              setShowEditModal(false);
+              setEditingPost(null);
+            }}
+            onSubmit={handleEditPost}
+            post={editingPost}
+            moderationError={moderationError}
+            onClearError={() => setModerationError(null)}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showDeleteModal && (
+          <DeleteConfirmModal
+            isOpen={showDeleteModal}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setDeletingPostId(null);
+            }}
+            onConfirm={handleDeletePost}
+            loading={deleteLoading}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

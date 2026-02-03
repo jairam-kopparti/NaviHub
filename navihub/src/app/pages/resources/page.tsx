@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search, Check, ChevronDown, MapPin, Star, Eye, Grid3X3, SlidersHorizontal, X } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
@@ -38,6 +39,37 @@ const RATING_OPTIONS = [
 ];
 
 const VIEWS_OPTIONS = ["Most Viewed", "Least Viewed"];
+
+// Animation variants
+const fadeInLeft = {
+  hidden: { opacity: 0, x: -30 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const fadeInRight = {
+  hidden: { opacity: 0, x: 30 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
+};
+
+const modalOverlay = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 }
+};
+
+const slideInDrawer = {
+  hidden: { x: "-100%" },
+  visible: { x: 0, transition: { type: "spring" as const, stiffness: 300, damping: 30 } },
+  exit: { x: "-100%", transition: { duration: 0.2 } }
+};
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -369,51 +401,77 @@ export default function ResourcesPage() {
     <div className="min-h-screen bg-(--bg)">
       {/* Section 1: Hero Image */}
       <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] border-b border-(--border) overflow-hidden">
-        <div
+        <motion.div
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{ backgroundImage: 'url(/resources.jpg)' }}
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-(--font-heading)">
+          <motion.h1 
+            className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-(--font-heading)"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             RESOURCES
-          </h1>
+          </motion.h1>
         </div>
       </section>
 
       {/* Mobile Filter Button */}
-      <div className="lg:hidden sticky top-0 z-30 bg-(--bg) border-b border-(--border) p-3">
-        <button
+      <motion.div 
+        className="lg:hidden sticky top-0 z-30 bg-(--bg) border-b border-(--border) p-3"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <motion.button
           onClick={() => setMobileFiltersOpen(true)}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-(--surface) border border-(--border) rounded-xl font-medium text-(--secondary-text) cursor-pointer"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <SlidersHorizontal className="w-5 h-5" />
           <span>Filters</span>
           {activeFilterCount > 0 && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full">
+            <motion.span 
+              className="px-2 py-0.5 text-xs font-medium bg-[#997e67] text-white rounded-full"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 15 }}
+            >
               {activeFilterCount}
-            </span>
+            </motion.span>
           )}
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {/* Mobile Filter Drawer Overlay */}
-      {mobileFiltersOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setMobileFiltersOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {mobileFiltersOpen && (
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            onClick={() => setMobileFiltersOpen(false)}
+            variants={modalOverlay}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Mobile Filter Drawer */}
-      <div
-        className={`
-          fixed top-0 left-0 h-full w-[85%] max-w-[350px] z-50
-          bg-(--surface) shadow-2xl
-          transform transition-transform duration-300 ease-out
-          lg:hidden
-          ${mobileFiltersOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
+      <AnimatePresence>
+        {mobileFiltersOpen && (
+          <motion.div
+            className="fixed top-0 left-0 h-full w-[85%] max-w-[350px] z-50 bg-(--surface) shadow-2xl lg:hidden"
+            variants={slideInDrawer}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
         <div className="flex flex-col h-full">
           {/* Mobile Filter Header */}
           <div className="px-5 py-4 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a] flex items-center justify-between">
@@ -615,20 +673,30 @@ export default function ResourcesPage() {
                 Clear all filters
               </button>
             )}
-            <button
+            <motion.button
               onClick={() => setMobileFiltersOpen(false)}
               className="w-full px-4 py-3 text-sm font-semibold text-white bg-[#997e67] rounded-xl hover:bg-[#8a6d5a] transition cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               Show {filteredResources.length} results
-            </button>
+            </motion.button>
           </div>
         </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Section 2 + 3: Preferences + Resources */}
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 flex flex-col lg:flex-row gap-6 lg:gap-8 border-b border-(--border)">
         {/* Preferences Panel - Hidden on mobile, shown on desktop */}
-        <aside className="hidden lg:block w-80 shrink-0">
+        <motion.aside 
+          className="hidden lg:block w-80 shrink-0"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInLeft}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <div className="sticky top-8 bg-(--surface) rounded-2xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
             {/* Panel Header */}
             <div className="px-6 py-5 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a]">
@@ -846,17 +914,38 @@ export default function ResourcesPage() {
             {/* Panel Footer - Results Count */}
             <div className="px-6 py-4 border-t border-(--border) bg-(--bg)/30">
               <p className="text-sm font-medium text-center" style={{ color: "#000000" }}>
-                Showing <span className="font-bold" style={{ color: "#997e67" }}>{filteredResources.length}</span> results
+                Showing <motion.span 
+                  className="font-bold" 
+                  style={{ color: "#997e67" }}
+                  key={filteredResources.length}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                >{filteredResources.length}</motion.span> results
               </p>
             </div>
           </div>
-        </aside>
+        </motion.aside>
 
         {/* Resource Cards Section */}
-        <div className="flex-1 min-w-0">
+        <motion.div 
+          className="flex-1 min-w-0"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInRight}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           {/* Search Bar + Add Resource Button */}
-          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
-            <div className="relative flex-1">
+          <motion.div 
+            className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
+            <motion.div 
+              className="relative flex-1"
+              whileFocus={{ scale: 1.01 }}
+            >
               <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-(--secondary-text) w-5 h-5" />
               <input
                 type="text"
@@ -866,21 +955,39 @@ export default function ResourcesPage() {
                 className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-(--secondary-text) text-base"
                 style={{ color: "#4a4a4a" }}
               />
-            </div>
-            <button 
+            </motion.div>
+            <motion.button 
               onClick={handleAddResourceClick}
-              className="px-4 sm:px-6 py-3 sm:py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap cursor-pointer text-sm sm:text-base">
+              className="px-4 sm:px-6 py-3 sm:py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap cursor-pointer text-sm sm:text-base"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
               Add resource
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* Results count - mobile only */}
-          <div className="lg:hidden mb-4 text-sm text-(--secondary-text)">
-            Showing <span className="font-semibold text-[#997e67]">{filteredResources.length}</span> results
-          </div>
+          <motion.div 
+            className="lg:hidden mb-4 text-sm text-(--secondary-text)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Showing <motion.span 
+              className="font-semibold text-[#997e67]"
+              key={filteredResources.length}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >{filteredResources.length}</motion.span> results
+          </motion.div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
             {filteredResources.map((resource) => (
               <div
                 key={resource.id}
@@ -896,34 +1003,46 @@ export default function ResourcesPage() {
                 />
               </div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Resource Detail Modal with Reviews and Favorites */}
-      <ResourceDetailModal
-        resource={selectedCard}
-        isOpen={!!selectedCard}
-        onClose={() => setSelectedCard(null)}
-        user={user}
-        onJudgeOverride={judgeOverrideMode}
-        onFavoriteToggled={handleResourcesUpdated}
-      />
+      <AnimatePresence>
+        {selectedCard && (
+          <ResourceDetailModal
+            resource={selectedCard}
+            isOpen={!!selectedCard}
+            onClose={() => setSelectedCard(null)}
+            user={user}
+            onJudgeOverride={judgeOverrideMode}
+            onFavoriteToggled={handleResourcesUpdated}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Modals */}
-      <AddResourceModal
-        isOpen={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setJudgeOverrideMode(false);
-        }}
-        onSuccess={handleResourcesUpdated}
-      />
-      <AuthErrorModal
-        isOpen={showAuthError}
-        onClose={() => setShowAuthError(false)}
-        onJudgeOverride={handleJudgeOverride}
-      />
+      <AnimatePresence>
+        {showAddModal && (
+          <AddResourceModal
+            isOpen={showAddModal}
+            onClose={() => {
+              setShowAddModal(false);
+              setJudgeOverrideMode(false);
+            }}
+            onSuccess={handleResourcesUpdated}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showAuthError && (
+          <AuthErrorModal
+            isOpen={showAuthError}
+            onClose={() => setShowAuthError(false)}
+            onJudgeOverride={handleJudgeOverride}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

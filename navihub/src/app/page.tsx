@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Star, BookOpen, Calendar, MessageCircle, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
 import { getTopResources } from "./lib/getTopResources";
@@ -348,7 +348,7 @@ export default function Home() {
       </section>
 
 
-      {/* ================= QUOTES SECTION ================= */}
+      {/*  QUOTES SECTION  */}
       <section className="w-full py-12 sm:py-24 bg-(--bg) flex flex-col items-center relative overflow-hidden">
         {/* Left Marquee - Hidden on mobile */}
         <div className="absolute left-0 top-0 h-full w-32 overflow-hidden hidden lg:flex items-center justify-center">
@@ -467,6 +467,181 @@ export default function Home() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* EXPLORE PAGES SECTION */}
+      <section className="w-full py-16 sm:py-24 bg-[#FFFFFA]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          {/* Section Header */}
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-[clamp(28px,5vw,48px)] font-bold mb-4" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
+              Explore <span className="text-[#997E67]">NaviHub</span>
+            </h2>
+            <p className="text-base sm:text-lg max-w-2xl mx-auto" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
+              Discover all the ways we can help connect you with your community
+            </p>
+          </div>
+
+          {/* Feature Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {/* Resources Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
+                  <BookOpen className="w-7 h-7 text-[#997E67]" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
+                  Community Resources
+                </h3>
+                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
+                  Browse our curated directory of local nonprofits, health services, educational programs, and support organizations across all five boroughs.
+                </p>
+                <Link
+                  href="/pages/resources"
+                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
+                >
+                  <span>Explore Resources</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Events Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
+                  <Calendar className="w-7 h-7 text-[#997E67]" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
+                  Local Events
+                </h3>
+                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
+                  Stay connected with community gatherings, workshops, volunteer opportunities, and social events happening near you.
+                </p>
+                <Link
+                  href="/pages/events"
+                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
+                >
+                  <span>View Events</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* NaviLink Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
+                  <MessageCircle className="w-7 h-7 text-[#997E67]" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
+                  NaviLink Forum
+                </h3>
+                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
+                  Join the conversation with fellow New Yorkers. Share experiences, ask questions, and connect with your community.
+                </p>
+                <Link
+                  href="/pages/NaviLink"
+                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
+                >
+                  <span>Join Discussion</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* About Us Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
+                  <Users className="w-7 h-7 text-[#997E67]" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
+                  About Us
+                </h3>
+                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
+                  Learn about our mission to bridge communities and create accessible pathways to support for all New Yorkers.
+                </p>
+                <Link
+                  href="/pages/about"
+                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
+                >
+                  <span>Our Story</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CTA BANNER SECTION ================= */}
+      <section className="w-full py-16 sm:py-20 bg-(--bg)">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="relative bg-gradient-to-br from-[#1F1F1F] to-[#2d2d2d] rounded-3xl p-8 sm:p-12 overflow-hidden"
+          >
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#997E67]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#997E67]/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+            
+            <div className="relative z-10 text-center">
+              <h2 className="text-[clamp(24px,4vw,40px)] font-bold text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+                Ready to Get Connected?
+              </h2>
+              <p className="text-white/70 mb-8 max-w-2xl mx-auto text-sm sm:text-base">
+                Join thousands of New Yorkers who have found the resources and support they need through NaviHub. Start exploring today.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  href="/pages/resources"
+                  className="group inline-flex items-center gap-3 px-6 py-3.5 bg-white text-[#1F1F1F] rounded-full font-semibold hover:bg-[#997E67] hover:text-white transition-all duration-300"
+                >
+                  <span>Browse Resources</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  href="/pages/signup"
+                  className="inline-flex items-center gap-3 px-6 py-3.5 border-2 border-white/30 text-white rounded-full font-semibold hover:bg-white/10 transition-all duration-300"
+                >
+                  <span>Create Account</span>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
       </div>

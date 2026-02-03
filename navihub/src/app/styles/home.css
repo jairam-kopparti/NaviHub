@@ -123,3 +123,75 @@
     animation-duration: 15s;
   }
 }
+
+/* ========================================
+   EXPLORE SECTION STYLES
+   ======================================== */
+
+.explore-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.explore-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(153, 126, 103, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.explore-card:hover::before {
+  opacity: 1;
+}
+
+/* Feature card hover effects */
+@media (min-width: 768px) {
+  .feature-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* CTA Banner gradient animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.cta-banner-gradient {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Smooth link hover */
+.explore-link {
+  position: relative;
+}
+
+.explore-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #997E67;
+  transition: width 0.3s ease;
+}
+
+.explore-link:hover::after {
+  width: 100%;
+}
