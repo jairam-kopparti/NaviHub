@@ -206,7 +206,7 @@ export default function Home() {
           src="/hero.jpg"
           alt="Hero"
           fill
-          className="object-cover opacity-80"
+          className="object-cover opacity-65"
           priority
         />
         <div className="absolute inset-0" />
