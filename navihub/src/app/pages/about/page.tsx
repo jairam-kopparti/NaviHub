@@ -1,18 +1,51 @@
 "use client"
 
 import "../../styles/aboutus.css"
-import { Users, Search, Layers } from "lucide-react"
-import { useEffect, useRef } from "react"
+import { Users, Search, Layers, Plus, Minus } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import gsap from "gsap"
 import ScrollTrigger from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
+
+const FAQ_ITEMS = [
+  {
+    question: "What is NaviHub and who is it for?",
+    answer: "NaviHub is a community resource hub designed for everyone—residents, families, newcomers, and anyone seeking local support. We centralize information about nonprofits, services, programs, and events to make help more accessible and less overwhelming for all community members."
+  },
+  {
+    question: "How do I find resources that match my needs?",
+    answer: "You can browse resources by category (such as food assistance, housing, employment, or health services) or use our search feature to find specific programs. Each listing includes detailed information about eligibility, contact details, and how to access the service."
+  },
+  {
+    question: "Is NaviHub free to use?",
+    answer: "Yes, NaviHub is completely free for all community members. Our mission is to break down barriers to access, so there are no fees or subscriptions required to search, browse, or connect with resources."
+  },
+  {
+    question: "How can organizations get listed on NaviHub?",
+    answer: "Organizations can submit their information through our 'Add Resource' feature. We review submissions to ensure accuracy and relevance. If you represent a nonprofit, service provider, or community program, we encourage you to reach out and join our growing network."
+  },
+  {
+    question: "How often is the resource information updated?",
+    answer: "We work continuously to keep our listings accurate and up-to-date. Community members and organizations can flag outdated information, and our team regularly reviews and verifies resource details to maintain quality and reliability."
+  },
+  {
+    question: "Can I save or bookmark resources for later?",
+    answer: "Yes! If you create a free account, you can favorite resources to easily access them later. This feature helps you keep track of services you're interested in or want to share with friends and family."
+  }
+]
 
 export default function AboutUs() {
   const heroImageRef = useRef<HTMLImageElement>(null)
   const missionItemsRef = useRef<HTMLParagraphElement[]>([])
   const whatWeDoRef = useRef<HTMLDivElement[]>([])
   const howStepsRef = useRef<HTMLDivElement[]>([])
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index)
+  }
 
   useEffect(() => {
     if (heroImageRef.current) {
@@ -225,6 +258,105 @@ export default function AboutUs() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="border-b border-(--border) bg-(--bg) py-12 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div 
+            className="text-center mb-10 sm:mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-block px-4 py-1.5 bg-[#997e67]/10 text-[#997e67] text-sm font-medium rounded-full mb-4">
+              FAQ
+            </span>
+            <h2 className="about-section-heading mb-4">
+              <span className="primary">Everything You</span>{" "}
+              <span className="secondary">Need to Know</span>
+            </h2>
+            <div className="about-mission-divider" />
+          </motion.div>
+
+          <motion.div 
+            className="space-y-3 sm:space-y-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 }
+              }
+            }}
+          >
+            {FAQ_ITEMS.map((item, index) => (
+              <motion.div
+                key={index}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                }}
+                className="group"
+              >
+                <motion.button
+                  onClick={() => toggleFaq(index)}
+                  className={`relative z-10 w-full flex items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 cursor-pointer ${
+                    openFaq === index 
+                      ? "bg-[#997e67] text-white shadow-lg" 
+                      : "bg-[#FFFFFA] hover:bg-[#997e67]/5 border border-(--border) hover:border-[#997e67]/30"
+                  }`}
+                  whileHover={{ scale: openFaq === index ? 1 : 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  <span className={`text-base sm:text-lg font-semibold ${
+                    openFaq === index ? "text-white" : "text-(--secondary-text)"
+                  }`}>
+                    {item.question}
+                  </span>
+                  <motion.div
+                    className={`shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
+                      openFaq === index 
+                        ? "bg-white/20" 
+                        : "bg-[#997e67]/10"
+                    }`}
+                    animate={{ rotate: openFaq === index ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {openFaq === index ? (
+                      <Minus className={`w-4 h-4 sm:w-5 sm:h-5 ${openFaq === index ? "text-white" : "text-[#997e67]"}`} />
+                    ) : (
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-[#997e67]" />
+                    )}
+                  </motion.div>
+                </motion.button>
+                
+                <AnimatePresence>
+                  {openFaq === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div 
+                        className="mx-6 sm:mx-8 px-4 sm:px-5 pt-5 pb-5 bg-[#f5f5f0] rounded-b-xl border-l-2 border-[#997e67]"
+                      >
+                        <p className="text-sm sm:text-base leading-relaxed" style={{ color: "#4a4a4a" }}>
+                          {item.answer}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
     </>
