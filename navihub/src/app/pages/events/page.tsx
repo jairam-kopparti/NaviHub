@@ -385,7 +385,6 @@ export default function CommunityEvents() {
               transition={{ duration: 0.6, delay: 0.8 }}
             >
               <div className="flex-1 relative">
-                <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
                   placeholder="Search events..."
@@ -393,6 +392,7 @@ export default function CommunityEvents() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
                 />
+                <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
               </div>
               <button 
                 onClick={() => setShowFilters(!showFilters)}
