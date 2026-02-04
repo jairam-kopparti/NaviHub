@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { X, MapPin, Clock, Users, Search, Filter, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import "../../styles/events.css";
@@ -26,6 +26,30 @@ const staggerContainer = {
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: { opacity: 1, scale: 1 }
+};
+
+const sidebarVariants = {
+  hidden: { x: "100%", opacity: 0 },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: { 
+      type: "spring" as const,
+      stiffness: 300,
+      damping: 30
+    }
+  },
+  exit: { 
+    x: "100%", 
+    opacity: 0,
+    transition: { duration: 0.3, ease: "easeInOut" as const }
+  }
+};
+
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } }
 };
 
 type Category =
@@ -404,93 +428,105 @@ export default function CommunityEvents() {
             </motion.div>
 
             {/* Filter Pills Sidebar */}
-            {showFilters && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-                  onClick={() => setShowFilters(false)}
-                />
-                <div className="fixed top-0 right-0 h-full w-full max-w-[320px] sm:max-w-md bg-[#1F1F1F] z-50 p-5 sm:p-8 shadow-2xl border-l border-white/10 overflow-y-auto">
-                  <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-2xl font-bold text-white">Filter Events</h3>
-                    <button 
-                      onClick={() => setShowFilters(false)}
-                      className="p-2 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-
-                  <div className="mb-8">
-                    <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Category</p>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => setActiveCategory("all")}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
-                          activeCategory === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
-                        }`}
+            <AnimatePresence>
+              {showFilters && (
+                <>
+                  <motion.div 
+                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+                    onClick={() => setShowFilters(false)}
+                    variants={backdropVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  />
+                  <motion.div 
+                    className="fixed top-0 right-0 h-full w-full max-w-[320px] sm:max-w-md bg-[#1F1F1F] z-50 p-5 sm:p-8 shadow-2xl border-l border-white/10 overflow-y-auto"
+                    variants={sidebarVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-2xl font-bold text-white">Filter Events</h3>
+                      <button 
+                        onClick={() => setShowFilters(false)}
+                        className="p-2 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white"
                       >
-                        All
+                        <X size={24} />
                       </button>
-                      {CATEGORIES.map((cat) => (
+                    </div>
+
+                    <div className="mb-8">
+                      <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Category</p>
+                      <div className="flex flex-wrap gap-2">
                         <button
-                          key={cat}
-                          onClick={() => setActiveCategory(cat)}
+                          onClick={() => setActiveCategory("all")}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
-                            activeCategory === cat ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                            activeCategory === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                           }`}
                         >
-                          {CATEGORY_LABELS[cat]}
+                          All
                         </button>
-                      ))}
+                        {CATEGORIES.map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => setActiveCategory(cat)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                              activeCategory === cat ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                            }`}
+                          >
+                            {CATEGORY_LABELS[cat]}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mb-8">
-                    <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Location</p>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => setActiveBorough("all")}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
-                          activeBorough === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
-                        }`}
-                      >
-                        All Boroughs
-                      </button>
-                      {BOROUGHS.map((b) => (
+                    <div className="mb-8">
+                      <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Location</p>
+                      <div className="flex flex-wrap gap-2">
                         <button
-                          key={b}
-                          onClick={() => setActiveBorough(b)}
+                          onClick={() => setActiveBorough("all")}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
-                            activeBorough === b ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                            activeBorough === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                           }`}
                         >
-                          {b}
+                          All Boroughs
                         </button>
-                      ))}
+                        {BOROUGHS.map((b) => (
+                          <button
+                            key={b}
+                            onClick={() => setActiveBorough(b)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                              activeBorough === b ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                            }`}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-12 pt-8 border-t border-white/10">
-                    <button 
-                      onClick={() => {
-                        setActiveCategory("all");
-                        setActiveBorough("all");
-                      }}
-                      className="w-full py-4 rounded-xl border border-white/10 text-white font-medium hover:bg-white/5 transition mb-3 cursor-pointer"
-                    >
-                      Reset Filters
-                    </button>
-                    <button 
-                      onClick={() => setShowFilters(false)}
-                      className="w-full py-4 rounded-xl bg-[#997e67] text-white font-bold hover:bg-[#8a715c] transition cursor-pointer"
-                    >
-                      Show Results
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
+                    <div className="mt-12 pt-8 border-t border-white/10">
+                      <button 
+                        onClick={() => {
+                          setActiveCategory("all");
+                          setActiveBorough("all");
+                        }}
+                        className="w-full py-4 rounded-xl border border-white/10 text-white font-medium hover:bg-white/5 transition mb-3 cursor-pointer"
+                      >
+                        Reset Filters
+                      </button>
+                      <button 
+                        onClick={() => setShowFilters(false)}
+                        className="w-full py-4 rounded-xl bg-[#997e67] text-white font-bold hover:bg-[#8a715c] transition cursor-pointer"
+                      >
+                        Show Results
+                      </button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </section>
