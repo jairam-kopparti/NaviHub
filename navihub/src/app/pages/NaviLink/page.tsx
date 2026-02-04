@@ -136,6 +136,157 @@ const CATEGORIES: Category[] = [
   },
 ];
 
+const DEMO_POSTS: Post[] = [
+  // Sports
+  {
+    id: "demo-sports-1",
+    title: "Our NaviHub Running Club just hit 50 members!",
+    content: "What started as a simple post looking for a running buddy has turned into a massive weekly event. We just hit 50 active members running every Tuesday! If you want to get fit and meet great people, come join us at the central trail entrance.",
+    category_id: "sports",
+    user_id: "demo-user-1",
+    user_email: "tom.h@example.com",
+    created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-sports-2",
+    title: "Looking for tennis partners (Beginner/Intermediate)",
+    content: "Hi everyone, I just moved to the area and I'm looking for someone to play tennis with on weekends. I'm around a 3.0 level. Let me know if you're interested!",
+    category_id: "sports",
+    user_id: "demo-user-2",
+    user_email: "sarah.k@example.com",
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  // Education
+  {
+    id: "demo-edu-1",
+    title: "Compiled Study Notes for the Advanced Certification Exam",
+    content: "Hi everyone! I noticed many of us are preparing for the upcoming certification. I've compiled all the notes from our study group sessions into one comprehensive PDF. The community support kept me going when I wanted to quit. Hope this helps others cross the finish line!",
+    category_id: "education",
+    user_id: "demo-user-3",
+    user_email: "david.k@example.com",
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-edu-2",
+    title: "Free Python workshops starting next month",
+    content: "Just wanted to share that the local library is hosting free coding workshops. Great specific resource for anyone trying to toggle careers!",
+    category_id: "education",
+    user_id: "demo-user-4",
+    user_email: "tech.tutor@example.com",
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  // Careers
+  {
+    id: "demo-career-1",
+    title: "Landed my first developer role thanks to the mentorship program!",
+    content: "I wanted to share a huge win with the community. After struggling with imposter syndrome for months, I connected with a mentor through the 'Careers' section here. Their guidance on my portfolio was invaluable. Two weeks later, I passed my interviews and got an offer! relationships built here really change lives.",
+    category_id: "careers",
+    user_id: "demo-user-5",
+    user_email: "sarah.j@example.com",
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-career-2",
+    title: "Remote vs Office: What's your preference?",
+    content: "I'm currently weighing two job offers. One is fully remote, the other is hybrid. I'd love to hear some perspectives from this community on what you value most in a work environment.",
+    category_id: "careers",
+    user_id: "demo-user-6",
+    user_email: "job.seeker@example.com",
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  // Community
+  {
+    id: "demo-comm-1",
+    title: "Update: Weekend Park Cleanup Results",
+    content: "Thank you to the 25 volunteers from NaviHub who showed up this Saturday! We successfully collected over 40 bags of litter and planted 10 new saplings. It's incredible to see our online connections translate into real-world positive change for our neighborhood.",
+    category_id: "community",
+    user_id: "demo-user-7",
+    user_email: "marcus.w@example.com",
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-comm-2",
+    title: "Annual Block Party Planning",
+    content: "It's that time of year again! We need volunteers for the food committee and music setup. Let's make this year the best one yet.",
+    category_id: "community",
+    user_id: "demo-user-8",
+    user_email: "community.lead@example.com",
+    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  // Wellness
+  {
+    id: "demo-well-1",
+    title: "30 Days of Mindfulness: My Journey initiated here",
+    content: "A month ago, I saw a post here challenging us to practice mindfulness. I was skeptical, but I tried it. Today marks day 30, and my stress levels are down significantly. This platform isn't just about information; it's about better living. Thanks for the push!",
+    category_id: "wellness",
+    user_id: "demo-user-9",
+    user_email: "alex.c@example.com",
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-well-2",
+    title: "Healthy Meal Prep Ideas needed",
+    content: "I'm trying to eat healthier but struggle with time. Does anyone have quick, healthy meal prep recipes they swear by?",
+    category_id: "wellness",
+    user_id: "demo-user-10",
+    user_email: "fit.fan@example.com",
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+const DEMO_REPLIES: Reply[] = [
+  {
+    id: "demo-reply-1",
+    post_id: "demo-sports-1",
+    content: "I joined two weeks ago and I'm already running my fastest 5k. The encouragement from the group is unmatched!",
+    user_id: "demo-user-11",
+    user_email: "lisa.m@example.com",
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-reply-2",
+    post_id: "demo-edu-1",
+    content: "You are a lifesaver, David! The section on data structures was exactly what I was missing. Thank you for giving back.",
+    user_id: "demo-user-12",
+    user_email: "priya.m@example.com",
+    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-reply-3",
+    post_id: "demo-career-1",
+    content: "This is so inspiring to hear! Congratulations Sarah. Do you have any tips for the technical interview part?",
+    user_id: "demo-user-13",
+    user_email: "mike.t@example.com",
+    created_at: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "demo-reply-4",
+    post_id: "demo-comm-1",
+    content: "My kids had a blast helping out! It was a great way to teach them about community service. Count us in for the next one.",
+    user_id: "demo-user-14",
+    user_email: "jessica.b@example.com",
+    created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+     id: "demo-reply-5",
+    post_id: "demo-well-1",
+    content: "I'm on day 12 myself! The support thread really helps keep me accountable. Keep it up, Alex!",
+    user_id: "demo-user-15",
+    user_email: "raj.p@example.com",
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  }
+];
+
 const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -815,13 +966,16 @@ export default function NaviLinkPage() {
 
         if (error) {
           console.error("Error fetching posts:", error);
-          setPosts([]);
+          const demoPosts = DEMO_POSTS.filter(p => p.category_id === selectedCategory.id);
+          setPosts(demoPosts);
         } else {
-          setPosts(data || []);
+          const demoPosts = DEMO_POSTS.filter(p => p.category_id === selectedCategory.id);
+          setPosts([...demoPosts, ...(data || [])]);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
-        setPosts([]);
+        const demoPosts = DEMO_POSTS.filter(p => p.category_id === selectedCategory.id);
+        setPosts(demoPosts);
       }
       setLoading(false);
     };
@@ -836,24 +990,31 @@ export default function NaviLinkPage() {
         return;
       }
 
-      const postIds = posts.map((p) => p.id);
-      try {
-        const { data, error } = await supabase
-          .from("navilink_replies")
-          .select("*")
-          .in("post_id", postIds)
-          .order("created_at", { ascending: true });
+      const allPostIds = posts.map((p) => p.id);
+      const dbPostIds = allPostIds.filter(id => !id.startsWith('demo-'));
+      
+      let dbReplies: Reply[] = [];
 
-        if (error) {
-          console.error("Error fetching replies:", error);
-          setReplies([]);
-        } else {
-          setReplies(data || []);
+      if (dbPostIds.length > 0) {
+        try {
+          const { data, error } = await supabase
+            .from("navilink_replies")
+            .select("*")
+            .in("post_id", dbPostIds)
+            .order("created_at", { ascending: true });
+
+          if (error) {
+            console.error("Error fetching replies:", error);
+          } else {
+            dbReplies = data || [];
+          }
+        } catch (err) {
+          console.error("Unexpected error:", err);
         }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-        setReplies([]);
       }
+
+      const demoReplies = DEMO_REPLIES.filter(r => allPostIds.includes(r.post_id));
+      setReplies([...demoReplies, ...dbReplies]);
     };
 
     fetchReplies();
@@ -1024,6 +1185,9 @@ export default function NaviLinkPage() {
   const handleReply = async (postId: string, content: string): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: "You must be signed in" };
 
+    // Check if replying to a demo post
+    const isDemoPost = DEMO_POSTS.some(p => p.id === postId);
+
     try {
       const moderationResponse = await fetch("/api/moderate", {
         method: "POST",
@@ -1035,6 +1199,20 @@ export default function NaviLinkPage() {
 
       if (!moderationResult.safe) {
         return { success: false, error: moderationResult.message || "Inappropriate content detected" };
+      }
+
+      if (isDemoPost) {
+        // Handle local-only reply for demo posts
+        const newReply: Reply = {
+          id: `local-reply-${Date.now()}`,
+          post_id: postId,
+          content,
+          user_id: user.id,
+          user_email: user.email || 'user',
+          created_at: new Date().toISOString(),
+        };
+        setReplies(prev => [...prev, newReply]);
+        return { success: true };
       }
 
       const { error } = await supabase.from("navilink_replies").insert([
