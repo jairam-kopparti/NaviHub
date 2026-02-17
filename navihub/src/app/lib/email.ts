@@ -1,12 +1,19 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY) 
+  : null;
 
 export async function sendEventConfirmationEmail(
   userEmail: string,
   userName: string,
   eventName: string
 ) {
+  if (!resend) {
+    console.error("Resend API key validation failed: Key is missing");
+    return { success: false };
+  }
+
   try {
     await resend.emails.send({
       from: "NaviHub <onboarding@resend.dev>",
@@ -35,6 +42,11 @@ export async function sendEventCancellationEmail(
   userName: string,
   eventName: string
 ) {
+  if (!resend) {
+    console.error("Resend API key validation failed: Key is missing");
+    return { success: false };
+  }
+
   try {
     await resend.emails.send({
       from: "NaviHub <onboarding@resend.dev>",
