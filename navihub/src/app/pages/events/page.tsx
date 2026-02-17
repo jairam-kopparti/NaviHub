@@ -148,10 +148,43 @@ const EventModal = ({
         await supabase.from("event_signups").delete().eq("user_id", user.id).eq("event_id", event.id);
         await supabase.from("events").update({ spots_taken: Math.max(0, event.spots_taken - 1) }).eq("id", event.id);
         onSignupChange(event.id, false);
+
+        // Send cancellation email
+        try {
+          await fetch("/api/send-event-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userEmail: user.email,
+              userName: user.user_metadata?.full_name || "Community Member",
+              eventName: event.title,
+              type: "cancellation"
+            }),
+          });
+        } catch (emailErr) {
+          console.error("Failed to send cancellation email:", emailErr);
+        }
       } else {
         await supabase.from("event_signups").insert([{ user_id: user.id, event_id: event.id }]);
         await supabase.from("events").update({ spots_taken: event.spots_taken + 1 }).eq("id", event.id);
         onSignupChange(event.id, true);
+
+        // Send confirmation email
+        try {
+          await fetch("/api/send-event-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userEmail: user.email,
+              userName: user.user_metadata?.full_name || "Community Member",
+              eventName: event.title,
+              type: "confirmation"
+            }),
+          });
+        } catch (emailErr) {
+          console.error("Failed to send confirmation email:", emailErr);
+          // Don't block the UI flow for email error, just log it
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update");
@@ -269,7 +302,7 @@ const EventModal = ({
             )}
           </div>
 
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {error && <p className="!text-black text-sm mb-4">{error}</p>}
 
           {event.signup_required && (
             <motion.button
