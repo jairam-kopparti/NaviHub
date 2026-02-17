@@ -1092,6 +1092,12 @@ export default function NaviLinkPage() {
         setModerationError(moderationResult.message || "Your content contains inappropriate material.");
         return false;
       }
+      
+      // OPTIONAL: Warn user about low severity issues (like mild insults) even if allowed
+      if (moderationResult.details && moderationResult.details.flagged && moderationResult.details.allowed) {
+         // You could choose to show a toast or notification here
+         console.warn("Content flagged but allowed:", moderationResult.details.reason);
+      }
 
       const { error } = await supabase.from("navilink_posts").insert([
         {
@@ -1131,6 +1137,11 @@ export default function NaviLinkPage() {
       if (!moderationResult.safe) {
         setModerationError(moderationResult.message || "Your content contains inappropriate material.");
         return false;
+      }
+      
+      // OPTIONAL: Warn user about low severity issues (like mild insults) even if allowed
+      if (moderationResult.details && moderationResult.details.flagged && moderationResult.details.allowed) {
+         console.warn("Content flagged but allowed:", moderationResult.details.reason);
       }
 
       const { error } = await supabase
@@ -1199,6 +1210,10 @@ export default function NaviLinkPage() {
 
       if (!moderationResult.safe) {
         return { success: false, error: moderationResult.message || "Inappropriate content detected" };
+      }
+
+      if (moderationResult.details && moderationResult.details.flagged && moderationResult.details.allowed) {
+         console.warn("Reply flagged but allowed:", moderationResult.details.reason);
       }
 
       if (isDemoPost) {

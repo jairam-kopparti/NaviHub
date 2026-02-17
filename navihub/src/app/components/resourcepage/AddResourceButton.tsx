@@ -65,6 +65,23 @@ export default function AddResourceModal({
         throw new Error("Description must be at least 15 words");
       }
 
+      // Moderation Check
+      const moderationResponse = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `${title}\n${description}` }),
+      });
+
+      const moderationResult = await moderationResponse.json();
+
+      if (!moderationResult.safe) {
+        throw new Error(moderationResult.message || "Content contains inappropriate material");
+      }
+
+      if (moderationResult.details && moderationResult.details.flagged && moderationResult.details.allowed) {
+          console.warn("Resource content flagged but allowed:", moderationResult.details.reason);
+      }
+
       const { error: insertError, data } = await supabase
         .from("resources")
         .insert([

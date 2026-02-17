@@ -19,10 +19,14 @@ export async function POST(req: Request) {
       return NextResponse.json({
         safe: false,
         message: moderation.reason,
+        details: moderation
       })
     }
 
-    return NextResponse.json({ safe: true })
+    return NextResponse.json({ 
+      safe: true,
+      details: moderation
+    })
   } catch (error) {
     console.error('Moderation error:', error)
     return NextResponse.json(
@@ -31,4 +35,3 @@ export async function POST(req: Request) {
     )
   }
 }
-

@@ -27,6 +27,19 @@ export default function AuthCard({ type }: AuthCardProps) {
 
     try {
       if (isSignup) {
+        
+        // Moderate Name (Optional but good for quality)
+        const nameCheck = await fetch("/api/moderate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: name }),
+        });
+        const nameResult = await nameCheck.json();
+        
+        if (!nameResult.safe) {
+            throw new Error(`Invalid name: ${nameResult.message}`);
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
