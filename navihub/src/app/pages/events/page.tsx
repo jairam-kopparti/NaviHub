@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, MapPin, Clock, Users, Search, Filter, ArrowRight } from "lucide-react";
+import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
+import EventChat from "../../components/events/EventChat";
 import "../../styles/events.css";
 
 // Animation variants
@@ -123,11 +124,13 @@ const EventModal = ({
   onClose,
   isSignedUp,
   onSignupChange,
+  onOpenChat,
 }: {
   event: Event;
   onClose: () => void;
   isSignedUp: boolean;
   onSignupChange: (eventId: string, signed: boolean) => void;
+  onOpenChat: (eventId: string) => void;
 }) => {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
@@ -324,6 +327,22 @@ const EventModal = ({
               {loading ? "Processing..." : isFull && !isSignedUp ? "Fully Booked" : isSignedUp ? "Cancel Registration" : "Register Now"}
             </motion.button>
           )}
+
+          {/* Chat Button - only visible for signed-up users */}
+          {isSignedUp && (
+            <motion.button
+              onClick={() => { onClose(); onOpenChat(event.id); }}
+              className="w-full mt-3 py-4 rounded-2xl font-semibold transition-all cursor-pointer bg-[#F5F0EB] text-[#997e67] hover:bg-[#EDE8E3] border border-[#E5E0DB] flex items-center justify-center gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <MessageCircle size={18} />
+              Open Event Chat
+            </motion.button>
+          )}
         </motion.div>
       </motion.div>
     </div>
@@ -342,6 +361,7 @@ export default function CommunityEvents() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [userSignups, setUserSignups] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [chatEventId, setChatEventId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || userLoading) return;
@@ -869,6 +889,13 @@ export default function CommunityEvents() {
         </div>
       </section>
 
+      {/* Event Chat */}
+      <EventChat
+        eventId={chatEventId || ""}
+        isOpen={!!chatEventId}
+        onClose={() => setChatEventId(null)}
+      />
+
       {/* Modal */}
       {selectedEvent && (
         <motion.div
@@ -882,6 +909,7 @@ export default function CommunityEvents() {
             onClose={() => setSelectedEvent(null)}
             isSignedUp={userSignups.includes(selectedEvent.id)}
             onSignupChange={handleSignupChange}
+            onOpenChat={(id) => setChatEventId(id)}
           />
         </motion.div>
       )}
