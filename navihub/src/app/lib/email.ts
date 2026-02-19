@@ -16,7 +16,7 @@ export async function sendEventConfirmationEmail(
 
   try {
     await resend.emails.send({
-      from: "NaviHub <onboarding@resend.dev>",
+      from: "NaviHub <noreply@navihub.org>",
       to: userEmail,
       subject: `You're confirmed for ${eventName}!`,
       html: `
