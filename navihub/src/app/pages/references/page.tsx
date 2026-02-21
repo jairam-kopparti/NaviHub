@@ -149,6 +149,12 @@ export default function ReferencePage() {
                   </a>{" "}
                   - Open source Firebase alternative for database and authentication (v2.89.0)
                 </li>
+                <li>
+                  <a href="https://resend.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Resend
+                  </a>{" "}
+                  - Email API for developers (v6.9.2)
+                </li>
               </ul>
             </div>
 

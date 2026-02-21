@@ -17,12 +17,10 @@ export default function AuthCard({ type }: AuthCardProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    setEmailNotConfirmed(false)
     setLoading(true)
 
     try {
@@ -56,15 +54,14 @@ export default function AuthCard({ type }: AuthCardProps) {
         setPassword("")
         setName("")
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
 
         if (error) {
           if (error.message.includes("Invalid login credentials") || error.message.includes("incorrect")) {
-            setEmailNotConfirmed(true)
-            throw new Error("Email not confirmed or invalid credentials")
+            throw new Error("Invalid email or password")
           }
           throw error
         }
@@ -75,32 +72,11 @@ export default function AuthCard({ type }: AuthCardProps) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred"
       if (errorMessage.includes("Email not confirmed")) {
         setError("Please check your email to confirm your account")
-      } else if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("incorrect")) {
-        setError("Invalid email or password")
+      } else if (errorMessage.includes("Invalid login credentials") || errorMessage.includes("incorrect") || errorMessage === "Invalid email or password") {
+        setError("Email does not exist. Please sign up.")
       } else {
         setError(errorMessage)
       }
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function resendConfirmation() {
-    if (!email) {
-      setError("Please enter your email address")
-      return
-    }
-    setLoading(true)
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-      })
-      if (error) throw error
-      alert("Confirmation email sent! Check your inbox.")
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to resend email"
-      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -168,18 +144,9 @@ export default function AuthCard({ type }: AuthCardProps) {
         </div>
 
         {error && (
-          <p className="text-red-600 text-sm">{error}</p>
-        )}
-
-        {emailNotConfirmed && !isSignup && (
-          <button
-            type="button"
-            onClick={resendConfirmation}
-            disabled={loading}
-            className="text-sm text-blue-600 hover:text-blue-700 underline"
-          >
-            Resend confirmation email
-          </button>
+          <p className={`text-sm ${error === "Email does not exist. Please sign up." ? "!text-black" : "text-red-600"}`}>
+            {error}
+          </p>
         )}
 
         <button
