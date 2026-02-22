@@ -163,6 +163,12 @@ export default function ReferencePage() {
               <h3>UI Components & Others</h3>
               <ul className="references-list">
                 <li>
+                  <a href="https://docs.mapbox.com/mapbox-gl-js/api/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Mapbox GL JS
+                  </a>{" "}
+                  - Interactive, customizable vector maps (v3.18.1)
+                </li>
+                <li>
                   <a href="https://lucide.dev/" target="_blank" rel="noopener noreferrer" className="references-link">
                     Lucide React
                   </a>{" "}

@@ -1,4 +1,6 @@
 
+export type Borough = "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island";
+
 export type Resource = {
   id: string;
   title: string;
@@ -6,7 +8,11 @@ export type Resource = {
   description: string; 
   imageUrl: string;     
   views: number;
-  location?: "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island";
+  location?: Borough;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  resource_type?: string;
   isFavorited?: boolean;
   reviewCount?: number;
   avgRating?: number;

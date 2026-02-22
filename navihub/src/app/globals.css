@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700&family=Petrona:wght@500;700&display=swap');
 @import "tailwindcss";
 
+/* Mapbox GL CSS */
+@import "mapbox-gl/dist/mapbox-gl.css";
+
 :root {
   --bg: #FFDBBB;
   --surface: #FFFFFA;

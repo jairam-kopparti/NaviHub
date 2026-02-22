@@ -275,6 +275,12 @@ export default function ResourceDetailModal({
                   {resource.location}
                 </div>
               )}
+              {resource.address && (
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-emerald-50 text-emerald-700 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium">
+                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  {resource.address}
+                </div>
+              )}
               <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium">
                 <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {resource.views?.toLocaleString() || 0} views

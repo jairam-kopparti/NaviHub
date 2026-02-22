@@ -10,6 +10,8 @@ import { useUser } from "../../lib/useUser";
 import AddResourceModal from "../../components/resourcepage/AddResourceButton";
 import AuthErrorModal from "../../components/resourcepage/AuthErrorPopup";
 import ResourceDetailModal from "../../components/resourcepage/ResourceDetailModal";
+import ResourceMapSection from "../../components/map/ResourceMapSection";
+import FullMapModal from "../../components/map/FullMapModal";
 
 const CATEGORIES = [
   "Nonprofit & Charitable Organizations",
@@ -85,6 +87,7 @@ export default function ResourcesPage() {
   const [judgeOverrideMode, setJudgeOverrideMode] = useState(false);
   const [showFilterScrollIndicator, setShowFilterScrollIndicator] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [showFullMap, setShowFullMap] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     locations: true,
@@ -419,6 +422,13 @@ export default function ResourcesPage() {
           </motion.h1>
         </div>
       </section>
+
+      {/* Resource Map Section */}
+      <ResourceMapSection
+        resources={resources}
+        onResourceClick={handleResourceCardClick}
+        onOpenFullMap={() => setShowFullMap(true)}
+      />
 
       {/* Mobile Filter Button */}
       <motion.div 
@@ -1043,6 +1053,17 @@ export default function ResourcesPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Full Map Modal */}
+      <FullMapModal
+        isOpen={showFullMap}
+        onClose={() => setShowFullMap(false)}
+        resources={resources}
+        onResourceClick={(resource) => {
+          setShowFullMap(false);
+          handleResourceCardClick(resource);
+        }}
+      />
     </div>
   );
 }
