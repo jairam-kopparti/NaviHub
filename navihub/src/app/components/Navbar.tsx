@@ -28,6 +28,7 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Resources', href: '/pages/resources' },
     { name: 'Events', href: '/pages/events' },
+    { name: 'News', href: '/pages/news' },
     { name: 'NaviLink', href: '/pages/NaviLink' },
     { name: 'About', href: '/pages/about' },
     { name: 'Reference Page', href: '/pages/references' },
