@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Chatbot from "./components/Chatbot"
 import ScrollProgressBar from "./components/ScrollProgressBar";
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
         <ScrollProgressBar />
         <Navbar />
         {children}
+        <Chatbot />
         <Footer />
       </body>
     </html>
