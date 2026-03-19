@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, MessageCircle } from "lucide-react";
+import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
@@ -363,6 +363,13 @@ export default function CommunityEvents() {
   const [showFilters, setShowFilters] = useState(false);
   const [chatEventId, setChatEventId] = useState<string | null>(null);
 
+  // Pagination new
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
+  
+  // (Effect removed)
+
+
   useEffect(() => {
     if (!user || userLoading) return;
     const fetchUserSignups = async () => {
@@ -389,6 +396,9 @@ export default function CommunityEvents() {
     const q = searchTerm.toLowerCase();
     return e.title.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q) || e.location_name?.toLowerCase().includes(q);
   });
+
+  const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE);
+  const paginatedEvents = filteredEvents.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const upcomingEvents = filteredEvents.slice(0, 3);
   const myEvents = filteredEvents.filter((e) => userSignups.includes(e.id));
@@ -466,7 +476,7 @@ export default function CommunityEvents() {
                   type="text"
                   placeholder="Search events..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
                   className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
                 />
                 <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
@@ -513,7 +523,7 @@ export default function CommunityEvents() {
                       <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Category</p>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => setActiveCategory("all")}
+                          onClick={() => { setActiveCategory("all"); setPage(0); }}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                             activeCategory === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                           }`}
@@ -523,7 +533,7 @@ export default function CommunityEvents() {
                         {CATEGORIES.map((cat) => (
                           <button
                             key={cat}
-                            onClick={() => setActiveCategory(cat)}
+                            onClick={() => { setActiveCategory(cat); setPage(0); }}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                               activeCategory === cat ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                             }`}
@@ -538,7 +548,7 @@ export default function CommunityEvents() {
                       <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">Location</p>
                       <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() => setActiveBorough("all")}
+                          onClick={() => { setActiveBorough("all"); setPage(0); }}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                             activeBorough === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                           }`}
@@ -548,7 +558,7 @@ export default function CommunityEvents() {
                         {BOROUGHS.map((b) => (
                           <button
                             key={b}
-                            onClick={() => setActiveBorough(b)}
+                            onClick={() => { setActiveBorough(b); setPage(0); }}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                               activeBorough === b ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                             }`}
@@ -564,6 +574,7 @@ export default function CommunityEvents() {
                         onClick={() => {
                           setActiveCategory("all");
                           setActiveBorough("all");
+                          setPage(0);
                         }}
                         className="w-full py-4 rounded-xl border border-white/10 text-white font-medium hover:bg-white/5 transition mb-3 cursor-pointer"
                       >
@@ -805,14 +816,16 @@ export default function CommunityEvents() {
               <p className="!text-gray-500 text-sm sm:text-base">Try adjusting your search or filters</p>
             </motion.div>
           ) : (
+            <>
             <motion.div 
+              key={page}
               className="space-y-3 sm:space-y-4"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
               variants={staggerContainer}
             >
-              {filteredEvents.map((event) => {
+              {paginatedEvents.map((event) => {
                 const isSignedUp = userSignups.includes(event.id);
                 return (
                   <motion.div
@@ -885,6 +898,42 @@ export default function CommunityEvents() {
                 );
               })}
             </motion.div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8 sm:mt-12">
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className={`p-3 rounded-full transition-all ${
+                    page === 0 
+                      ? "text-gray-300 cursor-not-allowed bg-gray-50" 
+                      : "text-[#997e67] hover:bg-[#997e67] hover:text-white bg-white border border-[#997e67]"
+                  }`}
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                
+                <span className="text-gray-600 font-medium">
+                  Page {page + 1} of {totalPages}
+                </span>
+
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page === totalPages - 1}
+                  className={`p-3 rounded-full transition-all ${
+                    page === totalPages - 1 
+                      ? "text-gray-300 cursor-not-allowed bg-gray-50" 
+                      : "text-[#997e67] hover:bg-[#997e67] hover:text-white bg-white border border-[#997e67]"
+                  }`}
+                  aria-label="Next page"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
+            </>
           )}
         </div>
       </section>
