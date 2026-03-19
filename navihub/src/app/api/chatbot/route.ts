@@ -9,27 +9,25 @@ const responseLog = (msg:string) =>
     `[${new Date().toISOString()}] ${msg}\n`,
   );
 
-export async function GET(request:NextRequest,{params}:{params:{message:string}}) {
+export async function POST(request:NextRequest) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-    const {searchParams} = new URL(request.url)
-    const message = searchParams.get("message")
+    let message = await request.json()
     let text
     if(message){
+    message+="Avoid returning special characters. Be as brief as possible without withholding any key details or information. Wherever there should be an enter or newline, output \n, the escape sequence for a newline, instead of creating an actual line break. When possible format with bullet points(dashes) under headings with colons next to them. DO NOT EVER INCLUDE BAD LANGUAGE in your responses. Keep a friendly and realistically polite tone. Don't go overboard. Make sure your response is grammatically correct."
     const result = await model.generateContent(message);
-
     const response = await result.response;
     text = response.text();
     } else{
       text="I don't understand the question!"
     }
-    
     responseLog(text);
     return NextResponse.json(text)
   } catch (error:unknown) {
     if(error instanceof Error){
       console.error("Error communicating with Gemini:", error);
-      return NextResponse.json(500)
+      return NextResponse.json(`Error communicating with gemini, please try again.`)
     }
   }
 }
