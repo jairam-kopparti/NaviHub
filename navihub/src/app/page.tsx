@@ -291,7 +291,7 @@ export default function Home() {
           marginBottom: "-100vh",
         }}
       >
-        {/* ================= SECTION 1 ================= */}
+        {/* ============= SECTION 1 =============== */}
         <section ref={section1Ref} className="min-h-screen bg-(--bg) flex items-center py-12 sm:py-24 relative z-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
