@@ -299,7 +299,7 @@ export default function Home() {
                 NaviHub is dedicated to helping residents easily find local support
                 and services. We bring together trusted non-profits, community
                 programs, and organizations in one place, making it simpler
-                for New Yorkers to get the help they need.
+                for New Yorkers to get the help they need
               </p>
 
               <div className="rounded-2xl overflow-hidden">
