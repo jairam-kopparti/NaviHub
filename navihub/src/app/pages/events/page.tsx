@@ -382,11 +382,36 @@ export default function CommunityEvents() {
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
-      let query = supabase.from("events").select("*").order("event_date", { ascending: true });
+      
+      const now = new Date();
+      // Format as YYYY-MM-DD using local time
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      let query = supabase.from("events").select("*").gte("event_date", todayStr).order("event_date", { ascending: true });
+      
       if (activeCategory !== "all") query = query.eq("category", activeCategory);
       if (activeBorough !== "all") query = query.eq("location_name", activeBorough);
+      
       const { data } = await query;
-      setEvents((data as Event[]) || []);
+      
+      let upcomingEvents = (data as Event[]) || [];
+
+      // Filter out events that ended earlier today
+      upcomingEvents = upcomingEvents.filter(event => {
+        if (event.event_date > todayStr) return true;
+        if (event.event_date === todayStr && event.end_time) {
+           const [h, m] = event.end_time.split(":");
+           const endMinutes = parseInt(h, 10) * 60 + parseInt(m, 10);
+           return endMinutes >= currentMinutes;
+        }
+        return true;
+      });
+
+      setEvents(upcomingEvents);
       setLoading(false);
     };
     fetchEvents();
