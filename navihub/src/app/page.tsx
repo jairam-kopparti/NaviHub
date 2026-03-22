@@ -646,28 +646,28 @@ export default function Home() {
   const quotes = [
     {
       id: 1,
-      text: "\u201cFrom the moment I landed on this website, it felt like a true home base for the community. Everything is organized in a way that makes sense, and I never feel lost while browsing. The layout is clean, the information is clear, and it genuinely feels like the site was built with real people in mind.\u201d",
+      text: "“This site feels like a true home base. Everything is clear, organized, and built with real people in mind.”",
       name: "Alex Rivera",
       image: "/person1.jpg",
       rating: 5,
     },
     {
       id: 2,
-      text: "\u201cWhat stands out most about this community resource hub is how much effort clearly went into making resources easy to find and understand. The site makes the process simple and welcoming — it turns what could be overwhelming information into something approachable and useful.\u201d",
+      text: "“Finding resources has never been simpler. It turns overwhelming information into something approachable and straightforward.”",
       name: "Jordan Lee",
       image: "/person2.jpg",
       rating: 4,
     },
     {
       id: 3,
-      text: "\u201cThis website does an amazing job of connecting people to opportunities and support within the community. It feels less like a random list of links and more like a guided experience that encourages people to get involved and actually use what is offered.\u201d",
+      text: "“More than just a list of links, it’s a guided experience that genuinely connects you to support and opportunities.”",
       name: "Emily Chen",
       image: "/person3.jpg",
       rating: 5,
     },
     {
       id: 4,
-      text: "\u201cWhat I appreciate most about this site is that it feels reliable and thoughtfully built. The structure, design, and content all work together to highlight events, organizations, and services in a way that feels trustworthy and up to date.\u201d",
+      text: "“A deeply reliable platform. It highlights community events and services in a way that feels trustworthy and very accessible.”",
       name: "Michael Torres",
       image: "/person4.jpg",
       rating: 4.5,
@@ -815,11 +815,11 @@ export default function Home() {
                   onClick={() => setActiveQuoteId(quote.id)}
                   className={`rounded-full overflow-hidden transition-all duration-500 cursor-pointer ${
                     isActive
-                      ? "w-16 h-16 border-2 border-[#997e67]"
-                      : "w-10 h-10 border border-[#1F1F1F]/20 grayscale opacity-50 hover:opacity-100"
+                      ? "w-20 h-20 border-2 border-[#997e67]"
+                      : "w-14 h-14 border border-[#1F1F1F]/20 grayscale opacity-50 hover:opacity-100"
                   }`}
                 >
-                  <Image src={quote.image} alt={quote.name} width={64} height={64} className="w-full h-full object-cover" />
+                  <Image src={quote.image} alt={quote.name} width={80} height={80} className="w-full h-full object-cover" />
                 </button>
               );
             })}

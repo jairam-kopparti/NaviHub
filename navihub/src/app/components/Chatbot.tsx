@@ -72,6 +72,12 @@ export default function Chatbot() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('open-chatbot', handleOpen);
+    return () => window.removeEventListener('open-chatbot', handleOpen);
+  }, []);
+
   const addMessage = (content: string, from: From) => {
     setMessages(prev => [...prev, {
       id: `${Date.now()}-${Math.random()}`,
