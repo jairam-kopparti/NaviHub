@@ -1,74 +1,604 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star, BookOpen, Calendar, MessageCircle, Users } from "lucide-react";
+import { Star } from "lucide-react";
 import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
 import { getTopResources } from "./lib/getTopResources";
 import { Resource } from "./lib/types";
 import "./styles/home.css";
 
-function Stat({
-  value,
-  suffix = "",
-  label,
-  start = false,
-}: {
-  value: number;
-  suffix?: string;
-  label: string;
-  start?: boolean;
-}) {
-  const [count, setCount] = useState(0);
-  const startedRef = useRef(false);
+// ─── Aupale-inspired Mission Section ─────────────────────────────────────────
+function HomeMissionSection() {
+  const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (!start || startedRef.current) return;
-    startedRef.current = true;
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      const subsections = gsap.utils.toArray<HTMLElement>(".ms-sub");
 
-    let current = 0;
-    const duration = 1200;
-    const step = 16;
-    const increment = value / (duration / step);
+      subsections.forEach((sub) => {
+        // ── Line-by-line text reveals (Aupale's signature) ──
+        sub.querySelectorAll<HTMLElement>(".ms-line-inner").forEach((inner, i) => {
+          gsap.from(inner, {
+            yPercent: 120,
+            duration: 1.4,
+            ease: "expo.out",
+            delay: i * 0.1,
+            scrollTrigger: {
+              trigger: sub,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          });
+        });
 
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setCount(value);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, step);
+        // ── Tag / label fade ──
+        sub.querySelectorAll(".ms-tag").forEach((tag) => {
+          gsap.from(tag, {
+            opacity: 0,
+            y: 15,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: sub,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          });
+        });
 
-    return () => clearInterval(timer);
-  }, [start, value]);
+        // ── Body text fade up ──
+        sub.querySelectorAll(".ms-body").forEach((body) => {
+          gsap.from(body, {
+            y: 35,
+            opacity: 0,
+            duration: 1.4,
+            ease: "power3.out",
+            delay: 0.35,
+            scrollTrigger: {
+              trigger: sub,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          });
+        });
+
+        // ── Rule scales from left ──
+        sub.querySelectorAll(".ms-rule").forEach((rule) => {
+          gsap.from(rule, {
+            scaleX: 0,
+            duration: 1.6,
+            ease: "expo.out",
+            transformOrigin: "left center",
+            scrollTrigger: {
+              trigger: sub,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          });
+        });
+
+        // ── Image: slide in from side + inner parallax ──
+        sub.querySelectorAll<HTMLElement>(".ms-img-outer").forEach((outer) => {
+          const fromLeft = outer.dataset.from === "left";
+          gsap.from(outer, {
+            x: fromLeft ? -50 : 50,
+            y: 30,
+            opacity: 0,
+            duration: 1.8,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: sub,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          });
+
+          const inner = outer.querySelector<HTMLElement>(".ms-img-inner");
+          if (inner) {
+            gsap.fromTo(
+              inner,
+              { yPercent: 8, scale: 1.12 },
+              {
+                yPercent: -8,
+                scale: 1.12,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: outer,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.6,
+                },
+              }
+            );
+          }
+        });
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <div>
-      <div className="h-px w-full bg-(--primary-text)/20 mb-4" />
-      <div className="text-4xl font-semibold text-(--primary-text)">
-        {count.toLocaleString()}
-        {suffix}
+    <section ref={sectionRef} className="relative w-full overflow-hidden">
+
+      {/* ════════════════════════════
+          SUB 1 — bg: #FFDBBB (peach)
+          Text Left · Image Right
+          ════════════════════════════ */}
+      <div className="ms-sub relative bg-[#FFDBBB]">
+        {/* Subtle contour lines */}
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none select-none"
+          viewBox="0 0 1440 800"
+          preserveAspectRatio="xMidYMid slice"
+          fill="none"
+          aria-hidden="true"
+        >
+          <g strokeWidth="0.8" stroke="rgba(31,31,31,0.07)">
+            <path d="M-60,200 C20,120 140,100 200,180 C260,260 240,360 160,400 C80,440 -20,400 -60,340Z" />
+            <path d="M-120,178 C0,68 180,38 260,148 C340,258 310,400 200,452 C90,504 -40,452 -90,370Z" />
+            <path d="M1200,100 C1320,60 1480,80 1520,180 C1560,280 1490,400 1380,430 C1270,460 1150,310Z" />
+          </g>
+        </svg>
+
+        <div className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 pt-28 pb-20 lg:pt-40 lg:pb-32">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1px_1fr] gap-0 items-start">
+
+            {/* Left: Text */}
+            <div className="lg:pr-16 xl:pr-24 flex flex-col gap-5 lg:pt-10">
+              <span className="ms-tag block text-[10px] uppercase tracking-[0.32em] !text-[#1F1F1F]/50 font-medium mb-2">
+                Our Philosophy
+              </span>
+
+              <h2 className="ms-heading !text-[#1F1F1F] font-heading">
+                <span className="ms-line-wrap"><span className="ms-line-inner">We bring communities</span></span>
+                <span className="ms-line-wrap"><span className="ms-line-inner"><em>closer,</em> focusing on</span></span>
+                <span className="ms-line-wrap"><span className="ms-line-inner">what truly <em>matters.</em></span></span>
+              </h2>
+
+              <div className="ms-rule h-px w-10 bg-[#1F1F1F]/20 my-3" />
+
+              <p className="ms-body text-[11px] leading-[1.9] !text-[#1F1F1F]/60 uppercase tracking-[0.14em] max-w-xs">
+                No additives. No artifice. In a world of shortcuts, we choose restraint.
+                Fewer, better elements handled with care.
+              </p>
+
+              {/* Counter row */}
+              <div className="ms-body flex gap-10 mt-6 pt-6 border-t border-[#1F1F1F]/10">
+                {[["9+", "Categories"], ["90+", "Resources"], ["5", "Boroughs"]].map(([num, label]) => (
+                  <div key={label}>
+                    <p className="text-2xl font-heading font-semibold !text-[#1F1F1F]">{num}</p>
+                    <p className="text-[9px] uppercase tracking-[0.2em] !text-[#1F1F1F]/45 mt-0.5">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Vertical divider */}
+            <div className="hidden lg:block w-px bg-[#1F1F1F]/10 self-stretch mx-4" />
+
+            {/* Right: Image */}
+            <div className="ms-img-outer lg:pl-16 xl:pl-24 mt-14 lg:mt-0" data-from="right">
+              <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
+                <Image
+                  src="/home-mission-resources.jpg"
+                  alt="Community Resources"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+              <p className="mt-4 text-[9px] uppercase tracking-[0.28em] !text-[#1F1F1F]/40">
+                Community Resources Hub
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="mt-1 text-sm text-(--secondary-text)">
-        {label}
+
+      {/* ════════════════════════════
+          SUB 2 — bg: #FFFFFA (cream)
+          Image Left · Text Right
+          ════════════════════════════ */}
+      <div className="ms-sub relative bg-[#FFFFFA] border-t border-[#1F1F1F]/6">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-20 lg:py-32">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-28 items-center">
+
+            {/* Left: Image */}
+            <div className="ms-img-outer order-2 lg:order-1" data-from="left">
+              <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "4/3" }}>
+                <Image
+                  src="/home-mission-events.jpg"
+                  alt="Community Events"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+              <p className="mt-4 text-[9px] uppercase tracking-[0.28em] !text-black/40">
+                Local Events &amp; Programs
+              </p>
+            </div>
+
+            {/* Right: Text */}
+            <div className="flex flex-col gap-5 order-1 lg:order-2">
+              <span className="ms-tag block text-[10px] uppercase tracking-[0.32em] !text-black/45 font-medium mb-2">
+                What We Do
+              </span>
+
+              <h2 className="ms-heading !text-black font-heading">
+                <span className="ms-line-wrap"><span className="ms-line-inner">When our community</span></span>
+                <span className="ms-line-wrap"><span className="ms-line-inner">needs something,</span></span>
+                <span className="ms-line-wrap"><span className="ms-line-inner">we don&apos;t overlook it,</span></span>
+                <span className="ms-line-wrap"><span className="ms-line-inner">we <em>build</em> it.</span></span>
+              </h2>
+
+              <div className="ms-rule h-px w-10 bg-black/20 my-3" />
+
+              <p className="ms-body text-[11px] leading-[1.9] !text-black/55 uppercase tracking-[0.14em] max-w-xs">
+                It&apos;s not about complex systems. It&apos;s about simplifying access,
+                removing what isn&apos;t necessary, and letting the community thrive.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* ════════════════════════════
+          SUB 3 — bg: #FFDBBB (peach)
+          Two images · Closing text
+          ════════════════════════════ */}
+      <div className="ms-sub relative bg-[#FFDBBB] border-t border-[#1F1F1F]/6">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-20 lg:py-32">
+
+          {/* Two-image editorial row */}
+          <div className="grid grid-cols-2 lg:grid-cols-[5fr_3fr_5fr] gap-6 lg:gap-10 items-end mb-20 lg:mb-28">
+
+            {/* Image A */}
+            <div className="ms-img-outer" data-from="left">
+              <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "2/3" }}>
+                <Image
+                  src="/home-mission-navilink.jpg"
+                  alt="NaviLink Community Forum"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 30vw"
+                />
+              </div>
+            </div>
+
+            {/* Center label — desktop only */}
+            <div className="hidden lg:flex flex-col items-center justify-end pb-6 gap-3">
+              <div className="ms-rule h-px w-full bg-[#1F1F1F]/12" />
+              <p className="text-center text-[8px] uppercase tracking-[0.3em] !text-[#1F1F1F]/35 leading-loose">
+                NaviHub<br />New York City<br />Est. 2025
+              </p>
+            </div>
+
+            {/* Image B — offset lower */}
+            <div className="ms-img-outer mt-8 lg:mt-0" data-from="right">
+              <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "2/3" }}>
+                <Image
+                  src="/home-mission-news.jpg"
+                  alt="NYC News"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 30vw"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Closing statement */}
+          <div className="flex flex-col items-center text-center gap-6">
+            <div className="ms-rule w-10 h-px bg-[#1F1F1F]/20" />
+            <p className="ms-body text-[11px] leading-[1.9] !text-[#1F1F1F]/60 uppercase tracking-[0.14em] max-w-xl">
+              In a world of overwhelming information, we choose clarity. No endless searching.
+              No hidden agendas. Just genuine connections built with care.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
-} 
+}
+
+// ─── Dotted concentric circles (arch interior) ────────────────────────────────
+function ArchDots() {
+  const radii = [55, 100, 145, 190, 235, 280, 325, 370, 415];
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      viewBox="0 0 320 700"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
+      {radii.map((r) => (
+        <circle
+          key={r}
+          cx="160"
+          cy="300"
+          r={r}
+          fill="none"
+          stroke="rgba(31,31,31,0.07)"
+          strokeWidth="1"
+          strokeDasharray="2.5 8"
+        />
+      ))}
+    </svg>
+  );
+}
+
+// ─── Background rings (right side of arch section) ───────────────────────────
+function BgRings() {
+  const rings = [80, 130, 180, 230, 280, 330, 380, 430, 480, 530];
+  return (
+    <svg
+      className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none select-none"
+      style={{ width: "42vw", height: "90vh", opacity: 0.2 }}
+      viewBox="0 0 600 800"
+      fill="none"
+      aria-hidden
+    >
+      {rings.map((r) => (
+        <ellipse
+          key={r}
+          cx="580"
+          cy="400"
+          rx={r}
+          ry={r * 0.75}
+          stroke="#1F1F1F"
+          opacity="0.15"
+          strokeWidth="0.8"
+        />
+      ))}
+    </svg>
+  );
+}
+
+// ─── Arch Section — bg: #FFFFFA (cream), arch pill: #FFDBBB ──────────────────
+function HomeArchSection() {
+  const outerRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const archTextRef = useRef<HTMLDivElement>(null);
+  const photoLeftRef = useRef<HTMLDivElement>(null);
+  const photoRightTopRef = useRef<HTMLDivElement>(null);
+  const photoRightBotRef = useRef<HTMLDivElement>(null);
+  const photoLeftBotRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const outer = outerRef.current;
+      if (!outer) return;
+
+      ScrollTrigger.create({
+        trigger: outer,
+        start: "top top",
+        end: "bottom bottom",
+        pin: stageRef.current,
+        pinSpacing: false,
+      });
+
+      // Arch text line reveals
+      if (archTextRef.current) {
+        const lines = archTextRef.current.querySelectorAll(".arch-line-inner");
+        gsap.from(lines, {
+          yPercent: 120,
+          rotate: 2,
+          stagger: 0.1,
+          duration: 1.4,
+          opacity: 0,
+          ease: "expo.out",
+          scrollTrigger: {
+            trigger: outer,
+            start: "top top",
+            end: "8% top",
+            toggleActions: "play none none none",
+          },
+        });
+      }
+
+      // Photo LEFT — enters from bottom with CCW rotation that normalises
+      gsap.fromTo(
+        photoLeftRef.current,
+        { y: "65vh", opacity: 0, rotate: -8, scale: 0.95 },
+        {
+          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "3% top", end: "30% top", scrub: 1.8 },
+        }
+      );
+      gsap.to(photoLeftRef.current, {
+        y: "-30vh", opacity: 0, rotate: 5, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "65% top", end: "85% top", scrub: 1.8 },
+      });
+
+      // Photo RIGHT TOP — enters from upper-right
+      gsap.fromTo(
+        photoRightTopRef.current,
+        { y: "-40vh", x: "12vw", opacity: 0, rotate: 10, scale: 0.95 },
+        {
+          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "6% top", end: "35% top", scrub: 1.8 },
+        }
+      );
+      gsap.to(photoRightTopRef.current, {
+        y: "-45vh", opacity: 0, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "32% top", end: "60% top", scrub: 1.8 },
+      });
+
+      // Photo LEFT BOTTOM
+      gsap.fromTo(
+        photoLeftBotRef.current,
+        { y: "55vh", opacity: 0, rotate: 6, scale: 0.95 },
+        {
+          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "35% top", end: "60% top", scrub: 1.8 },
+        }
+      );
+      gsap.to(photoLeftBotRef.current, {
+        y: "-35vh", opacity: 0, rotate: -4, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "72% top", end: "92% top", scrub: 1.8 },
+      });
+
+      // Photo RIGHT BOTTOM
+      gsap.fromTo(
+        photoRightBotRef.current,
+        { y: "60vh", x: "8vw", opacity: 0, rotate: -8, scale: 0.95 },
+        {
+          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "48% top", end: "75% top", scrub: 1.8 },
+        }
+      );
+      gsap.to(photoRightBotRef.current, {
+        y: "-28vh", opacity: 0, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "82% top", end: "96% top", scrub: 1 },
+      });
+    }, outerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section ref={outerRef} style={{ height: "280vh", backgroundColor: "#FFFFFA" }}>
+      <div
+        ref={stageRef}
+        className="relative overflow-hidden"
+        style={{ height: "100vh", backgroundColor: "#FFFFFA" }}
+      >
+        {/* Noise texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")",
+          }}
+        />
+        <BgRings />
+
+        {/* ── Central arch pill — filled with peach (#FFDBBB) ── */}
+        <div
+          className="absolute left-1/2 top-1/2 border border-[#1F1F1F]/8 shadow-sm"
+          style={{
+            transform: "translate(-50%, -48%)",
+            width: "clamp(240px, 21vw, 300px)",
+            height: "clamp(460px, 86vh, 740px)",
+            borderRadius: "9999px",
+            backgroundColor: "#FFDBBB",
+            zIndex: 2,
+            overflow: "hidden",
+          }}
+        >
+          <ArchDots />
+          <div
+            ref={archTextRef}
+            className="absolute inset-0 flex items-center justify-center px-7"
+            style={{ paddingTop: "8%" }}
+          >
+            <h2
+              className="text-center leading-[1.12] !text-[#1F1F1F]"
+              style={{ fontFamily: "var(--font-heading)", fontWeight: 400, fontSize: "clamp(18px, 2.2vw, 30px)" }}
+            >
+              {[
+                "When our",
+                <><em key="c" style={{ fontStyle: "italic", fontWeight: 500 }}>community</em></>,
+                "needs something,",
+                "we don\u2019t",
+                <><em key="o" style={{ fontStyle: "italic", fontWeight: 500 }}>overlook</em> it,</>,
+                <>we <em key="b" style={{ fontStyle: "italic", fontWeight: 500 }}>build</em> it.</>,
+              ].map((line, i) => (
+                <span key={i} className="arch-line-wrap block overflow-hidden">
+                  <span className="arch-line-inner block">{line}</span>
+                </span>
+              ))}
+            </h2>
+          </div>
+        </div>
+
+        {/* Photo: Left center */}
+        <div
+          ref={photoLeftRef}
+          className="arch-photo"
+          style={{ left: "clamp(12px, 6vw, 100px)", bottom: "clamp(70px, 14vh, 150px)", width: "clamp(160px, 15vw, 220px)", zIndex: 3 }}
+        >
+          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
+            <div className="relative w-full h-full">
+              <Image src="/home-arch-about.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
+            </div>
+          </div>
+          <p className="arch-photo-caption !text-[#1F1F1F]/40">
+            NaviHub exists not to reinvent, but to respect.
+          </p>
+        </div>
+
+        {/* Photo: Right top */}
+        <div
+          ref={photoRightTopRef}
+          className="arch-photo"
+          style={{ right: "clamp(12px, 6vw, 100px)", top: "clamp(30px, 6vh, 70px)", width: "clamp(150px, 14vw, 210px)", zIndex: 3 }}
+        >
+          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
+            <div className="relative w-full h-full">
+              <Image src="/home-arch-resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
+            </div>
+          </div>
+          <p className="arch-photo-caption !text-[#1F1F1F]/40">
+            Connections are not forced. They are fostered.
+          </p>
+        </div>
+
+        {/* Photo: Left top (second entrance) */}
+        <div
+          ref={photoLeftBotRef}
+          className="arch-photo"
+          style={{ left: "clamp(12px, 9vw, 140px)", top: "clamp(30px, 6vh, 60px)", width: "clamp(120px, 11vw, 170px)", zIndex: 3 }}
+        >
+          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
+            <div className="relative w-full h-full">
+              <Image src="/home-arch-events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
+            </div>
+          </div>
+        </div>
+
+        {/* Photo: Right bottom */}
+        <div
+          ref={photoRightBotRef}
+          className="arch-photo"
+          style={{ right: "clamp(12px, 9vw, 150px)", bottom: "clamp(20px, 4vh, 55px)", width: "clamp(140px, 13vw, 200px)", zIndex: 3 }}
+        >
+          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
+            <div className="relative w-full h-full">
+              <Image src="/home-arch-navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
-  const line1 = "Building Bridges,";
-  const line2 = "Not Walls";
-
   const [topResources, setTopResources] = useState<Resource[]>([]);
   const heroRef = useRef<HTMLElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const section1Ref = useRef<HTMLElement | null>(null);
-  const [statsStart, setStatsStart] = useState(false);
+
+  useLayoutEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const heroCtx = gsap.context(() => {
+      gsap.to(".hero-video", {
+        yPercent: 30,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: true },
+      });
+    });
+    return () => heroCtx.revert();
+  }, []);
+
   const [slideProgress, setSlideProgress] = useState(0);
 
   useEffect(() => {
@@ -80,53 +610,26 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const el = section1Ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setStatsStart(true);
-          }
-        });
-      },
-      { threshold: 0.4 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     const heroEl = heroRef.current;
     if (!heroEl) return;
-
     let ticking = false;
-
     const update = () => {
       if (!heroRef.current) return;
       const rect = heroRef.current.getBoundingClientRect();
       const height = rect.height || window.innerHeight;
-      const bottom = rect.bottom;
-
-      let progress = 1 - bottom / height;
+      let progress = 1 - rect.bottom / height;
       progress = Math.min(Math.max(progress, 0), 1);
-
       setSlideProgress(progress);
       ticking = false;
     };
-
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(update);
     };
-
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", update);
-
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", update);
@@ -134,289 +637,164 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.text = "var stacked = false;";
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
-  useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       (window as unknown as { stacked?: boolean }).stacked = slideProgress > 0;
-    } catch {
-    }
+    } catch {}
   }, [slideProgress]);
 
   const quotes = [
     {
       id: 1,
-      text: "“From the moment I landed on this website, it felt like a true home base for the community. Everything is organized in a way that makes sense, from nonprofits to support services to local programs, and I never feel lost while browsing. The layout is clean, the information is clear, and it genuinely feels like the site was built with real people in mind, not just to look nice but to actually help.”",
+      text: "“This site feels like a true home base. Everything is clear, organized, and built with real people in mind.”",
       name: "Alex Rivera",
       image: "/person1.jpg",
-      rating: 5
+      rating: 5,
     },
     {
       id: 2,
-      text: "“What stands out most about this community resource hub is how much effort clearly went into making resources easy to find and understand. Whether I am looking for help, trying to learn about organizations in the area, or just exploring what is available nearby, the site makes the process simple and welcoming. It turns what could be overwhelming information into something approachable and useful.”",
+      text: "“Finding resources has never been simpler. It turns overwhelming information into something approachable and straightforward.”",
       name: "Jordan Lee",
       image: "/person2.jpg",
-      rating: 4
+      rating: 4,
     },
     {
       id: 3,
-      text: "“This website does an amazing job of connecting people to opportunities and support within the community. The way resources are grouped, explained, and presented shows that the creators deeply understand what residents need. It feels less like a random list of links and more like a guided experience that encourages people to get involved and actually use what is offered.”",
+      text: "“More than just a list of links, it’s a guided experience that genuinely connects you to support and opportunities.”",
       name: "Emily Chen",
       image: "/person3.jpg",
-      rating: 5
+      rating: 5,
     },
     {
       id: 4,
-      text: "“What I appreciate most about this site is that it feels reliable and thoughtfully built. The structure, design, and content all work together to highlight events, organizations, and services in a way that feels trustworthy and up to date. It gives the impression of a living hub that grows with the community and truly supports the goal of bringing people together through accessible information.”",
+      text: "“A deeply reliable platform. It highlights community events and services in a way that feels trustworthy and very accessible.”",
       name: "Michael Torres",
       image: "/person4.jpg",
-      rating: 4.5
-    }
+      rating: 4.5,
+    },
   ];
 
   const [activeQuoteId, setActiveQuoteId] = useState(1);
-  const activeQuote = quotes.find(q => q.id === activeQuoteId) || quotes[0];
+  const activeQuote = quotes.find((q) => q.id === activeQuoteId) || quotes[0];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveQuoteId((prevId) => {
-        const nextId = prevId === quotes.length ? 1 : prevId + 1;
-        return nextId;
-      });
+      setActiveQuoteId((prevId) => (prevId === quotes.length ? 1 : prevId + 1));
     }, 5000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [quotes.length]);
 
   return (
-    <>
-      {/* ================= HERO ================= */}
+    <main className="font-sans overflow-x-hidden w-full">
 
-      <main ref={heroRef} className="relative min-h-screen overflow-hidden bg-black">
-        <Image
-          src="/hero.jpg"
-          alt="Hero"
-          fill
-          className="object-cover opacity-65"
-          priority
-        />
-        <div className="absolute inset-0" />
-
-        <div className="relative z-10 flex flex-col justify-center min-h-screen px-4 sm:px-8 md:px-12">
+      {/* ═══════════ HERO — black bg, white text ═══════════ */}
+      <section
+        ref={heroRef}
+        className="hero-section relative w-full h-screen overflow-hidden bg-black flex items-center justify-center"
+      >
+        <div className="absolute inset-0 z-0 hero-video scale-110 w-full h-full">
+          <div className="absolute inset-0 bg-black/60 z-10" />
+          <Image src="/home-hero-bg.jpg" alt="Hero Background" fill className="object-cover opacity-80" priority />
+        </div>
+        <div className="relative z-30 text-center flex flex-col items-center justify-center px-4 w-full h-full pointer-events-auto">
           <h1
-            className="text-(--thirdary-text) font-bold leading-[1.05] max-w-3xl text-[clamp(40px,10vw,120px)]"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="!text-white font-bold leading-none tracking-tight uppercase max-w-5xl"
+            style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(40px, 8vw, 120px)", perspective: "1000px" }}
           >
-            <span className="block overflow-hidden leading-[1.2]">
-              {line1.split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="inline-block opacity-0 animate-letter"
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
-            </span>
-
-            <span className="block overflow-hidden mt-2">
-              {line2.split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="inline-block opacity-0 animate-letter"
-                  style={{
-                    animationDelay: `${
-                      line1.length * 0.05 + i * 0.05
-                    }s`,
-                  }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
-            </span>
+            <motion.span
+              className="block"
+              initial={{ y: 80, opacity: 0, rotateX: 15, filter: "blur(12px)" }}
+              animate={{ y: 0, opacity: 1, rotateX: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+            >
+              Building Bridges,
+            </motion.span>
+            <motion.span
+              className="block"
+              initial={{ y: 80, opacity: 0, rotateX: 15, filter: "blur(12px)" }}
+              animate={{ y: 0, opacity: 1, rotateX: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+            >
+              Not Walls
+            </motion.span>
           </h1>
-
-          <p className="mt-4 sm:mt-6 max-w-2xl text-[clamp(14px,3.5vw,28px)] text-white opacity-0 animate-slideUp px-1">
-            A centralized hub for trusted community resources, programs, and
-            organizations across New York City.
-          </p>
-
+          <motion.p
+            className="!text-white/80 mt-6 max-w-lg text-[clamp(14px,2vw,20px)] font-light tracking-wide"
+            initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            A centralized hub for trusted community resources, programs, and organizations across New York City.
+          </motion.p>
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease: "easeOut", delay: 2 }}
+            initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-10"
           >
             <Link
               href="/pages/resources"
-              className="group inline-flex items-center gap-3 sm:gap-4 mt-6 sm:mt-8 px-5 sm:px-7 py-3 sm:py-3.5 bg-white text-black rounded-full font-semibold shadow-md hover:shadow-lg transition w-max text-sm sm:text-base"
+              className="group inline-flex border border-white/50 !text-white hover:bg-white hover:!text-black uppercase tracking-widest text-xs font-semibold px-8 py-4 transition-all duration-500 items-center justify-center"
             >
-              <span>Browse Community Resources</span>
-              <span className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black">
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-white rotate-[-45deg] transition-transform duration-300 group-hover:rotate-0" />
-              </span>
+              Explore The Hub
             </Link>
           </motion.div>
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
-            <div className="w-6 h-6 border-b-2 border-r-2 border-white rotate-45 animate-bounce" />
-          </div>
         </div>
+      </section>
 
-        <style jsx>{`
-          .animate-slideUp {
-            animation-delay: ${line1.length * 0.05 +
-            line2.length * 0.05 +
-            0.3}s;
-          }
-        `}</style>
-      </main>
+      {/* Mission: sub1=#FFDBBB · sub2=#FFFFFA · sub3=#FFDBBB */}
+      <HomeMissionSection />
 
-      {/* ================= CONTENT WRAPPER (will slide/stack over hero) ================= */}
-      <div
-        ref={contentRef}
-        className="relative z-30"
-        style={{
-          transform: `translateY(-${slideProgress * 100}vh)`,
-          transition: "transform 0.05s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-          willChange: "transform",
-          zIndex: slideProgress > 0 ? 40 : undefined,
-          marginBottom: "-100vh",
-        }}
-      >
-        {/* ================= SECTION 1 ================= */}
-        <section ref={section1Ref} className="min-h-screen bg-(--bg) flex items-center py-12 sm:py-24 relative z-20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl max-w-xl text-(--secondary-text)">
-                NaviHub is dedicated to helping residents easily find local support
-                and services. We bring together trusted non-profits, community
-                programs, and organizations in one place, making it simpler
-                for New Yorkers to get the help they need.
-              </p>
+      {/* Arch: bg=#FFFFFA, arch pill=#FFDBBB */}
+      <HomeArchSection />
 
-              <div className="rounded-2xl overflow-hidden">
-                <Image
-                  src="/hands.jpg"
-                  alt="Community hands"
-                  width={1200}
-                  height={800}
-                  className="object-cover w-full h-64 sm:h-80 md:h-96"
-                />
-              </div>
-            </div>
-
-            <div className="mt-12 sm:mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10">
-              <Stat value={100} suffix="+" label="Community Resources" start={statsStart} />
-              <Stat value={50} suffix="+" label="Local Organizations" start={statsStart} />
-              <Stat value={5} label="Boroughs Served" start={statsStart} />
-              <Stat value={5000} suffix="+" label="Residents Supported" start={statsStart} />
-            </div>
-          </div>
-        </section>
-
-        {/* ================= SECTION 2 ================= */}
-        <section className="relative bg-[#FFFFFA] pt-4 overflow-hidden">
-        {/* ===== Marquee (Top) ===== */}
-        <div className="w-full overflow-hidden">
-          <div className="marquee flex gap-12 text-[64px] font-bold uppercase whitespace-nowrap">
-            {Array.from({ length: 30 }).map((_, i) => (
-              <span key={i} className={i % 2 === 0 ? "filled" : "outlined"}>
+      {/* ═══════════ HIGHLIGHTS — dark bg, white text ═══════════ */}
+      <section className="w-full bg-[#1F1F1F] py-24 overflow-hidden relative">
+        <div className="absolute inset-0 mix-blend-overlay opacity-5 pointer-events-none bg-[url('/noise.png')]" />
+        <div className="w-full overflow-hidden mb-12">
+          <div className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span key={i} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>
                 HIGHLIGHTS
               </span>
             ))}
           </div>
         </div>
-
-        {/* ===== Carousel ===== */}
-        <div className="mt-0 flex justify-center">
+        <div className="flex justify-center relative z-10">
           {topResources.length > 0 ? (
             <HighlightsCarousel resources={topResources} />
           ) : (
-            <div className="text-center py-12 text-(--secondary-text)">
+            <div className="text-center py-12 !text-white/50 uppercase tracking-widest text-sm">
               Loading highlights...
             </div>
           )}
         </div>
       </section>
 
+      {/* ═══════════ QUOTES — bg: #FFDBBB (peach), dark text ═══════════ */}
+      <section className="w-full py-32 bg-[#FFDBBB] flex flex-col items-center justify-center relative">
+        <div className="max-w-4xl w-full text-center px-6 relative z-10">
+          <motion.blockquote
+            key={activeQuoteId}
+            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[clamp(20px,3vw,36px)] font-light !text-[#1F1F1F] mb-12 leading-relaxed"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            {activeQuote.text}
+          </motion.blockquote>
 
-      {/*  QUOTES SECTION  */}
-      <section className="w-full py-12 sm:py-24 bg-(--bg) flex flex-col items-center relative overflow-hidden">
-        {/* Left Marquee - Hidden on mobile */}
-        <div className="absolute left-0 top-0 h-full w-32 overflow-hidden hidden lg:flex items-center justify-center">
-          <div className="marquee-vertical-stacked flex flex-col gap-12 text-[48px] font-bold uppercase">
-            {Array.from({ length: 30 }).map((_, i) => {
-              const words = ["New", "York", "City"];
-              const phraseIsFilled = i % 2 === 0;
-              return (
-                <div key={i} className="flex flex-col gap-0 leading-none">
-                  {words.map((word, wordIdx) => {
-                    const isYork = wordIdx === 1;
-                    const shouldFill = isYork ? !phraseIsFilled : phraseIsFilled;
-                    return word.split("").map((letter, letterIdx) => (
-                      <span key={`${wordIdx}-${letterIdx}`} className={shouldFill ? "filled" : "outlined"}>
-                        {letter}
-                      </span>
-                    ));
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right Marquee - Hidden on mobile */}
-        <div className="absolute right-0 top-0 h-full w-40 overflow-hidden hidden lg:flex items-center justify-center">
-          <div className="marquee-vertical-stacked flex flex-col gap-12 text-[48px] font-bold uppercase">
-            {Array.from({ length: 30 }).map((_, i) => {
-              const words = ["Building", "Bridges"];
-              const phraseIsFilled = i % 2 === 0;
-              return (
-                <div key={i} className="flex flex-col gap-0 leading-none">
-                  {words.map((word, wordIdx) => {
-                    const isBridges = wordIdx === 1;
-                    const shouldFill = isBridges ? !phraseIsFilled : phraseIsFilled;
-                    return word.split("").map((letter, letterIdx) => (
-                      <span key={`${wordIdx}-${letterIdx}`} className={shouldFill ? "filled" : "outlined"}>
-                        {letter}
-                      </span>
-                    ));
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="max-w-4xl w-full text-center px-4 sm:px-6 relative z-10">
-          {/* Star Rating */}
-          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-6 sm:mb-8">
+          <div className="flex items-center justify-center gap-1.5 mb-4">
             {[...Array(5)].map((_, i) => {
               const isFilled = i < activeQuote.rating;
               const isHalf = i === Math.floor(activeQuote.rating) && activeQuote.rating % 1 !== 0;
               return (
-                <div key={i} className="relative w-6 h-6">
-                  <Star
-                    size={24}
-                    className="absolute fill-gray-300 text-gray-300"
-                  />
+                <div key={i} className="relative w-5 h-5">
+                  <Star size={20} className="absolute fill-[#1F1F1F]/15 text-[#1F1F1F]/15" />
                   {(isFilled || isHalf) && (
-                    <div
-                      className="absolute top-0 left-0 overflow-hidden"
-                      style={{ width: isHalf ? "50%" : "100%" }}
-                    >
-                      <Star
-                        size={24}
-                        className="fill-[#997e67] text-[#997e67]"
-                      />
+                    <div className="absolute top-0 left-0 overflow-hidden" style={{ width: isHalf ? "50%" : "100%" }}>
+                      <Star size={20} className="fill-[#997e67] text-[#997e67]" />
                     </div>
                   )}
                 </div>
@@ -424,227 +802,30 @@ export default function Home() {
             })}
           </div>
 
-          {/* Quote Text */}
-          <blockquote className="text-[clamp(16px,4vw,32px)] italic font-semibold text-(--primary-text)/95 mb-4 leading-relaxed">
-            {activeQuote.text}
-          </blockquote>
-          <p className="text-base sm:text-lg md:text-xl font-semibold text-(--primary-text)/80 mb-8 sm:mb-12">
-            — {activeQuote.name}
+          <p className="text-sm font-semibold uppercase tracking-widest !text-[#1F1F1F]/55 mb-12">
+            {activeQuote.name}
           </p>
 
-          {/* Profile Pictures */}
-          <div className="flex items-center justify-center gap-3 sm:gap-6 h-10">
+          <div className="flex items-center justify-center gap-6 h-12">
             {quotes.map((quote) => {
               const isActive = quote.id === activeQuoteId;
               return (
                 <button
                   key={quote.id}
                   onClick={() => setActiveQuoteId(quote.id)}
-                  className={`rounded-full overflow-hidden border-4 transition-all duration-300 cursor-pointer ${
+                  className={`rounded-full overflow-hidden transition-all duration-500 cursor-pointer ${
                     isActive
-                      ? "w-14 h-14 sm:w-20 sm:h-20 border-[#997e67]"
-                      : "w-10 h-10 sm:w-16 sm:h-16 border-gray-300 grayscale hover:grayscale-0"
+                      ? "w-20 h-20 border-2 border-[#997e67]"
+                      : "w-14 h-14 border border-[#1F1F1F]/20 grayscale opacity-50 hover:opacity-100"
                   }`}
                 >
-                  <div className="relative w-full h-full">
-                    <img
-                      src={quote.image}
-                      alt={quote.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {isActive && (
-                      <img
-                        src={quote.image}
-                        alt={quote.name}
-                        className="absolute inset-0 w-full h-full object-cover animate-colorReveal"
-                        style={{
-                          filter: "grayscale(100%)"
-                        }}
-                      />
-                    )}
-                  </div>
+                  <Image src={quote.image} alt={quote.name} width={80} height={80} className="w-full h-full object-cover" />
                 </button>
               );
             })}
           </div>
         </div>
       </section>
-
-      {/* EXPLORE PAGES SECTION */}
-      <section className="w-full py-16 sm:py-24 bg-[#FFFFFA]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Section Header */}
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-[clamp(28px,5vw,48px)] font-bold mb-4" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
-              Explore <span className="text-[#997E67]">NaviHub</span>
-            </h2>
-            <p className="text-base sm:text-lg max-w-2xl mx-auto" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
-              Discover all the ways we can help connect you with your community
-            </p>
-          </div>
-
-          {/* Feature Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {/* Resources Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
-                  <BookOpen className="w-7 h-7 text-[#997E67]" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
-                  Community Resources
-                </h3>
-                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
-                  Browse our curated directory of local nonprofits, health services, educational programs, and support organizations across all five boroughs.
-                </p>
-                <Link
-                  href="/pages/resources"
-                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
-                >
-                  <span>Explore Resources</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* Events Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
-                  <Calendar className="w-7 h-7 text-[#997E67]" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
-                  Local Events
-                </h3>
-                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
-                  Stay connected with community gatherings, workshops, volunteer opportunities, and social events happening near you.
-                </p>
-                <Link
-                  href="/pages/events"
-                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
-                >
-                  <span>View Events</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* NaviLink Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
-                  <MessageCircle className="w-7 h-7 text-[#997E67]" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
-                  NaviLink Forum
-                </h3>
-                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
-                  Join the conversation with fellow New Yorkers. Share experiences, ask questions, and connect with your community.
-                </p>
-                <Link
-                  href="/pages/NaviLink"
-                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
-                >
-                  <span>Join Discussion</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* About Us Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="group relative bg-(--bg) rounded-2xl p-6 sm:p-8 overflow-hidden hover:shadow-xl transition-all duration-300"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#997E67]/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-xl bg-[#997E67]/15 flex items-center justify-center mb-5">
-                  <Users className="w-7 h-7 text-[#997E67]" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-heading)", color: "#1F1F1F" }}>
-                  About Us
-                </h3>
-                <p className="mb-6 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(31, 31, 31, 0.7)" }}>
-                  Learn about our mission to bridge communities and create accessible pathways to support for all New Yorkers.
-                </p>
-                <Link
-                  href="/pages/about"
-                  className="inline-flex items-center gap-2 text-[#997E67] font-semibold hover:gap-3 transition-all duration-300"
-                >
-                  <span>Our Story</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= CTA BANNER SECTION ================= */}
-      <section className="w-full py-16 sm:py-20 bg-(--bg)">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="relative bg-gradient-to-br from-[#1F1F1F] to-[#2d2d2d] rounded-3xl p-8 sm:p-12 overflow-hidden"
-          >
-            {/* Background Decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#997E67]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#997E67]/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
-            
-            <div className="relative z-10 text-center">
-              <h2 className="text-[clamp(24px,4vw,40px)] font-bold text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-                Ready to Get Connected?
-              </h2>
-              <p className="text-white/70 mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-                Join thousands of New Yorkers who have found the resources and support they need through NaviHub. Start exploring today.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link
-                  href="/pages/resources"
-                  className="group inline-flex items-center gap-3 px-6 py-3.5 bg-white text-[#1F1F1F] rounded-full font-semibold hover:bg-[#997E67] hover:text-white transition-all duration-300"
-                >
-                  <span>Browse Resources</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  href="/pages/signup"
-                  className="inline-flex items-center gap-3 px-6 py-3.5 border-2 border-white/30 text-white rounded-full font-semibold hover:bg-white/10 transition-all duration-300"
-                >
-                  <span>Create Account</span>
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-      </div>
-    </>
+    </main>
   );
 }

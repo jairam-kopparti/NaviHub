@@ -100,6 +100,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "GNEWS_API_KEY not configured" }, { status: 500 });
   }
 
+  // Delete articles older than 14 days to keep the database fresh
+  const deleteThreshold = new Date();
+  deleteThreshold.setDate(deleteThreshold.getDate() - 14);
+  const { error: deleteError } = await supabaseAdmin
+    .from("news")
+    .delete()
+    .lt("published_at", deleteThreshold.toISOString());
+
+  if (deleteError) {
+    console.error("Failed to delete old articles:", deleteError);
+  }
+
   // Date range: last 7 days
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - 7);

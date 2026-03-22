@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Chatbot from "./components/Chatbot"
 import ScrollProgressBar from "./components/ScrollProgressBar";
 
 export const metadata: Metadata = {
@@ -16,10 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased`}>
+      <body className={`antialiased min-h-screen flex flex-col`}>
         <ScrollProgressBar />
         <Navbar />
-        {children}
+        <div className="flex-1">
+          {children}
+        </div>
+        <Chatbot />
         <Footer />
       </body>
     </html>
