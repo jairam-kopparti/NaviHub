@@ -694,7 +694,7 @@ export default function Home() {
       >
         <div className="absolute inset-0 z-0 hero-video scale-110 w-full h-full">
           <div className="absolute inset-0 bg-black/60 z-10" />
-          <Image src="/home-hero-bg.jpg" alt="Hero Background" fill className="object-cover opacity-80" priority />
+          <Image src="/home-hero-bg.png" alt="Hero Background" fill className="object-cover opacity-80" priority />
         </div>
         <div className="relative z-30 text-center flex flex-col items-center justify-center px-4 w-full h-full pointer-events-auto">
           <h1
