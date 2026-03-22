@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Check, ChevronDown, MapPin, Star, Eye, Grid3X3, SlidersHorizontal, X } from "lucide-react";
+import { 
+  Search, Check, ChevronDown, MapPin, Star, Eye, Grid3X3, SlidersHorizontal, X,
+  Heart, GraduationCap, Briefcase, Scale, Home, Utensils, 
+  Calendar, Users, HeartHandshake, Map as MapIcon, ArrowLeft, ArrowRight,
+  Loader, FileText, Tag, Image as ImageIcon, Plus, CheckCircle
+} from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Resource } from "../../lib/types";
 import { ResourcesCard } from "../../components/resourcepage/ResourcesCard";
@@ -10,7 +15,6 @@ import { useUser } from "../../lib/useUser";
 import AddResourceModal from "../../components/resourcepage/AddResourceButton";
 import AuthErrorModal from "../../components/resourcepage/AuthErrorPopup";
 import ResourceDetailModal from "../../components/resourcepage/ResourceDetailModal";
-import ResourceMapSection from "../../components/map/ResourceMapSection";
 import FullMapModal from "../../components/map/FullMapModal";
 
 const CATEGORIES = [
@@ -24,6 +28,19 @@ const CATEGORIES = [
   "Community Events & Programs",
   "Youth, Family & Senior Services",
 ];
+
+const getCategoryIcon = (cat: string) => {
+  if (cat.includes("Health")) return <Heart className="w-6 h-6" />;
+  if (cat.includes("Education")) return <GraduationCap className="w-6 h-6" />;
+  if (cat.includes("Employment")) return <Briefcase className="w-6 h-6" />;
+  if (cat.includes("Legal")) return <Scale className="w-6 h-6" />;
+  if (cat.includes("Housing")) return <Home className="w-6 h-6" />;
+  if (cat.includes("Food")) return <Utensils className="w-6 h-6" />;
+  if (cat.includes("Events")) return <Calendar className="w-6 h-6" />;
+  if (cat.includes("Youth")) return <Users className="w-6 h-6" />;
+  if (cat.includes("Nonprofit")) return <HeartHandshake className="w-6 h-6" />;
+  return <Grid3X3 className="w-6 h-6" />;
+};
 
 const LOCATIONS = [
   "Manhattan",
@@ -74,6 +91,20 @@ const slideInDrawer = {
 };
 
 export default function ResourcesPage() {
+  const [viewMode, setViewMode] = useState<"dashboard" | "list">("dashboard");
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  
+  // Inline Form States
+  const [inlineTitle, setInlineTitle] = useState("");
+  const [inlineCategory, setInlineCategory] = useState("");
+  const [inlineLocation, setInlineLocation] = useState("Manhattan");
+  const [inlineDescription, setInlineDescription] = useState("");
+  const [inlineImageUrl, setInlineImageUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const wordCount = inlineDescription.trim().split(/\s+/).filter((w) => w.length > 0).length;
+
   const [resources, setResources] = useState<Resource[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -95,6 +126,70 @@ export default function ResourcesPage() {
     views: true,
   });
   const { user } = useUser();
+
+  // Fetch category counts for the dashboard
+  useEffect(() => {
+    supabase.from('resources').select('id, category').then(({data}) => {
+       if(data) {
+          const counts: Record<string, number> = {};
+          data.forEach(r => {
+             counts[r.category] = (counts[r.category] || 0) + 1;
+          });
+          setCategoryCounts(counts);
+       }
+    })
+  }, []);
+
+  const handleInlineSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      if (!inlineTitle.trim()) throw new Error("Title is required");
+      if (!inlineCategory) throw new Error("Category is required");
+      if (wordCount < 15) throw new Error("Description must be at least 15 words");
+
+      const moderationResponse = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `${inlineTitle}\n${inlineDescription}` }),
+      });
+
+      const moderationResult = await moderationResponse.json();
+      if (!moderationResult.safe) {
+        throw new Error(moderationResult.message || "Content contains inappropriate material");
+      }
+
+      const { error: insertError } = await supabase
+        .from("resources")
+        .insert([
+          {
+            title: inlineTitle.trim(),
+            category: inlineCategory,
+            description: inlineDescription.trim(),
+            image_url: inlineImageUrl.trim() || "",
+            location: inlineLocation,
+            views: 0,
+          },
+        ]);
+
+      if (insertError) throw insertError;
+
+      setShowSuccessPopup(true);
+      setInlineTitle("");
+      setInlineCategory("");
+      setInlineLocation("Manhattan");
+      setInlineDescription("");
+      setInlineImageUrl("");
+      handleResourcesUpdated();
+      setTimeout(() => setShowSuccessPopup(false), 3000);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to add resource");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleFilterScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const element = e.currentTarget;
@@ -403,7 +498,7 @@ export default function ResourcesPage() {
   return (
     <div className="min-h-screen bg-(--bg)">
       {/* Section 1: Hero Image */}
-      <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] border-b border-(--border) overflow-hidden">
+      <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] overflow-hidden">
         <motion.div
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{ backgroundImage: 'url(/resources.jpg)' }}
@@ -411,25 +506,175 @@ export default function ResourcesPage() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.h1 
-            className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-(--font-heading)"
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/20 to-transparent" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+          <motion.div
+            className="text-center bg-black/20 backdrop-blur-md px-10 py-6 rounded-3xl border border-white/20 shadow-2xl"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            RESOURCES
-          </motion.h1>
+            <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-(--font-heading) tracking-tight mb-3 flex items-center justify-center gap-4">
+              <Grid3X3 className="w-10 h-10 md:w-14 md:h-14 opacity-80" />
+              Resources
+            </h1>
+            <p className="text-white/90 text-lg md:text-xl font-medium max-w-xl mx-auto">
+              Discover and share community services across New York City
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* Resource Map Section */}
-      <ResourceMapSection
-        resources={resources}
-        onResourceClick={handleResourceCardClick}
-        onOpenFullMap={() => setShowFullMap(true)}
-      />
+      {/* Pull slide Map button */}
+      <button 
+        onClick={() => setShowFullMap(true)} 
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-white py-5 px-3 rounded-r-2xl shadow-[4px_0_24px_rgb(0,0,0,0.08)] border border-l-0 border-[#eae0d5]/60 flex flex-col items-center gap-2 hover:bg-[#fcfbf9] hover:pl-4 transition-all duration-300 cursor-pointer group"
+      >
+        <MapIcon className="w-6 h-6 text-[#997e67] group-hover:scale-110 transition-transform" />
+      </button>
 
+      {viewMode === "dashboard" ? (
+        <div className="bg-[#fcfbf9] min-h-screen">
+          <div className="container mx-auto px-4 py-16 md:py-24">
+            <div className="max-w-5xl mx-auto mb-20">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-5xl !text-[#4a3b32] mb-4 font-(--font-heading) tracking-tight">
+                  Explore by Category
+                </h2>
+                <p className="text-lg !text-[#6b5a4e] max-w-2xl mx-auto">
+                  Find the exact support services and organizations tailored to your needs from our curated directory.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {CATEGORIES.map((category) => (
+                  <motion.div 
+                    key={category}
+                    onClick={() => {
+                      setSelectedCategories([category]);
+                      setViewMode("list");
+                    }}
+                    whileHover={{ y: -5 }}
+                    className="bg-white rounded-3xl p-6 md:p-8 border border-[#eae0d5]/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(153,126,103,0.12)] transition-all cursor-pointer flex flex-col group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-[#997e67]/5 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-0 group-hover:opacity-100" />
+                    
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-14 h-14 bg-[#fdfaf7] border border-[#eae0d5]/50 rounded-2xl shadow-sm flex items-center justify-center text-[#997e67] group-hover:bg-[#997e67] group-hover:text-white transition-colors duration-300">
+                        {getCategoryIcon(category)}
+                      </div>
+                      <div className="bg-[#fdfaf7] px-3 py-1.5 rounded-full text-xs font-semibold text-[#6b5a4e] border border-[#eae0d5]/50 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#997e67] opacity-60"></span>
+                        {categoryCounts[category] || 0} resources
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-[#4a3b32] leading-tight mb-3 pr-2 group-hover:text-[#997e67] transition-colors">{category}</h3>
+                    <div className="mt-auto pt-4 flex items-center text-sm font-semibold text-[#997e67]/80 group-hover:text-[#997e67] transition-colors">
+                      Explore resources 
+                      <ArrowRight className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="max-w-3xl mx-auto bg-white p-8 md:p-12 rounded-[2.5rem] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-[#eae0d5]/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-linear-to-bl from-[#997e67]/10 via-[#997e67]/5 to-transparent rounded-bl-full pointer-events-none" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-12 h-12 bg-[#fdfaf7] rounded-full flex items-center justify-center border border-[#eae0d5]">
+                    <HeartHandshake className="w-6 h-6 text-[#997e67]" />
+                  </div>
+                  <h3 className="text-2xl md:text-3xl text-[#4a3b32] font-(--font-heading)">Suggest a Resource</h3>
+                </div>
+                <p className="!text-[#6b5a4e] mb-8 text-lg">Know about a helpful service? Share it with the community.</p>
+
+              {showSuccessPopup && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 animate-in fade-in slide-in-from-top-2">
+                  <CheckCircle className="w-5 h-5 shrink-0" />
+                  <p className="font-medium">Resource submitted successfully! It will be reviewed by our team.</p>
+                </div>
+              )}
+
+              {submitError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700">
+                  <X className="w-5 h-5 mt-0.5 shrink-0 cursor-pointer" onClick={() => setSubmitError(null)} />
+                  <p className="font-medium flex-1">{submitError}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleInlineSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold !text-[#4a3b32] ml-1">Title *</label>
+                  <div className="relative">
+                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 !text-[#997e67]/60" />
+                    <input required placeholder="e.g., Community Food Pantry" value={inlineTitle} onChange={(e) => setInlineTitle(e.target.value)} className="w-full pl-12 pr-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold !text-[#4a3b32] ml-1">Category *</label>
+                    <div className="relative">
+                      <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 !text-[#997e67]/60" />
+                      <select required value={inlineCategory} onChange={(e) => setInlineCategory(e.target.value)} className="w-full pl-12 pr-10 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] appearance-none">
+                        <option value="" disabled>Select category</option>
+                        {CATEGORIES.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 ! !text-[#4a3b32]/40 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold !text-[#4a3b32] ml-1">Location *</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 !text-[#997e67]/60" />
+                      <select required value={inlineLocation} onChange={(e) => setInlineLocation(e.target.value)} className="w-full pl-12 pr-10 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] appearance-none">
+                        {LOCATIONS.map((loc) => (<option key={loc} value={loc}>{loc}</option>))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a3b32]/40 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-sm font-semibold text-[#4a3b32]">Image URL</label>
+                    <span className="text-xs text-[#997e67]/60 font-medium uppercase tracking-wider">OPTIONAL</span>
+                  </div>
+                  <div className="relative">
+                    <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#997e67]/60" />
+                    <input type="url" placeholder="https://example.com/image.jpg" value={inlineImageUrl} onChange={(e) => setInlineImageUrl(e.target.value)} className="w-full pl-12 pr-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-sm font-semibold !text-[#4a3b32]">Description *</label>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${wordCount >= 15 ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                      {wordCount}/15 words
+                    </span>
+                  </div>
+                  <textarea required placeholder="Describe the resource in detail (min 15 words)..." value={inlineDescription} onChange={(e) => setInlineDescription(e.target.value)} rows={4} className="w-full p-4 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all resize-none text-[#4a3b32] placeholder:text-[#4a3b32]/40" />
+                </div>
+
+                <motion.button 
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  type="submit" 
+                  disabled={isSubmitting || !inlineTitle.trim() || !inlineCategory || wordCount < 15} 
+                  className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-[#997e67] hover:bg-[#8a6d5a] text-white rounded-2xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
+                >
+                  {isSubmitting ? <Loader className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Submit Resource</>}
+                </motion.button>
+              </form>
+            </div>
+          </div>
+          </div>
+        </div>
+      ) : (
+        <>
       {/* Mobile Filter Button */}
       <motion.div 
         className="lg:hidden sticky top-0 z-30 bg-(--bg) border-b border-(--border) p-3"
@@ -476,24 +721,26 @@ export default function ResourcesPage() {
       <AnimatePresence>
         {mobileFiltersOpen && (
           <motion.div
-            className="fixed top-0 left-0 h-full w-[85%] max-w-[350px] z-50 bg-(--surface) shadow-2xl lg:hidden"
+            className="fixed top-0 left-0 h-full w-[85%] max-w-87.5 z-50 bg-(--surface) shadow-2xl lg:hidden"
             variants={slideInDrawer}
             initial="hidden"
             animate="visible"
             exit="exit"
           >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-[#fdfaf7]">
           {/* Mobile Filter Header */}
-          <div className="px-5 py-4 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a] flex items-center justify-between">
+          <div className="px-5 py-5 border-b border-[#eae0d5]/60 bg-white flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <SlidersHorizontal className="w-5 h-5 text-white" />
-              <h2 className="font-semibold text-lg text-white">Filters</h2>
+              <div className="w-8 h-8 rounded-full bg-[#997e67]/10 flex items-center justify-center">
+                <SlidersHorizontal className="w-4 h-4 text-[#997e67]" />
+              </div>
+              <h2 className="font-bold text-lg text-[#4a3b32] tracking-tight">Filters</h2>
             </div>
             <button
               onClick={() => setMobileFiltersOpen(false)}
-              className="p-2 text-white/80 hover:text-white transition"
+              className="p-2 text-[#4a3b32]/60 hover:text-[#4a3b32] bg-[#fdfaf7] rounded-full transition cursor-pointer border border-[#eae0d5]/60"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
           </div>
 
@@ -674,18 +921,18 @@ export default function ResourcesPage() {
           </div>
 
           {/* Mobile Filter Footer */}
-          <div className="p-4 border-t border-(--border) space-y-3">
+          <div className="p-5 border-t border-[#eae0d5]/60 bg-white space-y-3">
             {activeFilterCount > 0 && (
               <button
                 onClick={clearAllFilters}
-                className="w-full px-4 py-3 text-sm font-medium text-[#997e67] border border-[#997e67] rounded-xl hover:bg-[#997e67]/10 transition cursor-pointer"
+                className="w-full px-4 py-3.5 text-sm font-bold text-[#997e67] border border-[#997e67]/30 rounded-2xl hover:bg-[#997e67]/5 transition cursor-pointer"
               >
                 Clear all filters
               </button>
             )}
             <motion.button
               onClick={() => setMobileFiltersOpen(false)}
-              className="w-full px-4 py-3 text-sm font-semibold text-white bg-[#997e67] rounded-xl hover:bg-[#8a6d5a] transition cursor-pointer"
+              className="w-full px-4 py-3.5 text-sm font-bold text-white bg-[#997e67] rounded-2xl hover:bg-[#8a6d5a] transition cursor-pointer shadow-[0_4px_20px_rgb(153,126,103,0.2)]"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -698,7 +945,21 @@ export default function ResourcesPage() {
       </AnimatePresence>
 
       {/* Section 2 + 3: Preferences + Resources */}
-      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 flex flex-col lg:flex-row gap-6 lg:gap-8 border-b border-(--border)">
+      <div className="container mx-auto px-4 py-8">
+        <motion.button 
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={() => {
+            setViewMode("dashboard");
+            setSelectedCategories([]);
+            setSearchQuery("");
+          }}
+          className="mb-8 flex items-center gap-2 text-[#997e67] hover:text-[#8a6d5a] font-semibold transition-colors cursor-pointer w-fit group px-4 py-2 rounded-xl hover:bg-[#997e67]/5"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          Back to Categories
+        </motion.button>
+        <div className="flex flex-col lg:flex-row gap-8 pb-8">
         {/* Preferences Panel - Hidden on mobile, shown on desktop */}
         <motion.aside 
           className="hidden lg:block w-80 shrink-0"
@@ -707,21 +968,23 @@ export default function ResourcesPage() {
           variants={fadeInLeft}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="sticky top-8 bg-(--surface) rounded-2xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="sticky top-8 bg-white border border-[#eae0d5]/60 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden max-h-[90vh] flex flex-col">
             {/* Panel Header */}
-            <div className="px-6 py-5 border-b border-(--border) bg-linear-to-r from-[#997e67] to-[#8a6d5a]">
+            <div className="px-6 py-5 border-b border-[#eae0d5]/60 bg-[#fdfaf7]/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <SlidersHorizontal className="w-5 h-5 text-white" />
-                  <h2 className="font-semibold text-lg text-white tracking-wide">Filters</h2>
+                  <div className="w-8 h-8 rounded-full bg-[#997e67]/10 flex items-center justify-center">
+                    <SlidersHorizontal className="w-4 h-4 text-[#997e67]" />
+                  </div>
+                  <h2 className="font-bold text-lg text-[#4a3b32] tracking-tight">Filters</h2>
                 </div>
                 {activeFilterCount > 0 && (
                   <button
                     onClick={clearAllFilters}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white/90 hover:text-white bg-white/20 hover:bg-white/30 rounded-full transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#997e67] hover:text-white bg-[#997e67]/10 hover:bg-[#997e67] rounded-full transition-all cursor-pointer"
                   >
                     <X className="w-3 h-3" />
-                    Clear all ({activeFilterCount})
+                    Clear all
                   </button>
                 )}
               </div>
@@ -947,32 +1210,29 @@ export default function ResourcesPage() {
         >
           {/* Search Bar + Add Resource Button */}
           <motion.div 
-            className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center"
+            className="mb-8 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <motion.div 
-              className="relative flex-1"
-              whileFocus={{ scale: 1.01 }}
-            >
-              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-(--secondary-text) w-5 h-5" />
+            <div className="relative flex-1 group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#997e67]/60 w-5 h-5 group-focus-within:text-[#997e67] transition-colors" />
               <input
                 type="text"
-                placeholder="Search resources..."
+                placeholder="Search resources by name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#997e67] placeholder:text-(--secondary-text) text-base"
-                style={{ color: "#4a4a4a" }}
+                className="w-full pl-14 pr-4 py-4 bg-white border border-[#eae0d5]/80 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] placeholder:text-[#4a3b32]/40 text-[#4a3b32] font-medium transition-all"
               />
-            </motion.div>
+            </div>
             <motion.button 
               onClick={handleAddResourceClick}
-              className="px-4 sm:px-6 py-3 sm:py-4 bg-[#997e67] text-white rounded-lg font-semibold hover:bg-[#8a6d5a] transition-colors whitespace-nowrap cursor-pointer text-sm sm:text-base"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              className="px-6 py-4 bg-[#997e67] text-white rounded-2xl font-bold hover:bg-[#8a6d5a] transition-all shadow-[0_4px_20px_rgb(153,126,103,0.2)] hover:shadow-[0_8px_30px_rgb(153,126,103,0.3)] whitespace-nowrap cursor-pointer flex items-center justify-center gap-2 text-sm sm:text-base"
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Suggest resource
+              <Plus className="w-5 h-5" />
+              Suggest Resource
             </motion.button>
           </motion.div>
 
@@ -1015,7 +1275,10 @@ export default function ResourcesPage() {
             ))}
           </motion.div>
         </motion.div>
+        </div>
       </div>
+      </>
+      )}
 
       {/* Resource Detail Modal with Reviews and Favorites */}
       <AnimatePresence>

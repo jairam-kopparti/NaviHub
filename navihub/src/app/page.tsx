@@ -25,13 +25,13 @@ function HomeMissionSection() {
         // ── Line-by-line text reveals (Aupale's signature) ──
         sub.querySelectorAll<HTMLElement>(".ms-line-inner").forEach((inner, i) => {
           gsap.from(inner, {
-            yPercent: 110,
-            duration: 1.1,
-            ease: "power4.out",
-            delay: i * 0.09,
+            yPercent: 120,
+            duration: 1.4,
+            ease: "expo.out",
+            delay: i * 0.1,
             scrollTrigger: {
               trigger: sub,
-              start: "top 82%",
+              start: "top 85%",
               toggleActions: "play none none none",
             },
           });
@@ -41,12 +41,12 @@ function HomeMissionSection() {
         sub.querySelectorAll(".ms-tag").forEach((tag) => {
           gsap.from(tag, {
             opacity: 0,
-            y: 10,
-            duration: 0.8,
-            ease: "power2.out",
+            y: 15,
+            duration: 1.2,
+            ease: "power3.out",
             scrollTrigger: {
               trigger: sub,
-              start: "top 82%",
+              start: "top 85%",
               toggleActions: "play none none none",
             },
           });
@@ -55,14 +55,14 @@ function HomeMissionSection() {
         // ── Body text fade up ──
         sub.querySelectorAll(".ms-body").forEach((body) => {
           gsap.from(body, {
-            y: 30,
+            y: 35,
             opacity: 0,
-            duration: 1,
-            ease: "power2.out",
-            delay: 0.45,
+            duration: 1.4,
+            ease: "power3.out",
+            delay: 0.35,
             scrollTrigger: {
               trigger: sub,
-              start: "top 82%",
+              start: "top 85%",
               toggleActions: "play none none none",
             },
           });
@@ -72,12 +72,12 @@ function HomeMissionSection() {
         sub.querySelectorAll(".ms-rule").forEach((rule) => {
           gsap.from(rule, {
             scaleX: 0,
-            duration: 1.2,
+            duration: 1.6,
             ease: "expo.out",
             transformOrigin: "left center",
             scrollTrigger: {
               trigger: sub,
-              start: "top 82%",
+              start: "top 85%",
               toggleActions: "play none none none",
             },
           });
@@ -87,10 +87,11 @@ function HomeMissionSection() {
         sub.querySelectorAll<HTMLElement>(".ms-img-outer").forEach((outer) => {
           const fromLeft = outer.dataset.from === "left";
           gsap.from(outer, {
-            x: fromLeft ? -80 : 80,
+            x: fromLeft ? -50 : 50,
+            y: 30,
             opacity: 0,
-            duration: 1.5,
-            ease: "power3.out",
+            duration: 1.8,
+            ease: "expo.out",
             scrollTrigger: {
               trigger: sub,
               start: "top 80%",
@@ -170,7 +171,7 @@ function HomeMissionSection() {
 
               {/* Counter row */}
               <div className="ms-body flex gap-10 mt-6 pt-6 border-t border-[#1F1F1F]/10">
-                {[["9+", "Categories"], ["500+", "Resources"], ["5", "Boroughs"]].map(([num, label]) => (
+                {[["9+", "Categories"], ["90+", "Resources"], ["5", "Boroughs"]].map(([num, label]) => (
                   <div key={label}>
                     <p className="text-2xl font-heading font-semibold !text-[#1F1F1F]">{num}</p>
                     <p className="text-[9px] uppercase tracking-[0.2em] !text-[#1F1F1F]/45 mt-0.5">{label}</p>
@@ -186,7 +187,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer lg:pl-16 xl:pl-24 mt-14 lg:mt-0" data-from="right">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
                 <Image
-                  src="/resources.jpg"
+                  src="/home-mission-resources.jpg"
                   alt="Community Resources"
                   fill
                   className="object-cover"
@@ -213,7 +214,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer order-2 lg:order-1" data-from="left">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "4/3" }}>
                 <Image
-                  src="/events.jpg"
+                  src="/home-mission-events.jpg"
                   alt="Community Events"
                   fill
                   className="object-cover"
@@ -263,7 +264,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer" data-from="left">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "2/3" }}>
                 <Image
-                  src="/navilink.jpg"
+                  src="/home-mission-navilink.jpg"
                   alt="NaviLink Community Forum"
                   fill
                   className="object-cover"
@@ -276,7 +277,7 @@ function HomeMissionSection() {
             <div className="hidden lg:flex flex-col items-center justify-end pb-6 gap-3">
               <div className="ms-rule h-px w-full bg-[#1F1F1F]/12" />
               <p className="text-center text-[8px] uppercase tracking-[0.3em] !text-[#1F1F1F]/35 leading-loose">
-                NaviHub<br />New York City<br />Est. 2024
+                NaviHub<br />New York City<br />Est. 2025
               </p>
             </div>
 
@@ -284,7 +285,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer mt-8 lg:mt-0" data-from="right">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "2/3" }}>
                 <Image
-                  src="/news.jpg"
+                  src="/home-mission-news.jpg"
                   alt="NYC News"
                   fill
                   className="object-cover"
@@ -390,10 +391,12 @@ function HomeArchSection() {
       if (archTextRef.current) {
         const lines = archTextRef.current.querySelectorAll(".arch-line-inner");
         gsap.from(lines, {
-          yPercent: 110,
-          stagger: 0.12,
-          duration: 1,
-          ease: "power4.out",
+          yPercent: 120,
+          rotate: 2,
+          stagger: 0.1,
+          duration: 1.4,
+          opacity: 0,
+          ease: "expo.out",
           scrollTrigger: {
             trigger: outer,
             start: "top top",
@@ -406,56 +409,56 @@ function HomeArchSection() {
       // Photo LEFT — enters from bottom with CCW rotation that normalises
       gsap.fromTo(
         photoLeftRef.current,
-        { y: "65vh", opacity: 0, rotate: -6 },
+        { y: "65vh", opacity: 0, rotate: -8, scale: 0.95 },
         {
-          y: "0vh", opacity: 1, rotate: 0, ease: "power2.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "32% top", scrub: 1.2 },
+          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "3% top", end: "30% top", scrub: 1.8 },
         }
       );
       gsap.to(photoLeftRef.current, {
-        y: "-28vh", opacity: 0, rotate: 4, ease: "power2.in",
-        scrollTrigger: { trigger: outer, start: "65% top", end: "85% top", scrub: 1.2 },
+        y: "-30vh", opacity: 0, rotate: 5, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "65% top", end: "85% top", scrub: 1.8 },
       });
 
       // Photo RIGHT TOP — enters from upper-right
       gsap.fromTo(
         photoRightTopRef.current,
-        { y: "-45vh", x: "15vw", opacity: 0, rotate: 8 },
+        { y: "-40vh", x: "12vw", opacity: 0, rotate: 10, scale: 0.95 },
         {
-          y: "0vh", x: "0vw", opacity: 1, rotate: 0, ease: "power2.out",
-          scrollTrigger: { trigger: outer, start: "8% top", end: "38% top", scrub: 1.3 },
+          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "6% top", end: "35% top", scrub: 1.8 },
         }
       );
       gsap.to(photoRightTopRef.current, {
-        y: "-42vh", opacity: 0, ease: "power2.in",
-        scrollTrigger: { trigger: outer, start: "32% top", end: "60% top", scrub: 1.2 },
+        y: "-45vh", opacity: 0, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "32% top", end: "60% top", scrub: 1.8 },
       });
 
       // Photo LEFT BOTTOM
       gsap.fromTo(
         photoLeftBotRef.current,
-        { y: "55vh", opacity: 0, rotate: 5 },
+        { y: "55vh", opacity: 0, rotate: 6, scale: 0.95 },
         {
-          y: "0vh", opacity: 1, rotate: 0, ease: "power2.out",
-          scrollTrigger: { trigger: outer, start: "35% top", end: "60% top", scrub: 1.2 },
+          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "35% top", end: "60% top", scrub: 1.8 },
         }
       );
       gsap.to(photoLeftBotRef.current, {
-        y: "-30vh", opacity: 0, rotate: -3, ease: "power2.in",
-        scrollTrigger: { trigger: outer, start: "72% top", end: "92% top", scrub: 1.2 },
+        y: "-35vh", opacity: 0, rotate: -4, scale: 0.95, ease: "power3.in",
+        scrollTrigger: { trigger: outer, start: "72% top", end: "92% top", scrub: 1.8 },
       });
 
       // Photo RIGHT BOTTOM
       gsap.fromTo(
         photoRightBotRef.current,
-        { y: "60vh", x: "8vw", opacity: 0, rotate: -6 },
+        { y: "60vh", x: "8vw", opacity: 0, rotate: -8, scale: 0.95 },
         {
-          y: "0vh", x: "0vw", opacity: 1, rotate: 0, ease: "power2.out",
-          scrollTrigger: { trigger: outer, start: "50% top", end: "78% top", scrub: 1.3 },
+          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+          scrollTrigger: { trigger: outer, start: "48% top", end: "75% top", scrub: 1.8 },
         }
       );
       gsap.to(photoRightBotRef.current, {
-        y: "-25vh", opacity: 0, ease: "power2.in",
+        y: "-28vh", opacity: 0, scale: 0.95, ease: "power3.in",
         scrollTrigger: { trigger: outer, start: "82% top", end: "96% top", scrub: 1 },
       });
     }, outerRef);
@@ -526,7 +529,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
             <div className="relative w-full h-full">
-              <Image src="/aboutus.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
+              <Image src="/home-arch-about.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
             </div>
           </div>
           <p className="arch-photo-caption !text-[#1F1F1F]/40">
@@ -542,7 +545,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
             <div className="relative w-full h-full">
-              <Image src="/resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
+              <Image src="/home-arch-resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
             </div>
           </div>
           <p className="arch-photo-caption !text-[#1F1F1F]/40">
@@ -558,7 +561,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
             <div className="relative w-full h-full">
-              <Image src="/events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
+              <Image src="/home-arch-events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
             </div>
           </div>
         </div>
@@ -571,7 +574,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
             <div className="relative w-full h-full">
-              <Image src="/navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
+              <Image src="/home-arch-navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
             </div>
           </div>
         </div>
@@ -691,30 +694,42 @@ export default function Home() {
       >
         <div className="absolute inset-0 z-0 hero-video scale-110 w-full h-full">
           <div className="absolute inset-0 bg-black/60 z-10" />
-          <Image src="/hero.jpg" alt="Hero Background" fill className="object-cover opacity-80" priority />
+          <Image src="/home-hero-bg.jpg" alt="Hero Background" fill className="object-cover opacity-80" priority />
         </div>
         <div className="relative z-30 text-center flex flex-col items-center justify-center px-4 w-full h-full pointer-events-auto">
-          <motion.h1
+          <h1
             className="!text-white font-bold leading-none tracking-tight uppercase max-w-5xl"
-            style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(40px, 8vw, 120px)" }}
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(40px, 8vw, 120px)", perspective: "1000px" }}
           >
-            Building Bridges,<br />Not Walls
-          </motion.h1>
+            <motion.span
+              className="block"
+              initial={{ y: 80, opacity: 0, rotateX: 15, filter: "blur(12px)" }}
+              animate={{ y: 0, opacity: 1, rotateX: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+            >
+              Building Bridges,
+            </motion.span>
+            <motion.span
+              className="block"
+              initial={{ y: 80, opacity: 0, rotateX: 15, filter: "blur(12px)" }}
+              animate={{ y: 0, opacity: 1, rotateX: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+            >
+              Not Walls
+            </motion.span>
+          </h1>
           <motion.p
             className="!text-white/80 mt-6 max-w-lg text-[clamp(14px,2vw,20px)] font-light tracking-wide"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             A centralized hub for trusted community resources, programs, and organizations across New York City.
           </motion.p>
           <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ y: 30, opacity: 0, filter: "blur(8px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mt-10"
           >
             <Link
@@ -761,9 +776,9 @@ export default function Home() {
         <div className="max-w-4xl w-full text-center px-6 relative z-10">
           <motion.blockquote
             key={activeQuoteId}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             className="text-[clamp(20px,3vw,36px)] font-light !text-[#1F1F1F] mb-12 leading-relaxed"
             style={{ fontFamily: "var(--font-heading)" }}
           >
