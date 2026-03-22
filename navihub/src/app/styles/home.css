@@ -195,3 +195,106 @@
 .explore-link:hover::after {
   width: 100%;
 }
+
+/* ========================================
+   HOME MISSION SECTION
+   ======================================== */
+
+.mission-section {
+  background-color: var(--bg);
+}
+
+.mission-svg-path-1 {
+  stroke: rgba(31, 31, 31, 0.08);
+}
+.mission-svg-path-2 {
+  stroke: rgba(31, 31, 31, 0.06);
+}
+.mission-svg-path-3 {
+  stroke: rgba(31, 31, 31, 0.04);
+}
+
+.mission-img-tl,
+.mission-img-bl,
+.mission-img-tr,
+.mission-img-br {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.mission-img-tl:hover,
+.mission-img-bl:hover,
+.mission-img-tr:hover,
+.mission-img-br:hover {
+  z-index: 10;
+}
+
+.mission-img-tl {
+  left: 2%;
+  top: 3%;
+  transform: rotate(-10deg);
+  width: clamp(100px, 14vw, 190px);
+}
+
+.mission-img-bl {
+  left: 6%;
+  bottom: -20%;
+  transform: rotate(8deg);
+  width: clamp(110px, 15vw, 210px);
+}
+
+.mission-img-tr {
+  right: 2%;
+  top: 10%;
+  transform: rotate(10deg);
+  width: clamp(100px, 14vw, 190px);
+}
+
+.mission-img-br {
+  right: 6%;
+  bottom: -25%;
+  transform: rotate(-6deg);
+  width: clamp(120px, 16vw, 220px);
+}
+
+@media (max-width: 768px) {
+  .mission-img-tl { left: -5%; top: 5%; opacity: 0.8; z-index: 0; }
+  .mission-img-bl { left: -5%; bottom: 5%; opacity: 0.8; z-index: 0; transform: rotate(15deg); }
+  .mission-img-tr { right: -5%; top: 10%; opacity: 0.8; z-index: 0; }
+  .mission-img-br { right: -5%; bottom: 5%; opacity: 0.8; z-index: 0; }
+}
+
+.mission-heading {
+  color: var(--secondary-text, #1F1F1F);
+  line-height: 1.08;
+  font-weight: 400;
+  font-size: clamp(28px, 5.5vw, 72px);
+  max-width: 600px;
+  padding: 60px 0;
+}
+
+.mission-heading em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.mission-subheading {
+  color: var(--secondary-text, #1F1F1F);
+  font-size: clamp(10px, 1.1vw, 13px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.mission-body-text {
+  color: rgba(31, 31, 31, 0.7);
+  font-size: clamp(10px, 0.95vw, 12px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.85;
+  font-weight: 400;
+}
