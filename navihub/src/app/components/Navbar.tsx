@@ -12,6 +12,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [navReady, setNavReady] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading } = useUser()
@@ -21,18 +22,29 @@ export default function Navbar() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    // Trigger entrance animation
+    const timer = setTimeout(() => setNavReady(true), 100)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(timer)
+    }
   }, [])
 
-  const links = [
+  // Split links: 4 left, 3 right (+ sign in) for symmetry
+  const leftLinks = [
     { name: 'Home', href: '/' },
     { name: 'Resources', href: '/pages/resources' },
     { name: 'Events', href: '/pages/events' },
     { name: 'News', href: '/pages/news' },
+  ]
+
+  const rightLinks = [
     { name: 'NaviLink', href: '/pages/NaviLink' },
     { name: 'About', href: '/pages/about' },
-    { name: 'Reference Page', href: '/pages/references' },
+    { name: 'References', href: '/pages/references' },
   ]
+
+  const allLinks = [...leftLinks, ...rightLinks]
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -58,297 +70,210 @@ export default function Navbar() {
     }
   }, [mobileMenuOpen])
 
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
+
   return (
     <header
-      className={`navbar fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      className={`navbar fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
         scrolled || isSpecialPage ? 'scrolled' : ''
-      }`}
+      } ${navReady ? 'is-ready' : ''}`}
     >
-      <div className="max-w-8xl mx-auto px-6 py-5 flex items-center gap-6">
+      <div className="nav-inner mx-auto px-8 py-4 flex items-center justify-between">
 
-        <Link href="/" className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-white">
+        {/* Left Links (Desktop) */}
+        <nav className="hidden lg:flex items-center gap-16 flex-1 justify-end">
+          {leftLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={`nav-link-aupale ${isActive(link.href) ? 'active' : ''}`}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Centered Logo */}
+        <Link href="/" className="nav-logo-center mx-16 lg:mx-20 flex-shrink-0">
+          <div className="nav-logo-wrapper">
             <Image
               src="/main_logo.png"
               alt="NaviHub logo"
-              width={72}
-              height={52}
+              width={64}
+              height={46}
               className="object-contain"
               priority
             />
           </div>
-          <span className="sr-only">NaviHub</span>
         </Link>
 
-        <span className="hidden md:block text-(--primary-text) text-2xl select-none">
-          |
-        </span>
-
-        <nav className="hidden md:flex items-center gap-10">
-          {links.map((link) => {
-            const isActive =
-              link.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(link.href)
-
-            return (
+        {/* Right Links + Auth (Desktop) */}
+        <div className="hidden lg:flex items-center gap-16 flex-1">
+          <nav className="flex items-center gap-16">
+            {rightLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`
-                  nav-link
-                  text-[22px]
-                  font-semibold
-                  tracking-wide
-                  transition
-                  ${
-                    isActive
-                      ? 'text-(--primary-text) active'
-                      : 'text-(--secondary-text)'
-                  }
-                `}
+                className={`nav-link-aupale ${isActive(link.href) ? 'active' : ''}`}
               >
                 {link.name}
               </Link>
-            )
-          })}
-        </nav>
+            ))}
+          </nav>
 
-        <div className="hidden md:flex items-center gap-4 ml-auto relative">
-          {!loading && !user && (
-            <>
+          {/* Auth */}
+          <div className="flex items-center gap-3 ml-auto">
+            {!loading && !user && (
               <Link
                 href={`/pages/signin?redirect=${encodeURIComponent(pathname)}`}
-                className="
-                  px-5 py-2
-                  text-(--primary-text)
-                  border border-(--primary-text)
-                  rounded-md
-                  text-sm
-                  font-semibold
-                  hover:bg-(--primary-text)
-                  hover:text-(--secondary-text)
-                  transition
-                "
+                className="nav-cta-btn"
               >
                 Sign In
               </Link>
+            )}
 
-              <Link
-                href={`/pages/signup?redirect=${encodeURIComponent(pathname)}`}
-                className="
-                  px-5 py-2
-                  bg-(--primary-text)
-                  text-(--secondary-text)
-                  rounded-md
-                  text-sm
-                  font-semibold
-                  hover:opacity-90
-                  transition
-                "
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
-
-          {!loading && user && (
-            <div className="relative">
-              <button
-                onClick={() => setOpen(!open)}
-                className="
-                  flex items-center gap-3
-                  px-3 py-2
-                  border border-(--primary-text)
-                  rounded-3xl
-                  text-sm
-                  font-semibold
-                  text-(--primary-text)
-                  hover:bg-(--primary-text)
-                  hover:text-(--secondary-text)
-                  transition
-                "
-              >
-                <div className="
-                  w-8 h-8
-                  rounded-full
-                  bg-(--primary-text)
-                  text-(--secondary-text)
-                  flex items-center justify-center
-                  font-bold
-                  text-xs
-                ">
-                  {(user.user_metadata?.full_name || user.email).charAt(0).toUpperCase()}
-                </div>
-
-                <span className="max-w-[100px] truncate">
-                  {user.user_metadata?.full_name || user.email}
-                </span>
-              </button>
-
-              {open && (
-                <div
-                  className="
-                    absolute right-0 mt-2 w-40
-                    bg-(--secondary-bg)
-                    border border-(--border)
-                    rounded-md
-                    shadow-lg
-                    overflow-hidden
-                  "
+            {!loading && user && (
+              <div className="relative">
+                <button
+                  onClick={() => setOpen(!open)}
+                  className="nav-user-btn"
                 >
-                  <button
-                    onClick={handleSignOut}
-                    className="
-                      w-full px-4 py-3
-                      flex items-center gap-2
-                      text-sm
-                      text-(--primary-text)
-                      hover:bg-(--hover-bg)
-                      transition
-                    "
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+                  <div className="nav-avatar">
+                    {(user.user_metadata?.full_name || user.email).charAt(0).toUpperCase()}
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {open && (
+                  <div className="nav-dropdown">
+                    <div className="px-4 py-3 border-b border-white/10">
+                      <p className="text-xs text-white/50 uppercase tracking-widest">Account</p>
+                      <p className="text-sm text-white/90 mt-1 truncate">
+                        {user.user_metadata?.full_name || user.email}
+                      </p>
+                    </div>
+                    <button onClick={handleSignOut} className="nav-dropdown-item">
+                      <LogOut size={15} />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="ml-auto md:hidden">
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden">
           <button
             aria-label="Open menu"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="nav-menu-btn p-2 text-(--primary-text)"
+            className="nav-menu-btn p-2 text-white/90"
           >
-            {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
       </div>
 
       {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-        </div>
-      )}
+      <div
+        className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
+          mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+      </div>
 
       {/* Mobile Menu Panel */}
       <div
         className={`
-          fixed top-0 right-0 h-full w-[85%] max-w-[320px] z-50
-          bg-[#1F1F1F] shadow-2xl
-          transform transition-transform duration-300 ease-out
-          md:hidden
+          fixed top-0 right-0 h-full w-[85%] max-w-[360px] z-50
+          bg-[#0a0a0a] shadow-2xl
+          transform transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]
+          lg:hidden
           ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
         <div className="flex flex-col h-full">
-          {/* Mobile Menu Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/10">
+          {/* Mobile Header */}
+          <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-              <div className="p-2 rounded-lg bg-white">
+              <div className="p-1.5 rounded-lg bg-white/10">
                 <Image
                   src="/main_logo.png"
                   alt="NaviHub logo"
-                  width={48}
-                  height={35}
+                  width={36}
+                  height={26}
                   className="object-contain"
                 />
               </div>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-2 text-white/80 hover:text-white transition"
+              className="p-2 text-white/50 hover:text-white transition-colors duration-200"
               aria-label="Close menu"
             >
-              <X size={24} />
+              <X size={22} />
             </button>
           </div>
 
-          {/* Mobile Navigation Links */}
-          <nav className="flex-1 overflow-y-auto py-6 px-5">
+          {/* Mobile Links */}
+          <nav className="flex-1 overflow-y-auto py-8 px-6">
             <div className="space-y-1">
-              {links.map((link) => {
-                const isActive =
-                  link.href === '/'
-                    ? pathname === '/'
-                    : pathname.startsWith(link.href)
-
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`
-                      block px-4 py-3.5 rounded-xl
-                      text-[17px] font-medium
-                      transition-all duration-200
-                      ${
-                        isActive
-                          ? 'bg-white/15 text-white'
-                          : 'text-white/70 hover:bg-white/10 hover:text-white'
-                      }
-                    `}
-                  >
-                    {link.name}
-                  </Link>
-                )
-              })}
+              {allLinks.map((link, i) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`
+                    mobile-nav-link
+                    ${isActive(link.href) ? 'active' : ''}
+                  `}
+                  style={{ transitionDelay: mobileMenuOpen ? `${i * 50}ms` : '0ms' }}
+                >
+                  <span>{link.name}</span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mobile-nav-arrow">
+                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+              ))}
             </div>
           </nav>
 
-          {/* Mobile Menu Footer - Auth Buttons */}
-          <div className="p-5 border-t border-white/10">
+          {/* Mobile Footer */}
+          <div className="p-6 border-t border-white/[0.06]">
             {!loading && !user && (
               <div className="space-y-3">
                 <Link
                   href={`/pages/signin?redirect=${encodeURIComponent(pathname)}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="
-                    block w-full px-5 py-3
-                    text-white
-                    border border-white/30
-                    rounded-xl
-                    text-center text-[15px] font-semibold
-                    hover:bg-white/10
-                    transition
-                  "
+                  className="mobile-cta-btn"
                 >
                   Sign In
                 </Link>
                 <Link
                   href={`/pages/signup?redirect=${encodeURIComponent(pathname)}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="
-                    block w-full px-5 py-3
-                    bg-white text-[#1F1F1F]
-                    rounded-xl
-                    text-center text-[15px] font-semibold
-                    hover:bg-white/90
-                    transition
-                  "
+                  className="mobile-cta-btn-outline"
                 >
-                  Sign Up
+                  Create Account
                 </Link>
               </div>
             )}
 
             {!loading && user && (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 px-4 py-3 bg-white/10 rounded-xl">
-                  <div className="
-                    w-10 h-10 rounded-full
-                    bg-white text-[#1F1F1F]
-                    flex items-center justify-center
-                    font-bold text-sm
-                  ">
+                <div className="flex items-center gap-3 px-4 py-3 bg-white/[0.04] rounded-lg">
+                  <div className="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center font-medium text-sm">
                     {(user.user_metadata?.full_name || user.email).charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-white font-medium truncate flex-1">
+                  <span className="text-white/80 text-sm font-medium truncate flex-1">
                     {user.user_metadata?.full_name || user.email}
                   </span>
                 </div>
@@ -357,15 +282,13 @@ export default function Navbar() {
                   className="
                     w-full px-5 py-3
                     flex items-center justify-center gap-2
-                    text-white/80 hover:text-white
-                    border border-white/20
-                    rounded-xl
-                    text-[15px] font-medium
-                    hover:bg-white/10
-                    transition
+                    text-white/60 hover:text-white
+                    border border-white/10 hover:border-white/20
+                    rounded-lg text-sm font-medium
+                    transition-all duration-200
                   "
                 >
-                  <LogOut size={18} />
+                  <LogOut size={16} />
                   Sign Out
                 </button>
               </div>
