@@ -1,289 +1,155 @@
-/* Hero Section Animations */
-@keyframes letterReveal {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
+/* ═══════════════════════════════════════
+   HERO ANIMATIONS
+═══════════════════════════════════════ */
 
-.animate-letter {
-  animation: letterReveal 0.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+@keyframes letterReveal {
+  0% { transform: translateX(-100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
 }
+.animate-letter { animation: letterReveal 0.5s cubic-bezier(0.77,0,0.175,1) forwards; }
 
 @keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
+.animate-slideUp { animation: slideUp 1s ease forwards; }
 
-.animate-slideUp {
-  animation: slideUp 1s ease forwards;
-}
+/* ═══════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════ */
 
-@keyframes buttonHop {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-/* Marquee Animation */
-.marquee {
-  animation: scroll-left 30s linear infinite;
-}
+.marquee { animation: scroll-left 30s linear infinite; }
 
 @keyframes scroll-left {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
 }
 
-.filled {
-  color: #997E67;
-}
-
-.outlined {
-  color: transparent;
-  -webkit-text-stroke: 1px #997E67;
-}
-
-/* Vertical Marquee Animation */
-.marquee-vertical {
-  animation: scroll-up 30s linear infinite;
-}
-
-.marquee-vertical-stacked {
-  animation: scroll-up 30s linear infinite;
-}
-
-@keyframes scroll-up {
-  0% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(-50%);
-  }
-}
-
-/* Color Reveal Animation (Left to Right) */
-@keyframes colorReveal {
-  0% {
-    clip-path: inset(0 100% 0 0);
-  }
-  100% {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-.animate-colorReveal {
-  animation: colorReveal 5s ease-in-out forwards;
-}
-
-/* ========================================
-   MOBILE RESPONSIVE STYLES - HOME PAGE
-   ======================================== */
+.filled { color: #997E67; }
+.outlined { color: transparent; -webkit-text-stroke: 1px #997E67; }
 
 @media (max-width: 768px) {
-  /* Marquee adjustments for mobile */
-  .marquee {
-    font-size: 36px;
-    gap: 8px;
-    animation-duration: 20s;
-  }
-
-  .marquee-vertical,
-  .marquee-vertical-stacked {
-    font-size: 28px;
-  }
-
-  /* Hide vertical marquees on mobile */
-  .marquee-vertical-stacked {
-    display: none;
-  }
+  .marquee { font-size: 36px; gap: 8px; animation-duration: 20s; }
 }
-
 @media (max-width: 480px) {
-  .marquee {
-    font-size: 28px;
-    gap: 6px;
-    animation-duration: 15s;
-  }
+  .marquee { font-size: 28px; gap: 6px; animation-duration: 15s; }
 }
 
-/* ========================================
-   EXPLORE SECTION STYLES
-   ======================================== */
+/* ═══════════════════════════════════════
+   MISSION SECTION SVG PATHS (legacy)
+═══════════════════════════════════════ */
 
-.explore-card {
-  position: relative;
+.mission-section { background-color: var(--bg); }
+.mission-svg-path-1 { stroke: rgba(31,31,31,0.07); }
+.mission-svg-path-2 { stroke: rgba(31,31,31,0.05); }
+.mission-svg-path-3 { stroke: rgba(31,31,31,0.04); }
+
+/* ═══════════════════════════════════════
+   AUPALE-STYLE LINE REVEAL
+   Each text line: <span class="ms-line-wrap"><span class="ms-line-inner">Text</span></span>
+═══════════════════════════════════════ */
+
+.ms-line-wrap {
+  display: block;
   overflow: hidden;
+  padding-bottom: 0.06em; /* prevents descender clipping */
 }
 
-.explore-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, transparent 0%, rgba(153, 126, 103, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.ms-line-inner {
+  display: block;
+  /* GSAP animates yPercent: 110 → 0 */
 }
 
-.explore-card:hover::before {
-  opacity: 1;
+/* ═══════════════════════════════════════
+   MISSION SECTION HEADING
+═══════════════════════════════════════ */
+
+.ms-heading {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: clamp(28px, 4.8vw, 68px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  /* Color explicitly set per-section via !text-[] classes */
 }
 
-/* Feature card hover effects */
-@media (min-width: 768px) {
-  .feature-card-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-  }
+.ms-heading em {
+  font-style: italic;
+  font-weight: 500;
 }
 
-/* CTA Banner gradient animation */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
+/* ═══════════════════════════════════════
+   IMAGE PARALLAX RIG
+═══════════════════════════════════════ */
 
-.cta-banner-gradient {
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease infinite;
-}
-
-/* Smooth link hover */
-.explore-link {
+.ms-img-outer {
   position: relative;
+  will-change: transform, opacity;
 }
 
-.explore-link::after {
-  content: '';
+.ms-img-inner {
+  will-change: transform;
+  transform-origin: center center;
+}
+
+/* ═══════════════════════════════════════
+   ARCH SECTION — FLOATING PHOTO CARDS
+═══════════════════════════════════════ */
+
+.arch-photo {
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: #997E67;
-  transition: width 0.3s ease;
+  will-change: transform, opacity;
 }
 
-.explore-link:hover::after {
-  width: 100%;
+.arch-photo-inner {
+  border-radius: 12px;
+  overflow: hidden;
+  will-change: transform;
 }
 
-/* ========================================
-   HOME MISSION SECTION
-   ======================================== */
-
-.mission-section {
-  background-color: var(--bg);
+.arch-photo-caption {
+  margin-top: 14px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  font-weight: 500;
+  max-width: 200px;
+  /* Color explicitly set via !text-[] */
 }
 
-.mission-svg-path-1 {
-  stroke: rgba(31, 31, 31, 0.08);
-}
-.mission-svg-path-2 {
-  stroke: rgba(31, 31, 31, 0.06);
-}
-.mission-svg-path-3 {
-  stroke: rgba(31, 31, 31, 0.04);
+/* ═══════════════════════════════════════
+   ARCH TEXT LINE REVEAL
+═══════════════════════════════════════ */
+
+.arch-line-wrap {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.05em;
 }
 
-.mission-img-tl,
-.mission-img-bl,
-.mission-img-tr,
-.mission-img-br {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.3s ease;
+.arch-line-inner {
+  display: block;
+  /* GSAP drives yPercent: 110 → 0 */
 }
 
-.mission-img-tl:hover,
-.mission-img-bl:hover,
-.mission-img-tr:hover,
-.mission-img-br:hover {
-  z-index: 10;
-}
-
-.mission-img-tl {
-  left: 2%;
-  top: 3%;
-  transform: rotate(-10deg);
-  width: clamp(100px, 14vw, 190px);
-}
-
-.mission-img-bl {
-  left: 6%;
-  bottom: -20%;
-  transform: rotate(8deg);
-  width: clamp(110px, 15vw, 210px);
-}
-
-.mission-img-tr {
-  right: 2%;
-  top: 10%;
-  transform: rotate(10deg);
-  width: clamp(100px, 14vw, 190px);
-}
-
-.mission-img-br {
-  right: 6%;
-  bottom: -25%;
-  transform: rotate(-6deg);
-  width: clamp(120px, 16vw, 220px);
-}
-
-@media (max-width: 768px) {
-  .mission-img-tl { left: -5%; top: 5%; opacity: 0.8; z-index: 0; }
-  .mission-img-bl { left: -5%; bottom: 5%; opacity: 0.8; z-index: 0; transform: rotate(15deg); }
-  .mission-img-tr { right: -5%; top: 10%; opacity: 0.8; z-index: 0; }
-  .mission-img-br { right: -5%; bottom: 5%; opacity: 0.8; z-index: 0; }
-}
+/* ═══════════════════════════════════════
+   LEGACY MISSION CLASSES (kept for compatibility)
+═══════════════════════════════════════ */
 
 .mission-heading {
-  color: var(--secondary-text, #1F1F1F);
+  color: var(--secondary-text);
   line-height: 1.08;
   font-weight: 400;
   font-size: clamp(28px, 5.5vw, 72px);
   max-width: 600px;
   padding: 60px 0;
 }
-
-.mission-heading em {
-  font-style: italic;
-  font-weight: 500;
-}
+.mission-heading em { font-style: italic; font-weight: 500; }
 
 .mission-subheading {
-  color: var(--secondary-text, #1F1F1F);
+  color: var(--secondary-text);
   font-size: clamp(10px, 1.1vw, 13px);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -291,10 +157,60 @@
 }
 
 .mission-body-text {
-  color: rgba(31, 31, 31, 0.7);
+  color: rgba(31,31,31,0.65);
   font-size: clamp(10px, 0.95vw, 12px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  line-height: 1.85;
+  line-height: 1.9;
   font-weight: 400;
 }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .arch-photo { display: none; }
+}
+
+@media (max-width: 768px) {
+  .ms-heading { font-size: clamp(28px, 8vw, 48px); }
+  .ms-sub .grid { gap: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+  .ms-heading { font-size: clamp(26px, 9vw, 40px); }
+}
+
+/* ═══════════════════════════════════════
+   EXPLORE / CTA MISC (legacy)
+═══════════════════════════════════════ */
+
+.explore-card { position: relative; overflow: hidden; }
+.explore-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(153,126,103,0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.explore-card:hover::before { opacity: 1; }
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.cta-banner-gradient { background-size: 200% 200%; animation: gradientShift 8s ease infinite; }
+
+.explore-link { position: relative; }
+.explore-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 2px;
+  background: #997E67;
+  transition: width 0.3s ease;
+}
+.explore-link:hover::after { width: 100%; }
