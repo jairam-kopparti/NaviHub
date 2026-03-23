@@ -209,7 +209,7 @@ function HomeMissionSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <p className="mt-4 text-[0.5625rem] uppercase tracking-[0.28em] !text-[#1F1F1F]/40">
+              <p className="mt-8 text-[0.5625rem] uppercase tracking-[0.28em] !text-[#1F1F1F]/40 z-10 relative">
                 Community Resources Hub
               </p>
             </div>
@@ -236,7 +236,7 @@ function HomeMissionSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <p className="mt-4 text-[9px] uppercase tracking-[0.28em] !text-black/40">
+              <p className="mt-8 text-[9px] uppercase tracking-[0.28em] !text-black/40 z-10 relative">
                 Local Events &amp; Programs
               </p>
             </div>
@@ -537,7 +537,7 @@ function HomeArchSection() {
         {/* Photo: Left center */}
         <div
           ref={photoLeftRef}
-          className="arch-photo"
+          className="arch-photo photo-bottom-left"
           style={{ left: "clamp(12px, 6vw, 100px)", bottom: "clamp(70px, 14vh, 150px)", width: "clamp(160px, 15vw, 220px)", zIndex: 3 }}
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>

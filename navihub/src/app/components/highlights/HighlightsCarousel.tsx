@@ -92,8 +92,8 @@ export default function HighlightsCarousel({ resources }: Props) {
             style={{ width: "8px", height: "8px", flexShrink: 0, borderRadius: "50%", padding: 0 }}
             className={`transition ${
               i === activeIndex
-                ? "bg-black scale-125"
-                : "bg-black/30 hover:bg-black/50"
+                ? "bg-white scale-125"
+                : "bg-white/30 hover:bg-white/50"
             }`}
             aria-label={`Go to slide ${i + 1}`}
           />

@@ -534,17 +534,26 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      {/* Pull slide Map button */}
-      <button 
-        onClick={() => setShowFullMap(true)} 
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-white py-5 px-3 rounded-r-2xl shadow-[4px_0_24px_rgb(0,0,0,0.08)] border border-l-0 border-[#eae0d5]/60 flex flex-col items-center gap-2 hover:bg-[#fcfbf9] hover:pl-4 transition-all duration-300 cursor-pointer group"
-      >
-        <MapIcon className="w-6 h-6 text-[#997e67] group-hover:scale-110 transition-transform" />
-      </button>
-
       {viewMode === "dashboard" ? (
-        <div className="bg-[#fcfbf9] min-h-screen">
-          <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="bg-[#fcfbf9] min-h-screen relative flex">
+          
+          {/* Prominent Map Panel taking the full length of the dashboard */}
+          <div className="w-12 md:w-16 shrink-0 bg-white shadow-[8px_0_30px_rgb(0,0,0,0.06)] border-r border-[#eae0d5]/80 relative z-20">
+            <button 
+              onClick={() => setShowFullMap(true)} 
+              className="sticky top-[80px] h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center gap-6 cursor-pointer group hover:bg-[#fdfaf7] transition-colors"
+            >
+              <MapIcon className="w-6 h-6 md:w-8 md:h-8 text-[#997e67] group-hover:scale-110 transition-transform drop-shadow-sm" />
+              <span 
+                className="text-[#997e67] font-bold tracking-[0.2em] uppercase text-xs md:text-sm group-hover:tracking-[0.25em] transition-all"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                View Interactive Map
+              </span>
+            </button>
+          </div>
+
+          <div className="flex-1 container mx-auto px-4 sm:px-6 md:px-8 py-16 md:py-24">
             <div className="max-w-5xl mx-auto mb-20">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-5xl !text-[#4a3b32] mb-4 font-(--font-heading) tracking-tight">

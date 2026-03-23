@@ -161,6 +161,9 @@ export default function ReferencePage() {
             {/* AI & Chatbot Dependencies */}
             <div className="references-card">
               <h3>AI & Machine Learning</h3>
+              <p className="text-sm !text-gray-600 mb-4 bg-gray-50 p-3 rounded-md border border-gray-100 italic">
+                <strong>Disclaimer:</strong> Artificial Intelligence was strictly utilized to power the NaviBot community assistant chatbot. AI was <strong>not</strong> used to generate the code, content, or design of this website.
+              </p>
               <ul className="references-list">
                 <li>
                   <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="references-link">

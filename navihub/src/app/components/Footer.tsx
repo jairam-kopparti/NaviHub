@@ -12,7 +12,7 @@ export default function Footer() {
           <Link href="/" className="inline-block">
             <img src="/main_logo.png" alt="NaviHub Logo" className="h-10 brightness-0 invert opacity-90 hover:opacity-100 transition" />
           </Link>
-          <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+          <p className="!text-[15px] text-gray-400 leading-relaxed max-w-sm">
             Empowering the community to connect, learn, and grow together. Discover resources, local events, and real-time news tailored for you.
           </p>
           <div className="flex items-center gap-4 mt-2">
@@ -50,7 +50,7 @@ export default function Footer() {
         {/* Try NaviBot AI */}
         <div className="flex flex-col gap-3 w-full">
           <h4 className="text-white font-semibold text-base mb-1">Need Guidance?</h4>
-          <p className="text-xs text-gray-400 leading-relaxed mb-1">
+          <p className="!text-[15px] text-gray-400 leading-relaxed mb-1">
             Not sure where to start? Let NaviBot, our AI community assistant, help you find exactly what you&apos;re looking for.
           </p>
           <div className="flex flex-col gap-2 mt-1">
@@ -70,7 +70,7 @@ export default function Footer() {
 
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-          <p className="text-[10px] md:text-sm">© {new Date().getFullYear()} TSA Webmaster. All rights reserved.</p>
+          <p className="!text-[8px] md:!text-[10px]">© {new Date().getFullYear()} TSA Webmaster. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/pages/references" className="hover:text-gray-300 transition-colors">References</Link>
           </div>

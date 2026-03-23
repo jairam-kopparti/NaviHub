@@ -170,7 +170,13 @@
 ═══════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-  .arch-photo { display: none; }
+  .arch-photo { transform: scale(0.8); }
+}
+
+@media (max-width: 768px) {
+  .arch-photo.photo-bottom-left {
+    bottom: 15px !important;
+  }
 }
 
 @media (max-width: 768px) {

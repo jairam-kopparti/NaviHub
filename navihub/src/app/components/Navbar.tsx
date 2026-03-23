@@ -81,6 +81,9 @@ export default function Navbar() {
     >
       <div className="nav-inner mx-auto px-8 py-4 flex items-center justify-between">
 
+        {/* Mobile Spacer (Left) */}
+        <div className="lg:hidden flex-1" />
+
         {/* Left Links (Desktop) */}
         <nav className="hidden lg:flex items-center gap-16 flex-1 justify-end">
           {leftLinks.map((link) => (
@@ -95,13 +98,13 @@ export default function Navbar() {
         </nav>
 
         {/* Centered Logo */}
-        <Link href="/" className="nav-logo-center mx-16 lg:mx-20 flex-shrink-0">
+        <Link href="/" className="nav-logo-center mx-0 lg:mx-20 flex-shrink-0">
           <div className="nav-logo-wrapper">
             <Image
               src="/main_logo.png"
               alt="NaviHub logo"
-              width={64}
-              height={46}
+              width={96}
+              height={70}
               className="object-contain"
               priority
             />
@@ -168,7 +171,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="lg:hidden">
+        <div className="lg:hidden flex-1 flex justify-end">
           <button
             aria-label="Open menu"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -208,8 +211,8 @@ export default function Navbar() {
                 <Image
                   src="/main_logo.png"
                   alt="NaviHub logo"
-                  width={36}
-                  height={26}
+                  width={48}
+                  height={36}
                   className="object-contain"
                 />
               </div>
