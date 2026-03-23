@@ -519,13 +519,12 @@ export default function ResourcesPage() {
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/20 to-transparent" />
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
           <motion.div
-            className="text-center bg-black/20 backdrop-blur-md px-10 py-6 rounded-3xl border border-white/20 shadow-2xl"
+            className="text-center"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             <h1 className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-(--font-heading) tracking-tight mb-3 flex items-center justify-center gap-4">
-              <Grid3X3 className="w-10 h-10 md:w-14 md:h-14 opacity-80" />
               Resources
             </h1>
             <p className="text-white/90 text-lg md:text-xl font-medium max-w-xl mx-auto">
@@ -567,6 +566,7 @@ export default function ResourcesPage() {
                     whileHover={{ y: -5 }}
                     className="bg-white rounded-3xl p-6 md:p-8 border border-[#eae0d5]/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(153,126,103,0.12)] transition-all cursor-pointer flex flex-col group relative overflow-hidden"
                   >
+                    <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-[#997e67] to-[#CCBEB1] z-10" />
                     <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-[#997e67]/5 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-0 group-hover:opacity-100" />
                     
                     <div className="flex justify-between items-start mb-6">

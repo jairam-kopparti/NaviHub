@@ -24,7 +24,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "How can organizations get listed on NaviHub?",
-    answer: "Organizations can submit their information through our 'Add Resource' feature. We review submissions to ensure accuracy and relevance. If you represent a nonprofit, service provider, or community program, we encourage you to reach out and join our growing network."
+    answer: "Organizations can submit their information through our 'Suggest a Resource' feature. We review submissions to ensure accuracy and relevance. If you represent a nonprofit, service provider, or community program, we encourage you to reach out and join our growing network."
   },
   {
     question: "How often is the resource information updated?",
