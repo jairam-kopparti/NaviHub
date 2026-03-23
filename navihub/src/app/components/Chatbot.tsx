@@ -110,10 +110,10 @@ export default function Chatbot() {
     return data;
   }, []);
 
-  const handleSendMessage = useCallback(async (messageText: string, openEnded: boolean = true) => {
-    if (!messageText.trim() || isLoading) return;
+  const handleSendMessage = useCallback(async (displayText: string, openEnded: boolean = true, hiddenPrompt?: string) => {
+    if (!displayText.trim() || isLoading) return;
 
-    addMessage(messageText, From.You);
+    addMessage(displayText, From.You);
     setInputValue("");
     setIsLoading(true);
 
@@ -121,7 +121,7 @@ export default function Chatbot() {
       const modRes = await fetch("/api/moderate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: messageText }),
+        body: JSON.stringify({ content: displayText }),
       });
       const modData = await modRes.json();
 
@@ -131,14 +131,26 @@ export default function Chatbot() {
         return;
       }
 
-      let toSend = messageText;
+      let toSend = hiddenPrompt || displayText;
       if (openEnded) {
         const [articles, resources, events] = await Promise.all([
           fetchArticles(),
           fetchResources(),
           fetchEvents()
         ]);
-        toSend = `You are a helpful community hub assistant for the citizens of New York City. These are the resources on our community hub: ${JSON.stringify(resources)}. These are the news articles: ${JSON.stringify(articles)}. These are the events: ${JSON.stringify(events)}. User's question: ${messageText}. You may use google if needed. Do not hallucinate. Steer conversation to the hub if irrelevant.`;
+
+        const safeStringify = (arr: any, limit: number) => {
+          if (!Array.isArray(arr)) return "None";
+          // Only take top items to save tokens & prevent timeouts
+          return JSON.stringify(arr.slice(0, limit)).substring(0, 2000);
+        };
+
+        toSend = `You are a helpful community hub assistant for NYC. 
+Resources available: ${safeStringify(resources, 5)}. 
+Recent News: ${safeStringify(articles, 3)}. 
+Events: ${safeStringify(events, 3)}. 
+User's question: ${displayText}. 
+Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. Be extremely concise (max 2-3 sentences).`;
       }
 
       const chatRes = await fetch(`/api/chatbot`, {
@@ -168,12 +180,15 @@ export default function Chatbot() {
         const msDifference = today.getTime() - articleDate.getTime();
         const daysDifference = Math.floor(msDifference / (1000 * 60 * 60 * 24));
         if (daysDifference < 25) { 
-          weeklyNews += article.content + "\\n";
+          // Truncate to just title and a short snippet to dramatically shorten payload
+          const snippet = article.content ? article.content.substring(0, 120) : "";
+          weeklyNews += `- ${article.title || 'News'}: ${snippet}...\n`;
         }
       });
 
       if (weeklyNews) {
-        await handleSendMessage(`Summarize ${weeklyNews}. Include important dates and highlights. Categorize them.`, false);
+        const prompt = `Provide a very brief 3-bullet summary of this week's news highlights:\n${weeklyNews}\nFocus on the top events. Keep it extremely short.`;
+        await handleSendMessage("Summarize this week's news.", false, prompt);
       } else {
         addMessage("I'm sorry. Looks like there is no recent news to summarize.", From.Chat);
         setIsLoading(false);
