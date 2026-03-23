@@ -104,7 +104,7 @@ function HomeMissionSection() {
               x: 0,
               y: 0,
               opacity: 1,
-              duration: 1.8,
+              duration: 1.5,
               ease: "expo.out",
               scrollTrigger: {
                 trigger: sub,
@@ -180,8 +180,8 @@ function HomeMissionSection() {
               <div className="ms-rule h-px w-10 bg-[#1F1F1F]/20 my-3" />
 
               <p className="ms-body text-[0.6875rem] leading-[1.9] !text-[#1F1F1F]/60 uppercase tracking-[0.14em] max-w-xs">
-                No additives. No artifice. In a world of shortcuts, we choose restraint.
-                Fewer, better elements handled with care.
+                No barriers. No gatekeeping. In a complex city, we choose connection.
+                Genuine, reliable resources shared with care.
               </p>
 
               {/* Counter row */}
@@ -209,7 +209,7 @@ function HomeMissionSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <p className="mt-8 text-[0.5625rem] uppercase tracking-[0.28em] !text-[#1F1F1F]/40 z-10 relative">
+              <p className="mt-8 text-[0.6875rem] uppercase tracking-[0.28em] !text-[#1F1F1F]/40 z-10 relative">
                 Community Resources Hub
               </p>
             </div>
@@ -236,7 +236,7 @@ function HomeMissionSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <p className="mt-8 text-[9px] uppercase tracking-[0.28em] !text-black/40 z-10 relative">
+              <p className="mt-8 text-[0.6875rem] uppercase tracking-[0.28em] !text-black/40 z-10 relative">
                 Local Events &amp; Programs
               </p>
             </div>
@@ -413,7 +413,7 @@ function HomeArchSection() {
             rotate: 0,
             opacity: 1,
             stagger: 0.1,
-            duration: 1.4,
+            duration: 1,
             ease: "expo.out",
             scrollTrigger: {
               trigger: outer,
@@ -470,7 +470,7 @@ function HomeArchSection() {
         gsap.to(archPillRef.current, {
           width: "clamp(380px, 42vw, 550px)", // noticeable but controlled expansion that shouldn't touch images
           ease: "none",
-          scrollTrigger: { trigger: outer, start: "top top", end: "90% top", scrub: true },
+          scrollTrigger: { trigger: outer, start: "top top", end: "75% top", scrub: true },
         });
       }
     }, outerRef);
@@ -562,7 +562,7 @@ function HomeArchSection() {
             </div>
           </div>
           <p className="arch-photo-caption !text-[#1F1F1F]/40">
-            Connections are not forced. They are fostered.
+            Connections are not forced. They are made.
           </p>
         </div>
 

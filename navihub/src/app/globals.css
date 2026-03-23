@@ -70,7 +70,7 @@ p, li, dd, dt, label {
 nav, .nav-link, nav a {
   font-family: var(--font-body);
   color: var(--secondary-text);
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px -> rem */
   font-weight: 400;
   text-decoration: none;
 }
@@ -93,12 +93,12 @@ nav a.active, .nav-link.active {
   position: relative;
   color: rgba(255, 255, 255, 0.7);
   font-family: var(--font-heading);
-  font-size: 17px;
+  font-size: 1.0625rem; /* 17px -> rem */
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 4px 0;
+  padding: 0.25rem 0; /* 4px -> rem */
   transition: color 0.3s ease;
 }
 
