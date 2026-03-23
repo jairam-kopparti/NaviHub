@@ -538,20 +538,26 @@ export default function ResourcesPage() {
         <div className="bg-[#fcfbf9] min-h-screen relative flex">
           
           {/* Prominent Map Panel taking the full length of the dashboard */}
-          <div className="w-12 md:w-16 shrink-0 bg-white shadow-[8px_0_30px_rgb(0,0,0,0.06)] border-r border-[#eae0d5]/80 relative z-20">
+          <motion.div 
+            animate={{ x: [0, 8, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            className="w-12 md:w-16 shrink-0 bg-white shadow-[8px_0_30px_rgb(0,0,0,0.06)] border-r border-[#eae0d5]/80 relative z-20 before:absolute before:inset-y-0 before:-left-10 before:w-10 before:bg-white"
+          >
             <button 
               onClick={() => setShowFullMap(true)} 
-              className="sticky top-[80px] h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center gap-6 cursor-pointer group hover:bg-[#fdfaf7] transition-colors"
+              className="sticky top-[80px] h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center cursor-pointer group hover:bg-[#fdfaf7] transition-colors"
             >
-              <MapIcon className="w-6 h-6 md:w-8 md:h-8 text-[#997e67] group-hover:scale-110 transition-transform drop-shadow-sm" />
-              <span 
-                className="text-[#997e67] font-bold tracking-[0.2em] uppercase text-xs md:text-sm group-hover:tracking-[0.25em] transition-all"
-                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-              >
-                View Interactive Map
-              </span>
+              <div className="flex flex-col items-center gap-6">
+                <MapIcon className="w-6 h-6 md:w-8 md:h-8 text-[#997e67] group-hover:scale-110 transition-transform drop-shadow-sm" />
+                <span 
+                  className="text-[#997e67] font-bold tracking-[0.2em] uppercase text-xs md:text-sm group-hover:tracking-[0.25em] transition-all"
+                  style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                >
+                  View Interactive Map
+                </span>
+              </div>
             </button>
-          </div>
+          </motion.div>
 
           <div className="flex-1 container mx-auto px-4 sm:px-6 md:px-8 py-16 md:py-24">
             <div className="max-w-5xl mx-auto mb-20">

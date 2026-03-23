@@ -155,17 +155,18 @@ nav a.active, .nav-link.active {
 .nav-cta-btn {
   display: inline-flex;
   align-items: center;
-  padding: 9px 28px;
+  padding: 0.5625rem 1.75rem; /* 9px 28px in rem */
   font-family: var(--font-heading);
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px in rem */
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #ffffff;
   text-decoration: none;
-  border: 2.5px solid rgba(255, 255, 255, 0.6);
-  border-radius: 100px;
+  border: 0.15625rem solid rgba(255, 255, 255, 0.6); /* 2.5px in rem */
+  border-radius: 6.25rem; /* 100px in rem */
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .nav-cta-btn:hover {

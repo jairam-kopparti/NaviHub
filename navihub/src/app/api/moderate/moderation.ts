@@ -59,7 +59,7 @@ const explicitWords = [
 const profanityWords = [
   "fuck", "fucked", "fucking", "fucker", "fuckers", "fuk", "fuq", "f*ck", "f**k",
   "shit", "shitty", "bullshit", "shithead", "sh1t", "sh!t",
-  "ass", "asshole", "assholes", "a$$", "a55hole",
+  "ass", "asshole", "assholes", "a$$", "a55", "a55hole",
   "bitch", "bitches", "bitching", "b1tch", "biatch", "b!tch",
   "bastard", "prick", "jerk",
   "cunt", "slut", "whore", "hoe", "thot",
@@ -82,7 +82,9 @@ const mildInsults = [
 function normalizeText(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[@!]/g, "i")
+    .replace(/@/g, "a")
+    .replace(/!/g, "i")
+    .replace(/\$/g, "s")
     .replace(/0/g, "o")
     .replace(/1/g, "i")
     .replace(/3/g, "e")

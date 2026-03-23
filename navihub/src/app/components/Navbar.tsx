@@ -85,12 +85,12 @@ export default function Navbar() {
         <div className="lg:hidden flex-1" />
 
         {/* Left Links (Desktop) */}
-        <nav className="hidden lg:flex items-center gap-16 flex-1 justify-end">
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1 justify-end">
           {leftLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className={`nav-link-aupale ${isActive(link.href) ? 'active' : ''}`}
+              className={`nav-link-aupale whitespace-nowrap shrink-0 ${isActive(link.href) ? 'active' : ''}`}
             >
               {link.name}
             </Link>
@@ -98,7 +98,7 @@ export default function Navbar() {
         </nav>
 
         {/* Centered Logo */}
-        <Link href="/" className="nav-logo-center mx-0 lg:mx-20 flex-shrink-0">
+        <Link href="/" className="nav-logo-center mx-4 xl:mx-10 2xl:mx-20 flex-shrink-0">
           <div className="nav-logo-wrapper">
             <Image
               src="/main_logo.png"
@@ -112,13 +112,13 @@ export default function Navbar() {
         </Link>
 
         {/* Right Links + Auth (Desktop) */}
-        <div className="hidden lg:flex items-center gap-16 flex-1">
-          <nav className="flex items-center gap-16">
+        <div className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1">
+          <nav className="flex items-center gap-6 xl:gap-10 2xl:gap-16">
             {rightLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`nav-link-aupale ${isActive(link.href) ? 'active' : ''}`}
+                className={`nav-link-aupale whitespace-nowrap shrink-0 ${isActive(link.href) ? 'active' : ''}`}
               >
                 {link.name}
               </Link>
@@ -126,11 +126,11 @@ export default function Navbar() {
           </nav>
 
           {/* Auth */}
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-3 ml-auto shrink-0">
             {!loading && !user && (
               <Link
                 href={`/pages/signin?redirect=${encodeURIComponent(pathname)}`}
-                className="nav-cta-btn"
+                className="nav-cta-btn whitespace-nowrap shrink-0"
               >
                 Sign In
               </Link>
