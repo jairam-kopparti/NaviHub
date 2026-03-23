@@ -216,16 +216,24 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     <>
       <AnimatePresence>
         {!isOpen && (
-          <motion.button
+          <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 p-4 rounded-full bg-[#404E3B] text-white shadow-lg hover:bg-[#7B9669] hover:shadow-xl transition-all z-50 focus:outline-none"
-            aria-label="Open Chatbot"
+            className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
           >
-            <BotMessageSquare size={32} />
-          </motion.button>
+            <div className="bg-white text-[#404E3B] px-4 py-2 rounded-lg shadow-md border border-gray-100 text-sm font-medium relative mr-2 animate-bounce cursor-pointer" onClick={() => setIsOpen(true)}>
+              Need help? Ask NaviBot!
+              <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
+            </div>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="p-4 rounded-full bg-[#404E3B] text-white shadow-lg hover:bg-[#7B9669] hover:shadow-xl transition-all focus:outline-none"
+              aria-label="Open Chatbot"
+            >
+              <BotMessageSquare size={32} />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 

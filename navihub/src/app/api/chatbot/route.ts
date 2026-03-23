@@ -1,13 +1,11 @@
 import "dotenv/config";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { appendFileSync } from "fs";
 import { NextRequest, NextResponse } from "next/server";
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_AI_API_KEY || "");
-const responseLog = (msg:string) =>
-  appendFileSync(
-    "gemini-responses.log",
-    `[${new Date().toISOString()}] ${msg}\n`,
-  );
+const responseLog = (msg:string) => {
+  console.log(`[${new Date().toISOString()}] ${msg}`);
+};
 
 export async function POST(request:NextRequest) {
   try {

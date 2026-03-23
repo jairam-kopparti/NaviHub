@@ -158,6 +158,25 @@ export default function ReferencePage() {
               </ul>
             </div>
 
+            {/* AI & Chatbot Dependencies */}
+            <div className="references-card">
+              <h3>AI & Machine Learning</h3>
+              <ul className="references-list">
+                <li>
+                  <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Google Generative AI
+                  </a>{" "}
+                  - SDK for interacting with Gemini AI models (v0.24.1)
+                </li>
+                <li>
+                  <a href="https://www.npmjs.com/package/dotenv" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Dotenv
+                  </a>{" "}
+                  - Zero-dependency module that loads environment variables (used for secure AI key management) (v17.3.1)
+                </li>
+              </ul>
+            </div>
+
             {/* UI Components */}
             <div className="references-card">
               <h3>UI Components & Others</h3>
