@@ -69,11 +69,11 @@ export default function HighlightsCarousel({ resources }: Props) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ---------- CAROUSEL TRACK ---------- */}
-      <div className="relative h-[420px] sm:h-[480px] md:h-[520px] flex items-center justify-center overflow-visible pb-12 sm:pb-16">
+      <div className="relative h-[26.25rem] sm:h-[30rem] md:h-[32.5rem] flex items-center justify-center overflow-visible pb-12 sm:pb-16">
         {visibleCards.map(({ resource, position }) => (
           <motion.div
             key={resource.id}
-            className="absolute w-[240px] sm:w-[260px] md:w-[280px]"
+            className="absolute w-[15rem] sm:w-[16.25rem] md:w-[17.5rem]"
             variants={variants}
             animate={position}
             transition={{ type: "spring", stiffness: 260, damping: 30 }}
@@ -84,12 +84,13 @@ export default function HighlightsCarousel({ resources }: Props) {
       </div>
 
       {/* ---------- DOTS ---------- */}
-      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 hidden sm:flex flex-wrap justify-center items-center gap-2 max-w-[90vw]">
         {resources.map((_, i) => (
           <button
             key={i}
             onClick={() => setActiveIndex(i)}
-            className={`h-2 w-2 rounded-full transition ${
+            style={{ width: "8px", height: "8px", flexShrink: 0, borderRadius: "50%", padding: 0 }}
+            className={`transition ${
               i === activeIndex
                 ? "bg-black scale-125"
                 : "bg-black/30 hover:bg-black/50"

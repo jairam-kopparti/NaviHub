@@ -320,6 +320,16 @@ export default function ResourcesPage() {
           });
 
           setResources(sorted);
+
+          // Check if we need to open a specific resource from homepage carousel
+          const openResourceId = sessionStorage.getItem("openResourceId");
+          if (openResourceId) {
+            const targetResource = sorted.find((r: Resource) => r.id === openResourceId);
+            if (targetResource) {
+              setSelectedCard(targetResource);
+            }
+            sessionStorage.removeItem("openResourceId");
+          }
         }
       } catch (err) {
         console.error("Unexpected error fetching resources:", err);

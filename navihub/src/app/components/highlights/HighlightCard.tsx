@@ -1,7 +1,11 @@
+"use client";
+
 import { Eye } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface HighlightsCardProps {
+  id: string;
   category: string;
   title: string;
   description: string;
@@ -10,23 +14,35 @@ interface HighlightsCardProps {
 }
 
 export default function HighlightsCard({
+  id,
   category,
   title,
   description,
   imageUrl,
   views,
-
 }: HighlightsCardProps) {
-  return (
-    <div className="relative w-[336px] p-2">
-      <div className="absolute inset-0 rounded-[36px] bg-gray-300" />
+  const router = useRouter();
 
-      <div className="relative rounded-[32px] bg-(--surface) shadow-lg p-6 flex flex-col">
+  const handleClick = () => {
+    if (id) {
+      sessionStorage.setItem("openResourceId", id);
+      router.push("/pages/resources");
+    }
+  };
+
+  return (
+    <div 
+      className="relative w-full p-2 cursor-pointer transition-transform hover:scale-[1.02]"
+      onClick={handleClick}
+    >
+      <div className="absolute inset-0 rounded-[2.25rem] bg-gray-300" />
+
+      <div className="relative rounded-[2rem] bg-(--surface) shadow-lg p-6 flex flex-col">
         <h3 className="text-xl font-semibold mb-4 text-(--secondary-text)">{category}</h3>
 
         <div className="mb-4">
           {imageUrl ? (
-            <div className="relative w-full h-[160px]">
+            <div className="relative w-full h-[10rem]">
               <Image
                 src={imageUrl}
                 alt={title}
@@ -36,7 +52,7 @@ export default function HighlightsCard({
               />
             </div>
           ) : (
-            <div className="w-full h-[160px] bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center">
+            <div className="w-full h-[10rem] bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center">
               <span className="text-gray-500 text-sm font-medium">Image Not Available</span>
             </div>
           )}
