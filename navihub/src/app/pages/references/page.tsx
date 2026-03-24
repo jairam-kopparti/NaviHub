@@ -72,7 +72,7 @@ export default function ReferencePage() {
           </p>
 
           <p className="references-intro" style={{ marginTop: '1rem' }}>
-            Find the plan of work log and the copyright checklist <a href="https://docs.google.com/presentation/d/19y5RCOb3_66rF2bocdMKrjaWx9LD0jyyStGprYfVBtE/copy" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
+            Find the plan of work log and the copyright checklist <a href="https://drive.google.com/file/d/1NFx058WITAtxvRC7LKYffE6gvEXb4yWn/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
           </p>
 
           <div className="references-grid">
