@@ -749,7 +749,7 @@ export default function Home() {
               href="/pages/resources"
               className="group inline-flex border border-white/50 !text-white hover:bg-white hover:!text-black uppercase tracking-widest text-xs font-semibold px-8 py-4 transition-all duration-500 items-center justify-center"
             >
-              Explore The Hub
+              Browse NYC Resources
             </Link>
           </motion.div>
         </div>

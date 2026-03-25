@@ -201,15 +201,26 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
 
   const handlePageInfo = () => {
     const url = window.location.href;
-    let text = "Welcome to Navihub! On our homepage, you can see our most popular resources and features.";
-    if (url.includes("resources")) text = "This is the resources page, where you can browse, filter, suggest, and locate resources on a map.";
-    else if (url.includes("news")) text = "This is the news page, where you can browse and filter through New York City's news.";
-    else if (url.includes("events")) text = "This is the events page, where you can see everything that's going on in New York City.";
-    else if (url.includes("NaviLink")) text = "This is navihub's forum, where you can talk about anything that matters to you in the community.";
-    else if (url.includes("about")) text = "This page tells you about navihub and its goals. It also answers questions asked by many users.";
+    let text = "Welcome to Navihub!\n\nHere on our Homepage, you get a bird's-eye view of our platform's mission to bridge communities across New York City.\n\nSpecial Features:\n• Browse our top highlighted tools and resources\n• Jump straight into any section of the site\n• Learn about our core philosophy and what drives us";
+    
+    if (url.toLowerCase().includes("resources")) {
+      text = "You are currently on the Resources page, the core directory of Navihub!\n\nSpecial Features:\n• Map View: Toggle the interactive map to find location-based resources visually.\n• Category Filters: Sort resources easily out of dozens of categories (Housing, Food, Legal, etc.) and by NYC borough.\n• Suggest a Resource: Know a community initiative? Click 'Suggest a Resource' to propose it for our database.\n• Direct Links: Click any resource card to view detailed contact info or go straight to their official page.";
+    }
+    else if (url.toLowerCase().includes("news")) {
+      text = "You are on the NYC Local News page.\n\nSpecial Features:\n• Live Updates: Stay updated with real-time news pulled straight from community channels.\n• Category Filters: Toggle between Politics, Community, Health, Real Estate, and more to read what matters to you.\n• Quick Briefs: Read a quick snippet of the story directly on the card before digging deeper.";
+    }
+    else if (url.toLowerCase().includes("events")) {
+      text = "You are on the Events page!\n\nSpecial Features:\n• RSVP System: View upcoming local community events and easily secure your spot.\n• Email Confirmations: Upon RSVPing, you'll receive a detailed confirmation email highlighting your specific spot, time, location, and the event details. Have it prepared on the day!\n• Shared Chat: All events feature a live discussion board you can join if you're signed in to talk with other attendees.\n• Organized Directory: Easily view upcoming dates, times, and exact locations so you never miss out on NYC gatherings.";
+    }
+    else if (url.toLowerCase().includes("navilink")) {
+      text = "Welcome to NaviLink, our community forum page!\n\nSpecial Features:\n• Categorized Posts: Filter discussions by Sports & Recreation, Education, Careers, Community Events, and Wellness.\n• Global Chat: Engage with others, share resources, and reply to posts in real-time.\n• Protected Community: You must be signed in to post and reply, which keeps our community safe, localized, and authentic.\n• Active Moderation: Our robust moderation algorithm automatically prevents profanity, spam, hate speech, and explicit content so this space thrives on positivity.";
+    }
+    else if (url.toLowerCase().includes("about")) {
+      text = "You are on the About Us page.\n\nHere you can learn all about Navihub's mission to create genuine, barrier-free connections in NYC. Scroll down to see our philosophy, meet our development goals, and check out our platform roadmap.";
+    }
 
     addMessage("Tell me about this page.", From.You);
-    setTimeout(() => addMessage(text, From.Chat), 500);
+    setTimeout(() => addMessage(text, From.Chat), 600);
   };
 
   return (
@@ -294,7 +305,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             {/* Quick Actions */}
             <div className="bg-[#7B9669] px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar">
               <ChatbotOption icon={Newspaper} content="Summarize News" action={handleSummarizeNews} setHoverText={setHoverText} />
-              <ChatbotOption icon={CircleQuestionMark} content="About Page" action={handlePageInfo} setHoverText={setHoverText} />
+              <ChatbotOption icon={CircleQuestionMark} content="About this Page" action={handlePageInfo} setHoverText={setHoverText} />
             </div>
 
             {/* Input Area */}

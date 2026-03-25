@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabaseClient'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [open, setOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navReady, setNavReady] = useState(false)
@@ -21,14 +22,24 @@ export default function Navbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
+    const onResize = () => setIsMobile(window.innerWidth < 1024)
+    
+    // Initial check
+    onScroll()
+    onResize()
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize, { passive: true })
     // Trigger entrance animation
     const timer = setTimeout(() => setNavReady(true), 100)
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
       clearTimeout(timer)
     }
   }, [])
+
+  const shouldScrolledState = scrolled || isSpecialPage || isMobile
 
   // Split links: 4 left, 3 right (+ sign in) for symmetry
   const leftLinks = [
@@ -76,7 +87,7 @@ export default function Navbar() {
   return (
     <header
       className={`navbar fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        scrolled || isSpecialPage ? 'scrolled' : ''
+        shouldScrolledState ? 'scrolled' : ''
       } ${navReady ? 'is-ready' : ''}`}
     >
       <div className="nav-inner mx-auto px-8 py-4 flex items-center justify-between">
