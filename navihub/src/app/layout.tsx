@@ -7,7 +7,7 @@ import ScrollProgressBar from "./components/ScrollProgressBar";
 
 export const metadata: Metadata = {
   title: "NaviHub",
-  description: "Team #2014-1",
+  description: "Team #2285-1",
 };
 
 export default function RootLayout({

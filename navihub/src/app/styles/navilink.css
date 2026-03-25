@@ -98,7 +98,7 @@
   left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(107, 90, 78, 0.5);
   z-index: 1;
   pointer-events: none;
 }
@@ -106,23 +106,22 @@
 .navilink-search-input {
   width: 100%;
   padding: 1rem 1.25rem 1rem 3.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: white;
+  border: 1px solid rgba(234, 224, 213, 0.6);
   border-radius: 16px;
   font-size: 1rem;
-  color: white;
+  color: rgba(107, 90, 78, 0.9);
   transition: all 0.3s ease;
 }
 
 .navilink-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(107, 90, 78, 0.4);
 }
 
 .navilink-search-input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: white;
+  border-color: #CCBEB1;
 }
 
 /* ========================================
