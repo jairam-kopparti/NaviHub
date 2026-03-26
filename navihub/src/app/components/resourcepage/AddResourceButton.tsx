@@ -234,7 +234,7 @@ export default function AddResourceModal({
 
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
-                  <ImageIcon className="w-4 h-4 text-[#997e67]" />
+                  <ImageIcon className="w-4 h-4 !text-[#997e67]" />
                   Image URL
                   <span className="text-xs font-normal text-gray-500 ml-1">(Optional)</span>
                 </label>
