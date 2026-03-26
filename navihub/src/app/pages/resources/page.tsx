@@ -665,7 +665,7 @@ export default function ResourcesPage() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between ml-1">
-                    <label className="text-sm font-semibold text-[#4a3b32]">Image URL</label>
+                    <label className="text-sm font-semibold !text-[#4a3b32]">Image URL</label>
                     <span className="text-xs text-[#997e67]/60 font-medium uppercase tracking-wider">OPTIONAL</span>
                   </div>
                   <div className="relative">
