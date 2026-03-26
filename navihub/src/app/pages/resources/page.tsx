@@ -1001,7 +1001,7 @@ export default function ResourcesPage() {
                   <div className="w-8 h-8 rounded-full bg-[#997e67]/10 flex items-center justify-center">
                     <SlidersHorizontal className="w-4 h-4 text-[#997e67]" />
                   </div>
-                  <h2 className="font-bold text-lg text-[#4a3b32] tracking-tight">Filters</h2>
+                  <h2 className="font-bold text-lg !text-[#4a3b32] tracking-tight">Filters</h2>
                 </div>
                 {activeFilterCount > 0 && (
                   <button
