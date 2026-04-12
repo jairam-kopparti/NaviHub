@@ -7,7 +7,7 @@ export default function SignUpPage() {
   return (
     <main className="auth-page">
       <img
-        src="/signup.jpg"
+        src="/page-images/signup.jpg"
         alt="Sign up background"
         className="auth-bg"
       />

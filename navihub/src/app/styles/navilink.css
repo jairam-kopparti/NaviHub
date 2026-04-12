@@ -594,7 +594,7 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.8rem;
-  color: #999;
+  color: #666;
 }
 
 .navilink-post-title {
@@ -709,7 +709,7 @@
 
 .navilink-reply-time {
   font-size: 0.75rem;
-  color: #999;
+  color: #666;
 }
 
 .navilink-reply-text {
@@ -751,7 +751,7 @@
 }
 
 .navilink-reply-input::placeholder {
-  color: #999;
+  color: #666;
 }
 
 .navilink-reply-input:focus {
@@ -781,7 +781,7 @@
 
 .navilink-reply-submit:disabled {
   background: #E5E0DB;
-  color: #999;
+  color: #666;
   cursor: not-allowed;
 }
 
@@ -799,7 +799,7 @@
   background: transparent;
   border: none;
   border-radius: 10px;
-  color: #999;
+  color: #666;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -949,7 +949,7 @@
 }
 
 .navilink-modal-input::placeholder {
-  color: #999;
+  color: #666;
 }
 
 .navilink-modal-input:focus {
@@ -973,7 +973,7 @@
 }
 
 .navilink-modal-textarea::placeholder {
-  color: #999;
+  color: #666;
 }
 
 .navilink-modal-textarea:focus {
@@ -1032,7 +1032,7 @@
 
 .navilink-modal-submit:disabled {
   background: #E5E0DB;
-  color: #999;
+  color: #666;
   cursor: not-allowed;
 }
 

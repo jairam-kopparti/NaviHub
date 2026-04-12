@@ -78,6 +78,12 @@ export default function Chatbot() {
     return () => window.removeEventListener('open-chatbot', handleOpen);
   }, []);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
+    if (isOpen) document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen]);
+
   const addMessage = (content: string, from: From) => {
     setMessages(prev => [...prev, {
       id: `${Date.now()}-${Math.random()}`,
@@ -255,15 +261,18 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             transition={{ duration: 0.2 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="chatbot-title"
             className="fixed bottom-6 right-6 w-[90vw] sm:w-[400px] h-[600px] max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-[#404E3B] text-white">
               <div className="flex items-center gap-3">
                 <BotMessageSquare size={24} />
-                <h2 className="text-xl font-semibold">NaviBot</h2>
+                <h2 id="chatbot-title" className="text-xl font-semibold">NaviBot</h2>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors">
+              <button onClick={() => setIsOpen(false)} aria-label="Close chatbot" className="text-white/80 hover:text-white transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -319,12 +328,14 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Ask a question..."
+                  aria-label="Type your message"
                   className="flex-1 bg-gray-100 border-none outline-none focus:ring-2 focus:ring-[#404E3B] rounded-full px-5 py-3 text-sm text-gray-700"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={isLoading || !inputValue.trim()}
+                  aria-label="Send message"
                   className="p-3 bg-[#404E3B] text-white rounded-full hover:bg-[#7B9669] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#404E3B]"
                 >
                   {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendHorizontal className="w-5 h-5" />}

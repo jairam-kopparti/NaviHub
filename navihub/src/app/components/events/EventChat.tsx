@@ -269,6 +269,9 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
 
         {/* Chat Panel */}
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="eventchat-title"
           className="relative w-full sm:max-w-lg h-[85vh] sm:h-[600px] bg-white sm:rounded-2xl overflow-hidden flex flex-col shadow-2xl"
           onClick={(e) => e.stopPropagation()}
           initial={{ opacity: 0, y: 60, scale: 0.95 }}
@@ -283,7 +286,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                 <MessageCircle size={18} />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">Event Chat</h3>
+                <h3 id="eventchat-title" className="font-semibold text-sm">Event Chat</h3>
                 <p className="text-xs text-gray-400">
                   {messages.length} message{messages.length !== 1 ? "s" : ""}
                 </p>
@@ -291,6 +294,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
             </div>
             <button
               onClick={onClose}
+              aria-label="Close chat"
               className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer"
             >
               <X size={18} />
@@ -367,8 +371,8 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                             {isOwn && (
                               <button
                                 onClick={() => handleDelete(msg.id)}
+                                aria-label="Delete message"
                                 className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 bg-red-50 text-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 hover:text-red-600"
-                                title="Delete message"
                               >
                                 <Trash2 size={12} />
                               </button>
@@ -396,6 +400,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
             {showScrollDown && (
               <motion.button
                 onClick={() => scrollToBottom()}
+                aria-label="Scroll to latest messages"
                 className="absolute bottom-24 right-4 w-9 h-9 bg-white border border-gray-200 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition cursor-pointer"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -440,6 +445,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a message..."
+                  aria-label="Type your message"
                   rows={1}
                   className="flex-1 resize-none px-4 py-3 bg-[#F5F0EB] rounded-xl text-sm !text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#997e67]/30 transition max-h-24 overflow-y-auto"
                   style={{ minHeight: "44px" }}
@@ -448,6 +454,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                 <motion.button
                   onClick={handleSend}
                   disabled={!input.trim() || sending}
+                  aria-label="Send message"
                   className={`p-3 rounded-xl transition cursor-pointer shrink-0 ${
                     input.trim() && !sending
                       ? "bg-[#1F1F1F] text-white hover:bg-black"

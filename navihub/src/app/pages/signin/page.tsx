@@ -8,7 +8,7 @@ export default function SignInPage() {
   return (
     <main className="auth-page">
       <Image
-        src="/signin.jpg"
+        src="/page-images/signin.jpg"
         alt="Sign in background"
         className="auth-bg"
         fill

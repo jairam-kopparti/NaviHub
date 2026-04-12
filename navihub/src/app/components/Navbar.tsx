@@ -96,7 +96,7 @@ export default function Navbar() {
         <div className="lg:hidden flex-1" />
 
         {/* Left Links (Desktop) */}
-        <nav className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1 justify-end">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1 justify-end">
           {leftLinks.map((link) => (
             <Link
               key={link.name}
@@ -124,7 +124,7 @@ export default function Navbar() {
 
         {/* Right Links + Auth (Desktop) */}
         <div className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1">
-          <nav className="flex items-center gap-6 xl:gap-10 2xl:gap-16">
+          <nav aria-label="Secondary navigation" className="flex items-center gap-6 xl:gap-10 2xl:gap-16">
             {rightLinks.map((link) => (
               <Link
                 key={link.name}
@@ -151,6 +151,10 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setOpen(!open)}
+                  onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+                  aria-label="User account menu"
+                  aria-haspopup="menu"
+                  aria-expanded={open}
                   className="nav-user-btn"
                 >
                   <div className="nav-avatar">
@@ -163,14 +167,14 @@ export default function Navbar() {
                 </button>
 
                 {open && (
-                  <div className="nav-dropdown">
+                  <div className="nav-dropdown" role="menu">
                     <div className="px-4 py-3 border-b border-white/10">
                       <p className="text-xs text-white/50 uppercase tracking-widest">Account</p>
                       <p className="text-sm text-white/90 mt-1 truncate">
                         {user.user_metadata?.full_name || user.email}
                       </p>
                     </div>
-                    <button onClick={handleSignOut} className="nav-dropdown-item">
+                    <button onClick={handleSignOut} className="nav-dropdown-item" role="menuitem">
                       <LogOut size={15} />
                       Sign Out
                     </button>
@@ -238,7 +242,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Links */}
-          <nav className="flex-1 overflow-y-auto py-8 px-6">
+          <nav aria-label="Mobile navigation" className="flex-1 overflow-y-auto py-8 px-6">
             <div className="space-y-1">
               {allLinks.map((link, i) => (
                 <Link

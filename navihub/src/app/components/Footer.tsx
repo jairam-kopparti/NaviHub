@@ -15,16 +15,37 @@ export default function Footer() {
           <p className="!text-[15px] text-gray-400 leading-relaxed max-w-sm">
             Empowering the community to connect, learn, and grow together. Discover resources, local events, and real-time news tailored for you.
           </p>
-          <div className="flex items-center gap-4 mt-2">
-            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#997e67] hover:text-white transition-all">
-              <Twitter size={18} />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#997e67] hover:text-white transition-all">
-              <Instagram size={18} />
-            </a>
-            <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#997e67] hover:text-white transition-all">
-              <Youtube size={18} />
-            </a>
+          <div className="flex flex-col gap-2 mt-2">
+            <p className="text-xs text-gray-400">Check out our community</p>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://twitter.com/nycgov"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="New York City on X (Twitter)"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#997e67] hover:text-white transition-all"
+              >
+                <Twitter size={18} />
+              </a>
+              <a
+                href="https://www.instagram.com/nycgov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="New York City on Instagram"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#997e67] hover:text-white transition-all"
+              >
+                <Instagram size={18} />
+              </a>
+              <a
+                href="https://www.youtube.com/nycgov"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="New York City on YouTube"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#997e67] hover:text-white transition-all"
+              >
+                <Youtube size={18} />
+              </a>
+            </div>
           </div>
         </div>
 
@@ -54,8 +75,9 @@ export default function Footer() {
             Not sure where to start? Let NaviBot, our AI community assistant, help you find exactly what you&apos;re looking for.
           </p>
           <div className="flex flex-col gap-2 mt-1">
-            <button 
-              onClick={() => window.dispatchEvent(new Event('open-chatbot'))} 
+            <button
+              onClick={() => window.dispatchEvent(new Event('open-chatbot'))}
+              aria-label="Open NaviBot AI chat assistant"
               className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 px-4 text-xs text-white transition-all flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-2">

@@ -106,6 +106,9 @@ export default function FullMapModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="map-modal-title"
           className="fixed inset-0 z-50 flex flex-col bg-white"
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -120,6 +123,7 @@ export default function FullMapModal({
               </div>
               <div>
                 <h2
+                  id="map-modal-title"
                   className="text-base sm:text-lg font-bold"
                   style={{ color: "#1F1F1F", fontFamily: "var(--font-heading)" }}
                 >
@@ -134,6 +138,8 @@ export default function FullMapModal({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowFilters(!showFilters)}
+                aria-expanded={showFilters}
+                aria-controls="map-filters-panel"
                 className={`flex items-center gap-1.5 pl-3 pr-3.5 py-2 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
                   showFilters || activeFilters > 0
                     ? "bg-[#997e67] text-white border-[#997e67] shadow-sm"
@@ -152,6 +158,7 @@ export default function FullMapModal({
               <button
                 onClick={requestLocation}
                 disabled={geoLoading}
+                aria-label={geoLoading ? "Getting your location..." : "Use my location"}
                 className="flex items-center gap-1.5 pl-3 pr-3.5 py-2 text-xs font-semibold rounded-full bg-white text-[#555] border border-gray-200 hover:border-[#997e67] hover:text-[#997e67] transition-all cursor-pointer disabled:opacity-50"
               >
                 <Locate className={`w-3.5 h-3.5 ${geoLoading ? "animate-spin" : ""}`} />
@@ -160,6 +167,7 @@ export default function FullMapModal({
 
               <button
                 onClick={onClose}
+                aria-label="Close map"
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -171,6 +179,7 @@ export default function FullMapModal({
           <AnimatePresence>
             {showFilters && (
               <motion.div
+                id="map-filters-panel"
                 className="px-4 sm:px-6 py-3 bg-white border-b border-gray-100 z-10"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
