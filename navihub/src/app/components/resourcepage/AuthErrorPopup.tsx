@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { X } from "lucide-react";
 import Link from "next/link";
 
@@ -10,6 +11,12 @@ interface AuthErrorModalProps {
 }
 
 export default function AuthErrorModal({ isOpen, onClose, onJudgeOverride }: AuthErrorModalProps) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    if (isOpen) document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -18,6 +25,9 @@ export default function AuthErrorModal({ isOpen, onClose, onJudgeOverride }: Aut
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-error-title"
         className="relative bg-(--surface) rounded-3xl shadow-2xl max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -26,6 +36,7 @@ export default function AuthErrorModal({ isOpen, onClose, onJudgeOverride }: Aut
       >
         <button
           onClick={onClose}
+          aria-label="Close sign in dialog"
           className="absolute top-6 right-6 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md"
         >
           <X className="w-5 h-5 text-black" />
@@ -34,7 +45,7 @@ export default function AuthErrorModal({ isOpen, onClose, onJudgeOverride }: Aut
         <div className="p-8">
           <div className="text-center">
             <div className="text-5xl mb-4">🔒</div>
-            <h2 className="text-2xl font-semibold mb-3" style={{ color: "#1F1F1F" }}>
+            <h2 id="auth-error-title" className="text-2xl font-semibold mb-3" style={{ color: "#1F1F1F" }}>
               Sign In Required
             </h2>
             <p className="text-base mb-6" style={{ color: "#666" }}>
@@ -83,4 +94,3 @@ export default function AuthErrorModal({ isOpen, onClose, onJudgeOverride }: Aut
     </div>
   );
 }
-

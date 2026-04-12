@@ -331,6 +331,9 @@ const getDisplayName = (email: string): string => {
       <button
         className="navilink-post-menu-btn"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Post options"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
         <MoreVertical size={18} />
       </button>
@@ -412,8 +415,11 @@ const CreatePostModal = ({
       variants={modalOverlay}
       transition={{ duration: 0.2 }}
     >
-      <motion.div 
-        className="navilink-modal" 
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-post-title"
+        className="navilink-modal"
         onClick={(e) => e.stopPropagation()}
         variants={modalContent}
         transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
@@ -424,16 +430,16 @@ const CreatePostModal = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h3>Create Post</h3>
+            <h3 id="create-post-title">Create Post</h3>
             <p className="navilink-modal-subtitle">Share with {categoryName}</p>
           </motion.div>
-          <button onClick={handleClose} className="navilink-modal-close">
+          <button onClick={handleClose} aria-label="Close create post" className="navilink-modal-close">
             <X size={20} />
           </button>
         </div>
         <AnimatePresence>
           {moderationError && (
-            <motion.div 
+            <motion.div
               className="navilink-error-banner"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -444,7 +450,7 @@ const CreatePostModal = ({
             </motion.div>
           )}
         </AnimatePresence>
-        <motion.div 
+        <motion.div
           className="navilink-modal-body"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -453,6 +459,7 @@ const CreatePostModal = ({
           <input
             type="text"
             placeholder="Give your post a title..."
+            aria-label="Post title"
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);
@@ -546,8 +553,11 @@ const EditPostModalContent = ({
       variants={modalOverlay}
       transition={{ duration: 0.2 }}
     >
-      <motion.div 
-        className="navilink-modal" 
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-post-title"
+        className="navilink-modal"
         onClick={(e) => e.stopPropagation()}
         variants={modalContent}
         transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
@@ -558,16 +568,16 @@ const EditPostModalContent = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h3>Edit Post</h3>
+            <h3 id="edit-post-title">Edit Post</h3>
             <p className="navilink-modal-subtitle">Update your post</p>
           </motion.div>
-          <button onClick={handleClose} className="navilink-modal-close">
+          <button onClick={handleClose} aria-label="Close edit post" className="navilink-modal-close">
             <X size={20} />
           </button>
         </div>
         <AnimatePresence>
           {moderationError && (
-            <motion.div 
+            <motion.div
               className="navilink-error-banner"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -578,7 +588,7 @@ const EditPostModalContent = ({
             </motion.div>
           )}
         </AnimatePresence>
-        <motion.div 
+        <motion.div
           className="navilink-modal-body"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -587,6 +597,7 @@ const EditPostModalContent = ({
           <input
             type="text"
             placeholder="Post Title"
+            aria-label="Post title"
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);
@@ -690,13 +701,17 @@ const DeleteConfirmModal = ({
       variants={modalOverlay}
       transition={{ duration: 0.2 }}
     >
-      <motion.div 
-        className="navilink-modal navilink-modal-small" 
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-post-title"
+        aria-describedby="delete-post-description"
+        className="navilink-modal navilink-modal-small"
         onClick={(e) => e.stopPropagation()}
         variants={modalContent}
         transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 25 }}
       >
-        <motion.div 
+        <motion.div
           className="navilink-delete-icon"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -704,7 +719,8 @@ const DeleteConfirmModal = ({
         >
           <Trash2 size={28} />
         </motion.div>
-        <motion.h3 
+        <motion.h3
+          id="delete-post-title"
           className="navilink-delete-title"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -712,7 +728,8 @@ const DeleteConfirmModal = ({
         >
           Delete Post?
         </motion.h3>
-        <motion.p 
+        <motion.p
+          id="delete-post-description"
           className="navilink-delete-text"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1261,7 +1278,7 @@ export default function NaviLinkPage() {
       <section className="navilink-hero">
         <motion.div 
           className="navilink-hero-bg"
-          style={{ backgroundImage: "url('/navilink.jpg')" }}
+          style={{ backgroundImage: "url('/page-images/navilink.jpg')" }}
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
@@ -1305,6 +1322,7 @@ export default function NaviLinkPage() {
               placeholder="Search discussions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search posts"
               className="navilink-search-input"
             />
           </motion.div>

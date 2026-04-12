@@ -91,6 +91,12 @@ export default function ResourceDetailModal({
     fetchReviews();
   }, [resource, user, onJudgeOverride]);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    if (isOpen) document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !resource) return null;
 
   const handleToggleFavorite = async () => {
@@ -196,6 +202,9 @@ export default function ResourceDetailModal({
     >
       {/* Modal Card */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resource-detail-title"
         className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -225,6 +234,7 @@ export default function ResourceDetailModal({
           {/* Floating Close Button */}
           <button
             onClick={onClose}
+            aria-label="Close resource details"
             className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2.5 hover:bg-white transition-all shadow-lg cursor-pointer group"
           >
             <X className="w-5 h-5 text-gray-700 group-hover:text-gray-900 transition-colors" />
@@ -234,6 +244,7 @@ export default function ResourceDetailModal({
           {(user || onJudgeOverride) && (
             <button
               onClick={handleToggleFavorite}
+              aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
               className={`absolute top-4 left-4 z-10 backdrop-blur-sm rounded-full p-2.5 transition-all shadow-lg cursor-pointer ${
                 isFavorited 
                   ? "bg-red-500 hover:bg-red-600" 
@@ -263,7 +274,7 @@ export default function ResourceDetailModal({
           {/* Content */}
           <div className="p-4 sm:p-6 md:p-8">
             {/* Title */}
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 leading-tight" style={{ color: "#000000" }}>
+            <h2 id="resource-detail-title" className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 leading-tight" style={{ color: "#000000" }}>
               {resource.title}
             </h2>
 
@@ -345,6 +356,8 @@ export default function ResourceDetailModal({
                           key={star}
                           type="button"
                           onClick={() => setNewRating(star)}
+                          aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                          aria-pressed={star <= newRating}
                           className="p-1 sm:p-1.5 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer"
                         >
                           <Star
@@ -367,6 +380,7 @@ export default function ResourceDetailModal({
                       value={newReview}
                       onChange={(e) => setNewReview(e.target.value)}
                       placeholder="Share your experience with this resource (min. 10 characters)"
+                      aria-label="Write your review"
                       style={{ color: "#000000" }}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent resize-none h-28 placeholder:text-gray-400 transition-shadow"
                     />

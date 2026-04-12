@@ -205,7 +205,10 @@ const EventModal = ({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
       />
-      <motion.div 
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-modal-title"
         className="relative bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -215,10 +218,10 @@ const EventModal = ({
       >
         {/* Header with gradient */}
         <div className="bg-[#997e67] p-8 text-white">
-          <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
+          <button onClick={onClose} aria-label="Close event details" className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
             <X size={20} />
           </button>
-          <motion.span 
+          <motion.span
             className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-medium mb-4"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -226,7 +229,8 @@ const EventModal = ({
           >
             {CATEGORY_LABELS[event.category]}
           </motion.span>
-          <motion.h2 
+          <motion.h2
+            id="event-modal-title"
             className="text-2xl font-bold mb-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -455,7 +459,7 @@ export default function CommunityEvents() {
       <section className="relative min-h-[50vh] sm:min-h-[60vh] bg-black overflow-hidden flex flex-col justify-center">
         <motion.div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/events.jpg')" }}
+          style={{ backgroundImage: "url('/page-images/events.jpg')" }}
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.6 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
@@ -500,14 +504,17 @@ export default function CommunityEvents() {
                 <input
                   type="text"
                   placeholder="Search events..."
+                  aria-label="Search events"
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
                   className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
                 />
                 <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
               </div>
-              <button 
+              <button
                 onClick={() => setShowFilters(!showFilters)}
+                aria-expanded={showFilters}
+                aria-controls="events-filter-panel"
                 className="px-6 sm:px-8 py-4 sm:py-auto bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white hover:bg-white/20 transition cursor-pointer flex items-center justify-center gap-2 font-medium"
               >
                 <Filter size={20} />
@@ -527,7 +534,8 @@ export default function CommunityEvents() {
                     animate="visible"
                     exit="exit"
                   />
-                  <motion.div 
+                  <motion.div
+                    id="events-filter-panel"
                     className="fixed top-0 right-0 h-full w-full max-w-[320px] sm:max-w-md bg-[#1F1F1F] z-50 p-5 sm:p-8 shadow-2xl border-l border-white/10 overflow-y-auto"
                     variants={sidebarVariants}
                     initial="hidden"
@@ -536,8 +544,9 @@ export default function CommunityEvents() {
                   >
                     <div className="flex items-center justify-between mb-8">
                       <h3 className="text-2xl font-bold text-white">Filter Events</h3>
-                      <button 
+                      <button
                         onClick={() => setShowFilters(false)}
+                        aria-label="Close filters"
                         className="p-2 hover:bg-white/10 rounded-full transition text-gray-400 hover:text-white"
                       >
                         <X size={24} />
@@ -769,7 +778,7 @@ export default function CommunityEvents() {
                         >
                            <div 
                               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
-                              style={{ backgroundImage: "url('/featuredevent.jpg')" }} 
+                              style={{ backgroundImage: "url('/page-images/featuredevent.jpg')" }} 
                            />
                         </motion.div>
                       )}

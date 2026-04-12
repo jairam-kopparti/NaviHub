@@ -185,7 +185,7 @@ export default function NewsPage() {
           transition={{ duration: 1.2, ease: "easeOut" }}
         >
           <Image
-            src="/news.jpg"
+            src="/page-images/news.jpg"
             alt="NYC News"
             fill
             className="object-cover"

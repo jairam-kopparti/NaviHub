@@ -187,7 +187,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer lg:pl-16 xl:pl-24 mt-14 lg:mt-0" data-from="right">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
                 <Image
-                  src="/home-mission-resources.jpg"
+                  src="/page-images/home-mission-resources.jpg"
                   alt="Community Resources"
                   fill
                   className="object-cover"
@@ -214,7 +214,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer order-2 lg:order-1" data-from="left">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "4/3" }}>
                 <Image
-                  src="/home-mission-events.jpg"
+                  src="/page-images/home-mission-events.jpg"
                   alt="Community Events"
                   fill
                   className="object-cover"
@@ -264,7 +264,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer" data-from="left">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "2/3" }}>
                 <Image
-                  src="/home-mission-navilink.jpg"
+                  src="/page-images/home-mission-navilink.jpg"
                   alt="NaviLink Community Forum"
                   fill
                   className="object-cover"
@@ -285,7 +285,7 @@ function HomeMissionSection() {
             <div className="ms-img-outer mt-8 lg:mt-0" data-from="right">
               <div className="ms-img-inner relative overflow-hidden rounded-xl" style={{ aspectRatio: "2/3" }}>
                 <Image
-                  src="/home-mission-news.jpg"
+                  src="/page-images/home-mission-news.jpg"
                   alt="NYC News"
                   fill
                   className="object-cover"
@@ -529,7 +529,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
             <div className="relative w-full h-full">
-              <Image src="/home-arch-about.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
+              <Image src="/page-images/home-arch-about.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
             </div>
           </div>
           <p className="arch-photo-caption !text-[#1F1F1F]/40">
@@ -545,7 +545,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
             <div className="relative w-full h-full">
-              <Image src="/home-arch-resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
+              <Image src="/page-images/home-arch-resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
             </div>
           </div>
           <p className="arch-photo-caption !text-[#1F1F1F]/40">
@@ -561,7 +561,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
             <div className="relative w-full h-full">
-              <Image src="/home-arch-events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
+              <Image src="/page-images/home-arch-events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
             </div>
           </div>
         </div>
@@ -574,7 +574,7 @@ function HomeArchSection() {
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
             <div className="relative w-full h-full">
-              <Image src="/home-arch-navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
+              <Image src="/page-images/home-arch-navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
             </div>
           </div>
         </div>
@@ -648,28 +648,28 @@ export default function Home() {
       id: 1,
       text: "“This site feels like a true home base. Everything is clear, organized, and built with real people in mind.”",
       name: "Alex Rivera",
-      image: "/person1.jpg",
+      image: "/page-images/person1.jpg",
       rating: 5,
     },
     {
       id: 2,
       text: "“Finding resources has never been simpler. It turns overwhelming information into something approachable and straightforward.”",
       name: "Jordan Lee",
-      image: "/person2.jpg",
+      image: "/page-images/person2.jpg",
       rating: 4,
     },
     {
       id: 3,
       text: "“More than just a list of links, it’s a guided experience that genuinely connects you to support and opportunities.”",
       name: "Emily Chen",
-      image: "/person3.jpg",
+      image: "/page-images/person3.jpg",
       rating: 5,
     },
     {
       id: 4,
       text: "“A deeply reliable platform. It highlights community events and services in a way that feels trustworthy and very accessible.”",
       name: "Michael Torres",
-      image: "/person4.jpg",
+      image: "/page-images/person4.jpg",
       rating: 4.5,
     },
   ];
@@ -694,7 +694,7 @@ export default function Home() {
       >
         <div className="absolute inset-0 z-0 hero-video scale-110 w-full h-full">
           <div className="absolute inset-0 bg-black/60 z-10" />
-          <Image src="/home-hero-bg.png" alt="Hero Background" fill className="object-cover opacity-80" priority />
+          <Image src="/page-images/home-hero-bg.png" alt="Hero Background" fill className="object-cover opacity-80" priority />
         </div>
         <div className="relative z-30 text-center flex flex-col items-center justify-center px-4 w-full h-full pointer-events-auto">
           <h1

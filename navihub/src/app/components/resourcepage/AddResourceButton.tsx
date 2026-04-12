@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Loader, FileText, Tag, MapPin, Image as ImageIcon, AlignLeft, Plus, CheckCircle } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -124,6 +124,12 @@ export default function AddResourceModal({
     }
   };
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    if (isOpen) document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -132,6 +138,9 @@ export default function AddResourceModal({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-resource-title"
         className="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -142,12 +151,13 @@ export default function AddResourceModal({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div>
-                <h2 className="text-xl font-bold text-white">Add Resource</h2>
+                <h2 id="add-resource-title" className="text-xl font-bold text-white">Add Resource</h2>
                 <p className="text-white/70 text-sm">Share a helpful resource with the community</p>
               </div>
             </div>
             <button
               onClick={onClose}
+              aria-label="Close add resource form"
               className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5 text-white" />
@@ -177,15 +187,17 @@ export default function AddResourceModal({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                <label htmlFor="resource-title" className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
                   <FileText className="w-4 h-4 text-[#997e67]" />
                   Resource Title
                 </label>
                 <input
+                  id="resource-title"
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter a descriptive title"
+                  aria-required="true"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent placeholder:text-gray-400 bg-gray-50 hover:bg-white transition-colors"
                   style={{ color: "#000000" }}
                 />
@@ -193,13 +205,15 @@ export default function AddResourceModal({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                  <label htmlFor="resource-category" className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
                     <Tag className="w-4 h-4 text-[#997e67]" />
                     Category
                   </label>
                   <select
+                    id="resource-category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
+                    aria-required="true"
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent bg-gray-50 hover:bg-white transition-colors cursor-pointer appearance-none"
                     style={{ color: category ? "#000000" : "#9ca3af", backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25em 1.25em', paddingRight: '2.5rem' }}
                   >
@@ -213,11 +227,12 @@ export default function AddResourceModal({
                 </div>
 
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                  <label htmlFor="resource-borough" className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
                     <MapPin className="w-4 h-4 text-[#997e67]" />
                     Borough
                   </label>
                   <select
+                    id="resource-borough"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent bg-gray-50 hover:bg-white transition-colors cursor-pointer appearance-none"
@@ -233,12 +248,13 @@ export default function AddResourceModal({
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
+                <label htmlFor="resource-image-url" className="flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: "#000000" }}>
                   <ImageIcon className="w-4 h-4 text-[#997e67]" />
                   Image URL
                   <span className="text-xs font-normal text-gray-500 ml-1">(Optional)</span>
                 </label>
                 <input
+                  id="resource-image-url"
                   type="url"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
@@ -250,7 +266,7 @@ export default function AddResourceModal({
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#000000" }}>
+                  <label htmlFor="resource-description" className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#000000" }}>
                     <AlignLeft className="w-4 h-4 text-[#997e67]" />
                     Description
                   </label>
@@ -265,9 +281,11 @@ export default function AddResourceModal({
                   </span>
                 </div>
                 <textarea
+                  id="resource-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe this resource and how it can help community members (minimum 15 words)"
+                  aria-required="true"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#997e67] focus:border-transparent resize-none placeholder:text-gray-400 bg-gray-50 hover:bg-white transition-colors h-32"
                   style={{ color: "#000000" }}
                 />
@@ -285,6 +303,7 @@ export default function AddResourceModal({
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
+                aria-busy={loading}
                 className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
                   isFormValid && !loading
                     ? "bg-[#997e67] text-white hover:bg-[#8a6d5a] hover:shadow-lg active:scale-[0.98]"

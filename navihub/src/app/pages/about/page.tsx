@@ -120,7 +120,7 @@ export default function AboutUs() {
       <section className="hero-section relative h-[50vh] sm:h-screen border-b border-(--border) overflow-hidden">
         <img
           ref={heroImageRef}
-          src="/aboutus.jpg"
+          src="/page-images/aboutus.jpg"
           alt="About NaviHub"
           className="absolute inset-0 w-full h-full object-cover"
         />

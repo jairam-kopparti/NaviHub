@@ -18,11 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased min-h-screen flex flex-col`}>
+        <a href="#main-content" className="skip-to-content">Skip to main content</a>
         <ScrollProgressBar />
         <Navbar />
-        <div className="flex-1">
+        <main id="main-content" className="flex-1">
           {children}
-        </div>
+        </main>
         <Chatbot />
         <Footer />
       </body>

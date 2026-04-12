@@ -501,7 +501,7 @@ export default function ResourcesPage() {
       <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] overflow-hidden">
         <motion.div
           className="absolute inset-0 w-full h-full bg-cover bg-center"
-          style={{ backgroundImage: 'url(/resources.jpg)' }}
+          style={{ backgroundImage: 'url(/page-images/resources.jpg)' }}
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -750,6 +750,8 @@ export default function ResourcesPage() {
             <div className="rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('categories')}
+                aria-expanded={expandedSections.categories}
+                aria-controls="filter-section-categories"
                 className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
@@ -798,6 +800,8 @@ export default function ResourcesPage() {
             <div className="rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('locations')}
+                aria-expanded={expandedSections.locations}
+                aria-controls="filter-section-locations"
                 className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
@@ -843,6 +847,8 @@ export default function ResourcesPage() {
             <div className="rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('rating')}
+                aria-expanded={expandedSections.rating}
+                aria-controls="filter-section-rating"
                 className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
@@ -887,6 +893,8 @@ export default function ResourcesPage() {
             <div className="rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('views')}
+                aria-expanded={expandedSections.views}
+                aria-controls="filter-section-views"
                 className="w-full flex items-center justify-between px-4 py-3 bg-(--bg)/50 hover:bg-(--bg) transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
@@ -1220,6 +1228,7 @@ export default function ResourcesPage() {
               <input
                 type="text"
                 placeholder="Search resources by name or description..."
+                aria-label="Search resources"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-14 pr-4 py-4 bg-white border border-[#eae0d5]/80 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] placeholder:text-[#4a3b32]/40 text-[#4a3b32] font-medium transition-all"
