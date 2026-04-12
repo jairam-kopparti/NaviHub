@@ -7,10 +7,12 @@ import { supabase } from "../lib/supabaseClient";
 // 📝 Update this list with the Supabase UUIDs of users 
 // who are allowed to access the restricted pages.
 const ALLOWED_UUIDS = [
-  "83f18768-6f8d-4b74-99a5-837282b8e3b7",
-  "e02c438a-6833-4e37-914d-9afdc194fe7c",
-  "210ede71-99d1-4ac6-aed1-3ee778f7a262",
-  "cba015b2-9fb2-4d97-90a3-7097b1eae469"
+  "83f18768-6f8d-4b74-99a5-837282b8e3b7", // me
+  "e02c438a-6833-4e37-914d-9afdc194fe7c", // sangle
+  "210ede71-99d1-4ac6-aed1-3ee778f7a262", // daniel
+  "cba015b2-9fb2-4d97-90a3-7097b1eae469", // keziah
+  "fcd16c99-ccc1-4031-a541-d1ff99cf3f2a", // tarun
+  "9ae1fef9-1966-4531-8b1e-b9059469f10b" // me again
 ];
 
 export default function PagesLayout({ children }: { children: React.ReactNode }) {
