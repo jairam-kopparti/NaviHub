@@ -236,7 +236,7 @@ export default function NewsPage() {
                   placeholder="Search articles..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
+                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white border border-[#eae0d5]/60 rounded-xl sm:rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
                 />
                 <Search
                   className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -245,7 +245,7 @@ export default function NewsPage() {
               </div>
               <button
                 onClick={() => setShowFilters(true)}
-                className="px-6 sm:px-8 py-4 sm:py-auto bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white hover:bg-white/20 transition cursor-pointer flex items-center justify-center gap-2 font-medium"
+                className="px-6 sm:px-8 py-4 sm:py-auto bg-white border border-[#eae0d5]/60 rounded-xl sm:rounded-2xl text-gray-900 hover:bg-gray-50 transition cursor-pointer flex items-center justify-center gap-2 font-medium"
               >
                 <Filter size={20} />
                 <span>Filters</span>

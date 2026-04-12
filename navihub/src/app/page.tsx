@@ -24,80 +24,95 @@ function HomeMissionSection() {
       subsections.forEach((sub) => {
         // ── Line-by-line text reveals (Aupale's signature) ──
         sub.querySelectorAll<HTMLElement>(".ms-line-inner").forEach((inner, i) => {
-          gsap.from(inner, {
-            yPercent: 120,
-            duration: 1.4,
-            ease: "expo.out",
-            delay: i * 0.1,
-            scrollTrigger: {
-              trigger: sub,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          });
+          gsap.fromTo(inner, 
+            { yPercent: 120 },
+            {
+              yPercent: 0,
+              duration: 1.4,
+              ease: "expo.out",
+              delay: i * 0.1,
+              scrollTrigger: {
+                trigger: sub,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
         });
 
         // ── Tag / label fade ──
         sub.querySelectorAll(".ms-tag").forEach((tag) => {
-          gsap.from(tag, {
-            opacity: 0,
-            y: 15,
-            duration: 1.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: sub,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          });
+          gsap.fromTo(tag, 
+            { opacity: 0, y: 15 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 1.2,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: sub,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
         });
 
         // ── Body text fade up ──
         sub.querySelectorAll(".ms-body").forEach((body) => {
-          gsap.from(body, {
-            y: 35,
-            opacity: 0,
-            duration: 1.4,
-            ease: "power3.out",
-            delay: 0.35,
-            scrollTrigger: {
-              trigger: sub,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          });
+          gsap.fromTo(body, 
+            { y: 35, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 1.4,
+              ease: "power3.out",
+              delay: 0.35,
+              scrollTrigger: {
+                trigger: sub,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
         });
 
         // ── Rule scales from left ──
         sub.querySelectorAll(".ms-rule").forEach((rule) => {
-          gsap.from(rule, {
-            scaleX: 0,
-            duration: 1.6,
-            ease: "expo.out",
-            transformOrigin: "left center",
-            scrollTrigger: {
-              trigger: sub,
-              start: "top 85%",
-              toggleActions: "play none none none",
-            },
-          });
+          gsap.fromTo(rule, 
+            { scaleX: 0 },
+            {
+              scaleX: 1,
+              duration: 1.6,
+              ease: "expo.out",
+              transformOrigin: "left center",
+              scrollTrigger: {
+                trigger: sub,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
         });
 
         // ── Image: slide in from side + inner parallax ──
         sub.querySelectorAll<HTMLElement>(".ms-img-outer").forEach((outer) => {
           const fromLeft = outer.dataset.from === "left";
-          gsap.from(outer, {
-            x: fromLeft ? -50 : 50,
-            y: 30,
-            opacity: 0,
-            duration: 1.8,
-            ease: "expo.out",
-            scrollTrigger: {
-              trigger: sub,
-              start: "top 80%",
-              toggleActions: "play none none none",
-            },
-          });
+          gsap.fromTo(outer, 
+            { x: fromLeft ? -50 : 50, y: 30, opacity: 0 },
+            {
+              x: 0,
+              y: 0,
+              opacity: 1,
+              duration: 1.5,
+              ease: "expo.out",
+              scrollTrigger: {
+                trigger: sub,
+                start: "top 80%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
 
           const inner = outer.querySelector<HTMLElement>(".ms-img-inner");
           if (inner) {
@@ -152,7 +167,7 @@ function HomeMissionSection() {
 
             {/* Left: Text */}
             <div className="lg:pr-16 xl:pr-24 flex flex-col gap-5 lg:pt-10">
-              <span className="ms-tag block text-[10px] uppercase tracking-[0.32em] !text-[#1F1F1F]/50 font-medium mb-2">
+              <span className="ms-tag block text-[0.625rem] uppercase tracking-[0.32em] !text-[#1F1F1F]/50 font-medium mb-2">
                 Our Philosophy
               </span>
 
@@ -164,9 +179,9 @@ function HomeMissionSection() {
 
               <div className="ms-rule h-px w-10 bg-[#1F1F1F]/20 my-3" />
 
-              <p className="ms-body text-[11px] leading-[1.9] !text-[#1F1F1F]/60 uppercase tracking-[0.14em] max-w-xs">
-                No additives. No artifice. In a world of shortcuts, we choose restraint.
-                Fewer, better elements handled with care.
+              <p className="ms-body text-[0.6875rem] leading-[1.9] !text-[#1F1F1F]/60 uppercase tracking-[0.14em] max-w-xs">
+                No barriers. No gatekeeping. In a complex city, we choose connection.
+                Genuine, reliable resources shared with care.
               </p>
 
               {/* Counter row */}
@@ -174,7 +189,7 @@ function HomeMissionSection() {
                 {[["9+", "Categories"], ["90+", "Resources"], ["5", "Boroughs"]].map(([num, label]) => (
                   <div key={label}>
                     <p className="text-2xl font-heading font-semibold !text-[#1F1F1F]">{num}</p>
-                    <p className="text-[9px] uppercase tracking-[0.2em] !text-[#1F1F1F]/45 mt-0.5">{label}</p>
+                    <p className="text-[0.5625rem] uppercase tracking-[0.2em] !text-[#1F1F1F]/45 mt-0.5">{label}</p>
                   </div>
                 ))}
               </div>
@@ -194,7 +209,7 @@ function HomeMissionSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <p className="mt-4 text-[9px] uppercase tracking-[0.28em] !text-[#1F1F1F]/40">
+              <p className="mt-8 text-[0.6875rem] uppercase tracking-[0.28em] !text-[#1F1F1F]/40 z-10 relative">
                 Community Resources Hub
               </p>
             </div>
@@ -221,7 +236,7 @@ function HomeMissionSection() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <p className="mt-4 text-[9px] uppercase tracking-[0.28em] !text-black/40">
+              <p className="mt-8 text-[0.6875rem] uppercase tracking-[0.28em] !text-black/40 z-10 relative">
                 Local Events &amp; Programs
               </p>
             </div>
@@ -367,6 +382,7 @@ function HomeArchSection() {
   const outerRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const archTextRef = useRef<HTMLDivElement>(null);
+  const archPillRef = useRef<HTMLDivElement>(null);
   const photoLeftRef = useRef<HTMLDivElement>(null);
   const photoRightTopRef = useRef<HTMLDivElement>(null);
   const photoRightBotRef = useRef<HTMLDivElement>(null);
@@ -390,35 +406,34 @@ function HomeArchSection() {
       // Arch text line reveals
       if (archTextRef.current) {
         const lines = archTextRef.current.querySelectorAll(".arch-line-inner");
-        gsap.from(lines, {
-          yPercent: 120,
-          rotate: 2,
-          stagger: 0.1,
-          duration: 1.4,
-          opacity: 0,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: outer,
-            start: "top top",
-            end: "8% top",
-            toggleActions: "play none none none",
-          },
-        });
+        gsap.fromTo(lines, 
+          { yPercent: 120, rotate: 2, opacity: 0 },
+          {
+            yPercent: 0,
+            rotate: 0,
+            opacity: 1,
+            stagger: 0.1,
+            duration: 1,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: outer,
+              start: "top top",
+              end: "8% top",
+              toggleActions: "play none none none",
+            },
+          }
+        );
       }
 
-      // Photo LEFT — enters from bottom with CCW rotation that normalises
+      // Photo LEFT — enters from bottom
       gsap.fromTo(
         photoLeftRef.current,
         { y: "65vh", opacity: 0, rotate: -8, scale: 0.95 },
         {
           y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "3% top", end: "30% top", scrub: 1.8 },
+          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
         }
       );
-      gsap.to(photoLeftRef.current, {
-        y: "-30vh", opacity: 0, rotate: 5, scale: 0.95, ease: "power3.in",
-        scrollTrigger: { trigger: outer, start: "65% top", end: "85% top", scrub: 1.8 },
-      });
 
       // Photo RIGHT TOP — enters from upper-right
       gsap.fromTo(
@@ -426,13 +441,9 @@ function HomeArchSection() {
         { y: "-40vh", x: "12vw", opacity: 0, rotate: 10, scale: 0.95 },
         {
           y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "6% top", end: "35% top", scrub: 1.8 },
+          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
         }
       );
-      gsap.to(photoRightTopRef.current, {
-        y: "-45vh", opacity: 0, scale: 0.95, ease: "power3.in",
-        scrollTrigger: { trigger: outer, start: "32% top", end: "60% top", scrub: 1.8 },
-      });
 
       // Photo LEFT BOTTOM
       gsap.fromTo(
@@ -440,13 +451,9 @@ function HomeArchSection() {
         { y: "55vh", opacity: 0, rotate: 6, scale: 0.95 },
         {
           y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "35% top", end: "60% top", scrub: 1.8 },
+          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
         }
       );
-      gsap.to(photoLeftBotRef.current, {
-        y: "-35vh", opacity: 0, rotate: -4, scale: 0.95, ease: "power3.in",
-        scrollTrigger: { trigger: outer, start: "72% top", end: "92% top", scrub: 1.8 },
-      });
 
       // Photo RIGHT BOTTOM
       gsap.fromTo(
@@ -454,13 +461,18 @@ function HomeArchSection() {
         { y: "60vh", x: "8vw", opacity: 0, rotate: -8, scale: 0.95 },
         {
           y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "48% top", end: "75% top", scrub: 1.8 },
+          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
         }
       );
-      gsap.to(photoRightBotRef.current, {
-        y: "-28vh", opacity: 0, scale: 0.95, ease: "power3.in",
-        scrollTrigger: { trigger: outer, start: "82% top", end: "96% top", scrub: 1 },
-      });
+
+      // Central Arch Pill — Expand horizontally on scroll
+      if (archPillRef.current) {
+        gsap.to(archPillRef.current, {
+          width: "clamp(380px, 42vw, 550px)", // noticeable but controlled expansion that shouldn't touch images
+          ease: "none",
+          scrollTrigger: { trigger: outer, start: "top top", end: "75% top", scrub: true },
+        });
+      }
     }, outerRef);
 
     return () => ctx.revert();
@@ -484,6 +496,7 @@ function HomeArchSection() {
 
         {/* ── Central arch pill — filled with peach (#FFDBBB) ── */}
         <div
+          ref={archPillRef}
           className="absolute left-1/2 top-1/2 border border-[#1F1F1F]/8 shadow-sm"
           style={{
             transform: "translate(-50%, -48%)",
@@ -524,7 +537,7 @@ function HomeArchSection() {
         {/* Photo: Left center */}
         <div
           ref={photoLeftRef}
-          className="arch-photo"
+          className="arch-photo photo-bottom-left"
           style={{ left: "clamp(12px, 6vw, 100px)", bottom: "clamp(70px, 14vh, 150px)", width: "clamp(160px, 15vw, 220px)", zIndex: 3 }}
         >
           <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
@@ -549,7 +562,7 @@ function HomeArchSection() {
             </div>
           </div>
           <p className="arch-photo-caption !text-[#1F1F1F]/40">
-            Connections are not forced. They are fostered.
+            Connections are not forced. They are made.
           </p>
         </div>
 
@@ -736,7 +749,7 @@ export default function Home() {
               href="/pages/resources"
               className="group inline-flex border border-white/50 !text-white hover:bg-white hover:!text-black uppercase tracking-widest text-xs font-semibold px-8 py-4 transition-all duration-500 items-center justify-center"
             >
-              Explore The Hub
+              Browse NYC Resources
             </Link>
           </motion.div>
         </div>

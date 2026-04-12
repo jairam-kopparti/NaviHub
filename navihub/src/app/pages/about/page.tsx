@@ -24,7 +24,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "How can organizations get listed on NaviHub?",
-    answer: "Organizations can submit their information through our 'Add Resource' feature. We review submissions to ensure accuracy and relevance. If you represent a nonprofit, service provider, or community program, we encourage you to reach out and join our growing network."
+    answer: "Organizations can submit their information through our 'Suggest a Resource' feature. We review submissions to ensure accuracy and relevance. If you represent a nonprofit, service provider, or community program, we encourage you to reach out and join our growing network."
   },
   {
     question: "How often is the resource information updated?",
@@ -305,10 +305,10 @@ export default function AboutUs() {
               >
                 <motion.button
                   onClick={() => toggleFaq(index)}
-                  className={`relative z-10 w-full flex items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 cursor-pointer ${
+                  className={`relative z-10 w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left transition-all duration-300 cursor-pointer ${
                     openFaq === index 
-                      ? "bg-[#997e67] text-white shadow-lg" 
-                      : "bg-[#FFFFFA] hover:bg-[#997e67]/5 border border-(--border) hover:border-[#997e67]/30"
+                      ? "bg-[#997e67] text-white shadow-lg rounded-t-xl" 
+                      : "bg-[#FFFFFA] hover:bg-[#997e67]/5 border border-[#eae0d5] hover:border-[#997e67]/30 rounded-xl"
                   }`}
                   whileHover={{ scale: openFaq === index ? 1 : 1.01 }}
                   whileTap={{ scale: 0.99 }}

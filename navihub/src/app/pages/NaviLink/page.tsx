@@ -1285,15 +1285,6 @@ export default function NaviLinkPage() {
         />
         <div className="navilink-hero-overlay" />
         <div className="navilink-hero-content">
-          <motion.div 
-            className="navilink-hero-badge"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Sparkles size={14} />
-            Community Forum
-          </motion.div>
           <motion.h1 
             className="navilink-hero-title"
             initial={{ opacity: 0, y: 30 }}

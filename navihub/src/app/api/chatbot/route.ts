@@ -1,13 +1,11 @@
 import "dotenv/config";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { appendFileSync } from "fs";
 import { NextRequest, NextResponse } from "next/server";
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_AI_API_KEY || "");
-const responseLog = (msg:string) =>
-  appendFileSync(
-    "gemini-responses.log",
-    `[${new Date().toISOString()}] ${msg}\n`,
-  );
+const responseLog = (msg:string) => {
+  console.log(`[${new Date().toISOString()}] ${msg}`);
+};
 
 export async function POST(request:NextRequest) {
   try {
@@ -15,8 +13,10 @@ export async function POST(request:NextRequest) {
     let message = await request.json()
     let text
     if(message){
-    message+="Avoid returning special characters. Be as brief as possible without withholding any key details or information. Wherever there should be an enter or newline, output \n, the escape sequence for a newline, instead of creating an actual line break. When possible format with bullet points(dashes) under headings with colons next to them. DO NOT EVER INCLUDE BAD LANGUAGE in your responses. Keep a friendly and realistically polite tone. Don't go overboard. Make sure your response is grammatically correct."
-    const result = await model.generateContent(message);
+    const systemInstruction = "Be concise and brief without withholding key details. Format using bullet points (using dashes) under headings if helpful. Keep a friendly, polite tone. DO NOT over-explain. Do not repeat the prompt. Ensure grammar is correct. Use actual line breaks instead of literal text '\\n'.";
+    
+    const finalPrompt = `${systemInstruction}\n\nUser Question / Context:\n${message}`;
+    const result = await model.generateContent(finalPrompt);
     const response = await result.response;
     text = response.text();
     } else{
@@ -24,10 +24,8 @@ export async function POST(request:NextRequest) {
     }
     responseLog(text);
     return NextResponse.json(text)
-  } catch (error:unknown) {
-    if(error instanceof Error){
-      console.error("Error communicating with Gemini:", error);
-      return NextResponse.json(`Error communicating with gemini, please try again.`)
-    }
+  } catch (error:any) {
+    console.error("Error communicating with Gemini:", error);
+    return NextResponse.json(`Error communicating with Gemini: ${error.message || "please try again."}`)
   }
 }

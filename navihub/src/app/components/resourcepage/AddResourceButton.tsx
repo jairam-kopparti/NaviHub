@@ -179,8 +179,8 @@ export default function AddResourceModal({
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
                 <CheckCircle className="w-10 h-10 text-emerald-500" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Success!</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold !text-gray-900 mb-2">Success!</h3>
+              <p className="!text-gray-600">
                 Your resource has been added successfully.
               </p>
             </div>

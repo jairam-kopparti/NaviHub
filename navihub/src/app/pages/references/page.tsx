@@ -72,7 +72,7 @@ export default function ReferencePage() {
           </p>
 
           <p className="references-intro" style={{ marginTop: '1rem' }}>
-            Find the plan of work log and the copyright checklist <a href="https://docs.google.com/presentation/d/19y5RCOb3_66rF2bocdMKrjaWx9LD0jyyStGprYfVBtE/copy" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
+            Find the plan of work log and the copyright checklist <a href="https://drive.google.com/file/d/1NFx058WITAtxvRC7LKYffE6gvEXb4yWn/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
           </p>
 
           <div className="references-grid">
@@ -154,6 +154,28 @@ export default function ReferencePage() {
                     Resend
                   </a>{" "}
                   - Email API for developers (v6.9.2)
+                </li>
+              </ul>
+            </div>
+
+            {/* AI & Chatbot Dependencies */}
+            <div className="references-card">
+              <h3>AI & Machine Learning</h3>
+              <p className="text-sm !text-gray-600 mb-4 bg-gray-50 p-3 rounded-md border border-gray-100 italic">
+                <strong>Disclaimer:</strong> Artificial Intelligence was strictly utilized to power the NaviBot community assistant chatbot. AI was <strong>not</strong> used to generate the code, content, or design of this website.
+              </p>
+              <ul className="references-list">
+                <li>
+                  <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Google Generative AI
+                  </a>{" "}
+                  - SDK for interacting with Gemini AI models (v0.24.1)
+                </li>
+                <li>
+                  <a href="https://www.npmjs.com/package/dotenv" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Dotenv
+                  </a>{" "}
+                  - Zero-dependency module that loads environment variables (used for secure AI key management) (v17.3.1)
                 </li>
               </ul>
             </div>

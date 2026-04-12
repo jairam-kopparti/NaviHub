@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabaseClient'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [open, setOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navReady, setNavReady] = useState(false)
@@ -21,14 +22,24 @@ export default function Navbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
+    const onResize = () => setIsMobile(window.innerWidth < 1024)
+    
+    // Initial check
+    onScroll()
+    onResize()
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize, { passive: true })
     // Trigger entrance animation
     const timer = setTimeout(() => setNavReady(true), 100)
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
       clearTimeout(timer)
     }
   }, [])
+
+  const shouldScrolledState = scrolled || isSpecialPage || isMobile
 
   // Split links: 4 left, 3 right (+ sign in) for symmetry
   const leftLinks = [
@@ -76,18 +87,21 @@ export default function Navbar() {
   return (
     <header
       className={`navbar fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        scrolled || isSpecialPage ? 'scrolled' : ''
+        shouldScrolledState ? 'scrolled' : ''
       } ${navReady ? 'is-ready' : ''}`}
     >
       <div className="nav-inner mx-auto px-8 py-4 flex items-center justify-between">
 
+        {/* Mobile Spacer (Left) */}
+        <div className="lg:hidden flex-1" />
+
         {/* Left Links (Desktop) */}
-        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-16 flex-1 justify-end">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1 justify-end">
           {leftLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className={`nav-link-aupale ${isActive(link.href) ? 'active' : ''}`}
+              className={`nav-link-aupale whitespace-nowrap shrink-0 ${isActive(link.href) ? 'active' : ''}`}
             >
               {link.name}
             </Link>
@@ -95,13 +109,13 @@ export default function Navbar() {
         </nav>
 
         {/* Centered Logo */}
-        <Link href="/" className="nav-logo-center mx-16 lg:mx-20 flex-shrink-0">
+        <Link href="/" className="nav-logo-center mx-4 xl:mx-10 2xl:mx-20 flex-shrink-0">
           <div className="nav-logo-wrapper">
             <Image
               src="/main_logo.png"
               alt="NaviHub logo"
-              width={64}
-              height={46}
+              width={96}
+              height={70}
               className="object-contain"
               priority
             />
@@ -109,13 +123,13 @@ export default function Navbar() {
         </Link>
 
         {/* Right Links + Auth (Desktop) */}
-        <div className="hidden lg:flex items-center gap-16 flex-1">
-          <nav aria-label="Secondary navigation" className="flex items-center gap-16">
+        <div className="hidden lg:flex items-center gap-6 xl:gap-10 2xl:gap-16 flex-1">
+          <nav aria-label="Secondary navigation" className="flex items-center gap-6 xl:gap-10 2xl:gap-16">
             {rightLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`nav-link-aupale ${isActive(link.href) ? 'active' : ''}`}
+                className={`nav-link-aupale whitespace-nowrap shrink-0 ${isActive(link.href) ? 'active' : ''}`}
               >
                 {link.name}
               </Link>
@@ -123,11 +137,11 @@ export default function Navbar() {
           </nav>
 
           {/* Auth */}
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-3 ml-auto shrink-0">
             {!loading && !user && (
               <Link
                 href={`/pages/signin?redirect=${encodeURIComponent(pathname)}`}
-                className="nav-cta-btn"
+                className="nav-cta-btn whitespace-nowrap shrink-0"
               >
                 Sign In
               </Link>
@@ -172,7 +186,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="lg:hidden">
+        <div className="lg:hidden flex-1 flex justify-end">
           <button
             aria-label="Open menu"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -212,8 +226,8 @@ export default function Navbar() {
                 <Image
                   src="/main_logo.png"
                   alt="NaviHub logo"
-                  width={36}
-                  height={26}
+                  width={48}
+                  height={36}
                   className="object-contain"
                 />
               </div>

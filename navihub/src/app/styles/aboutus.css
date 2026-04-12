@@ -76,11 +76,13 @@
 }
 
 .about-section-heading .secondary {
-  color: #FFFFFA;
+  color: #997e67;
+  font-style: italic;
 }
 
 .about-section-heading .tertiary {
-  color: #ccbeb1;
+  color: #404E3B; /* Maybe matched to NaviHub theme */
+  font-style: italic;
 }
 
 .about-section-text {

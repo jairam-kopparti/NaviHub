@@ -92,10 +92,45 @@ export default function ResourceDetailModal({
   }, [resource, user, onJudgeOverride]);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleModalClose(); };
     if (isOpen) document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
+  }, [isOpen]);
+
+  // Handle browser back button (prevents closing the entire site)
+  useEffect(() => {
+    if (!isOpen) {
+      if (typeof window !== "undefined" && window.location.hash === "#resource") {
+        // cleanup hash if closed without back button somehow
+        // though we prefer utilizing back()
+      }
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      if (window.location.hash !== "#resource") {
+        window.history.pushState(null, "", window.location.pathname + window.location.search + "#resource");
+      }
+    }
+
+    const handlePopState = () => {
+      if (window.location.hash !== "#resource") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [isOpen, onClose]);
+
+  const handleModalClose = () => {
+    if (typeof window !== "undefined" && window.location.hash === "#resource") {
+      window.history.back(); // This triggers popstate and closes it via our effect!
+    } else {
+      onClose();
+    }
+  };
+
 
   if (!isOpen || !resource) return null;
 
@@ -198,7 +233,7 @@ export default function ResourceDetailModal({
   return (
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4"
-      onClick={onClose}
+      onClick={handleModalClose}
     >
       {/* Modal Card */}
       <div
@@ -233,7 +268,7 @@ export default function ResourceDetailModal({
           
           {/* Floating Close Button */}
           <button
-            onClick={onClose}
+            onClick={handleModalClose}
             aria-label="Close resource details"
             className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2.5 hover:bg-white transition-all shadow-lg cursor-pointer group"
           >

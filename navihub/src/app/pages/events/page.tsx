@@ -507,7 +507,7 @@ export default function CommunityEvents() {
                   aria-label="Search events"
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
-                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-gray-300 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
+                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white border border-transparent rounded-xl sm:rounded-2xl text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-[#404E3B] focus:ring-1 focus:ring-[#404E3B] shadow-md transition text-base sm:text-lg"
                 />
                 <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
               </div>
@@ -515,7 +515,7 @@ export default function CommunityEvents() {
                 onClick={() => setShowFilters(!showFilters)}
                 aria-expanded={showFilters}
                 aria-controls="events-filter-panel"
-                className="px-6 sm:px-8 py-4 sm:py-auto bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl text-white hover:bg-white/20 transition cursor-pointer flex items-center justify-center gap-2 font-medium"
+                className="px-6 sm:px-8 py-4 sm:py-auto bg-white border border-transparent rounded-xl sm:rounded-2xl text-gray-900 hover:bg-gray-50 shadow-md transition cursor-pointer flex items-center justify-center gap-2 font-medium"
               >
                 <Filter size={20} />
                 <span>Filters</span>
@@ -527,7 +527,7 @@ export default function CommunityEvents() {
               {showFilters && (
                 <>
                   <motion.div 
-                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+                    className="fixed inset-0 z-40 bg-black/60"
                     onClick={() => setShowFilters(false)}
                     variants={backdropVariants}
                     initial="hidden"
