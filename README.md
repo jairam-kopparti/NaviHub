@@ -1,3 +1,3 @@
 NaviHub
-Team #2285-1
+Team #2295-1
 Technology Student Association Webmaster Competition 2025-2026
