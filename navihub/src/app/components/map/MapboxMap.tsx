@@ -49,7 +49,26 @@ export default function MapboxMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    // Create persistent tooltip element
+    mapContainerRef.current.style.position = "relative";
+
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/light-v11",
+      center: NYC_CENTER,
+      zoom: initialZoom ?? NYC_ZOOM,
+      minZoom: 3,
+      maxZoom: 18,
+    });
+
+    map.on("load", () => {
+      if (showBoroughs) {
+        addBoroughLayers(map);
+      }
+    });
+
+    mapRef.current = map;
+
+    // Create persistent tooltip element after Map instance
     const tooltip = document.createElement("div");
     tooltip.className = "map-hover-tooltip";
     tooltip.style.cssText = `
@@ -68,40 +87,20 @@ export default function MapboxMap({
       transform: translate(-50%, -100%);
       margin-top: -14px;
     `;
-    mapContainerRef.current.style.position = "relative";
     mapContainerRef.current.appendChild(tooltip);
     tooltipRef.current = tooltip;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: NYC_CENTER,
-      zoom: initialZoom ?? NYC_ZOOM,
-      minZoom: 9,
-      maxZoom: 18,
-      maxBounds: [
-        [-74.35, 40.45],
-        [-73.65, 40.95],
-      ],
-    });
-
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
-
-    map.on("load", () => {
-      if (showBoroughs) {
-        addBoroughLayers(map);
-      }
-    });
-
-    mapRef.current = map;
 
     return () => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
       userMarkerRef.current?.remove();
       userMarkerRef.current = null;
-      tooltipRef.current?.remove();
-      tooltipRef.current = null;
+      if (tooltipRef.current) {
+        tooltipRef.current.remove();
+        tooltipRef.current = null;
+      }
       map.remove();
       mapRef.current = null;
     };
@@ -176,6 +175,73 @@ export default function MapboxMap({
     });
   }, []);
 
+  // Fetch and draw route on Mapbox
+  const drawRoute = useCallback(async (destination: Resource) => {
+    if (!userLocation || !mapRef.current || destination.latitude == null || destination.longitude == null) {
+      alert("User location is required for Navihub directions.");
+      return;
+    }
+    const map = mapRef.current;
+    const start = [userLocation.longitude, userLocation.latitude];
+    const end = [destination.longitude, destination.latitude];
+    
+    try {
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      const json = await query.json();
+      const data = json.routes[0];
+      const route = data.geometry.coordinates;
+
+      const geojson: GeoJSON.Feature<GeoJSON.LineString> = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: route
+        }
+      };
+
+      if (map.getSource('route')) {
+        (map.getSource('route') as mapboxgl.GeoJSONSource).setData(geojson);
+      } else {
+        map.addLayer({
+          id: 'route',
+          type: 'line',
+          source: {
+            type: 'geojson',
+            data: geojson
+          },
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': '#4285F4',
+            'line-width': 5,
+            'line-opacity': 0.8
+          }
+        });
+      }
+      
+      // Calculate bounds using standard coordinates arrays
+      const bounds = route.reduce(
+        (bounds: mapboxgl.LngLatBounds, coord: number[]) => {
+          return bounds.extend(coord as [number, number]);
+        },
+        new mapboxgl.LngLatBounds(route[0] as [number, number], route[0] as [number, number])
+      );
+
+      map.fitBounds(bounds, {
+        padding: 50,
+        maxZoom: 15
+      });
+      
+    } catch (err) {
+      console.error("Error fetching directions", err);
+    }
+  }, [userLocation]);
+
   // Sync resource markers
   useEffect(() => {
     const map = mapRef.current;
@@ -203,8 +269,11 @@ export default function MapboxMap({
           transform-origin: center center;
         `;
 
+        let isPopupOpen = false;
+
         // Hover: glow effect (no scale to prevent drift)
         el.addEventListener("mouseenter", () => {
+          if (isPopupOpen) return;
           el.style.boxShadow = "0 0 0 4px rgba(153,126,103,0.3), 0 2px 12px rgba(0,0,0,0.25)";
           el.style.borderColor = "#997e67";
 
@@ -226,6 +295,7 @@ export default function MapboxMap({
         });
 
         el.addEventListener("mouseleave", () => {
+          if (isPopupOpen) return;
           el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.2)";
           el.style.borderColor = "#fff";
 
@@ -234,15 +304,59 @@ export default function MapboxMap({
           }
         });
 
-        // Create marker (no popup — click opens resource detail)
-        const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
-          .setLngLat([resource.longitude, resource.latitude])
-          .addTo(map);
+        const popupContainer = document.createElement("div");
+        popupContainer.innerHTML = `
+          <div style="padding: 4px 6px; font-family: 'Open Sans', sans-serif;">
+            <div style="font-size: 13px; font-weight: 700; color: #1F1F1F; margin-bottom: 2px;">${resource.title}</div>
+            <div style="font-size: 10px; color: #888; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px;">${resource.category || ""}</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <button id="view-resource-btn" style="background: #997e67; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                View Resource
+              </button>
+              <button id="navihub-dir-btn" style="background: #fff; color: #4285F4; border: 1px solid #4285F4; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                NaviHub Route
+              </button>
+              <button id="google-dir-btn" style="background: #fff; color: #34A853; border: 1px solid #34A853; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                Google Maps
+              </button>
+            </div>
+          </div>
+        `;
 
-        el.addEventListener("click", (e) => {
-          e.stopPropagation();
+        popupContainer.querySelector("#view-resource-btn")?.addEventListener("click", () => {
           onMarkerClick?.(resource);
         });
+
+        popupContainer.querySelector("#navihub-dir-btn")?.addEventListener("click", () => {
+          drawRoute(resource);
+        });
+
+        popupContainer.querySelector("#google-dir-btn")?.addEventListener("click", () => {
+          if (!userLocation) {
+            window.open(`https://www.google.com/maps/search/?api=1&query=${resource.latitude},${resource.longitude}`, '_blank');
+          } else {
+            window.open(`https://www.google.com/maps/dir/?api=1&origin=${userLocation.latitude},${userLocation.longitude}&destination=${resource.latitude},${resource.longitude}`, '_blank');
+          }
+        });
+
+        const popup = new mapboxgl.Popup({ offset: 15, closeButton: true, focusAfterOpen: false })
+          .setDOMContent(popupContainer);
+
+        popup.on('open', () => {
+          isPopupOpen = true;
+          if (tooltipRef.current) tooltipRef.current.style.opacity = "0";
+        });
+        
+        popup.on('close', () => {
+          isPopupOpen = false;
+          el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.2)";
+          el.style.borderColor = "#fff";
+        });
+
+        const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
+          .setLngLat([resource.longitude, resource.latitude])
+          .setPopup(popup)
+          .addTo(map);
 
         markersRef.current.push(marker);
       });
@@ -296,11 +410,28 @@ export default function MapboxMap({
     });
   }, [userLocation]);
 
+  const handleResetZoom = useCallback(() => {
+    if (!mapRef.current) return;
+    mapRef.current.flyTo({
+      center: NYC_CENTER,
+      zoom: initialZoom ?? NYC_ZOOM,
+      duration: 1200,
+    });
+  }, [initialZoom]);
+
   return (
-    <div
-      ref={mapContainerRef}
-      className={`w-full ${isFullView ? "h-full" : "h-100 lg:h-125"} overflow-hidden ${className}`}
-      style={{ minHeight: isFullView ? "100%" : 400 }}
-    />
+    <div 
+      className={`relative w-full overflow-hidden ${className}`} 
+      style={{ height: isFullView ? "100%" : "500px", minHeight: isFullView ? "100%" : "400px" }}
+    >
+      <div ref={mapContainerRef} className="w-full h-full" style={{ minHeight: "inherit" }} />
+      <button
+        onClick={handleResetZoom}
+        className="absolute top-4 left-4 z-10 bg-white px-3 py-1.5 shadow-md border border-gray-200 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition cursor-pointer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+        NYC Default View
+      </button>
+    </div>
   );
 }

@@ -765,7 +765,10 @@ export default function Home() {
       <section className="w-full bg-[#1F1F1F] py-24 overflow-hidden relative">
         <div className="absolute inset-0 mix-blend-overlay opacity-5 pointer-events-none bg-[url('/noise.png')]" />
         <div className="w-full overflow-hidden mb-12">
-          <div className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent">
+          <div 
+            className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent"
+            style={{ animationDuration: "180s" }}
+          >
             {Array.from({ length: 20 }).map((_, i) => (
               <span key={i} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>
                 HIGHLIGHTS

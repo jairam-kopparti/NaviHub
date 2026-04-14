@@ -49,6 +49,8 @@ export default function FullMapModal({
 }: FullMapModalProps) {
   const [filterBorough, setFilterBorough] = useState<Borough | "">("");
   const [filterType, setFilterType] = useState<string>("");
+  const [filterDistance, setFilterDistance] = useState<string>("");
+  const [filterRating, setFilterRating] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
 
   const {
@@ -65,14 +67,32 @@ export default function FullMapModal({
     return null;
   }, [latitude, longitude]);
 
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (x: number) => (x * Math.PI) / 180;
+    const R = 3958.8;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
   const mapResources = useMemo(() => {
     return resources.filter((r) => {
       if (r.latitude == null || r.longitude == null) return false;
       if (filterBorough && r.location !== filterBorough) return false;
       if (filterType && r.category !== filterType) return false;
+      if (filterRating && (r.avgRating || 0) < parseFloat(filterRating)) return false;
+      if (filterDistance && filterDistance !== "") {
+        if (!userLocation) return false;
+        const dist = calculateDistance(userLocation.latitude, userLocation.longitude, r.latitude, r.longitude);
+        if (dist > parseFloat(filterDistance)) return false;
+      }
       return true;
     });
-  }, [resources, filterBorough, filterType]);
+  }, [resources, filterBorough, filterType, filterDistance, filterRating, userLocation]);
 
   useEffect(() => {
     if (isOpen) {
@@ -95,11 +115,13 @@ export default function FullMapModal({
     return () => window.removeEventListener("keydown", handleKey);
   }, [isOpen, onClose]);
 
-  const activeFilters = (filterBorough ? 1 : 0) + (filterType ? 1 : 0);
+  const activeFilters = (filterBorough ? 1 : 0) + (filterType ? 1 : 0) + (filterDistance ? 1 : 0) + (filterRating ? 1 : 0);
 
   const clearMapFilters = useCallback(() => {
     setFilterBorough("");
     setFilterType("");
+    setFilterDistance("");
+    setFilterRating("");
   }, []);
 
   return (
@@ -218,6 +240,48 @@ export default function FullMapModal({
                         {RESOURCE_TYPES.map((t) => (
                           <option key={t} value={t}>{t}</option>
                         ))}
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="flex-1 relative">
+                    <label className="text-[10px] font-bold uppercase tracking-wider mb-1.5 block" style={{ color: "#999" }}>
+                      Distance (Miles)
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={filterDistance}
+                        onChange={(e) => {
+                          if (e.target.value && !userLocation) {
+                            requestLocation();
+                          }
+                          setFilterDistance(e.target.value);
+                        }}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 text-[#333] focus:outline-none focus:ring-2 focus:ring-[#997e67]/30 focus:border-[#997e67] cursor-pointer appearance-none pr-8"
+                      >
+                        <option value="">Any Distance</option>
+                        <option value="1">Within 1 mile</option>
+                        <option value="5">Within 5 miles</option>
+                        <option value="10">Within 10 miles</option>
+                        <option value="25">Within 25 miles</option>
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="flex-1 relative">
+                    <label className="text-[10px] font-bold uppercase tracking-wider mb-1.5 block" style={{ color: "#999" }}>
+                      Rating
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={filterRating}
+                        onChange={(e) => setFilterRating(e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 text-[#333] focus:outline-none focus:ring-2 focus:ring-[#997e67]/30 focus:border-[#997e67] cursor-pointer appearance-none pr-8"
+                      >
+                        <option value="">Any Rating</option>
+                        <option value="4">4+ Stars</option>
+                        <option value="3">3+ Stars</option>
+                        <option value="2">2+ Stars</option>
                       </select>
                       <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
