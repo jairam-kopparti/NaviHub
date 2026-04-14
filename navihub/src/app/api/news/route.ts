@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
 
   const borough = searchParams.get("borough");
   const category = searchParams.get("category");
+  const news_type = searchParams.get("newsType");
   const search = searchParams.get("search");
   const limit = Math.min(Number(searchParams.get("limit")) || 20, 100);
   const offset = Number(searchParams.get("offset")) || 0;
@@ -38,6 +39,10 @@ export async function GET(request: NextRequest) {
 
   if (category) {
     query = query.eq("category", category);
+  }
+
+  if (news_type) {
+    query = query.eq("news_type", news_type);
   }
 
   if (search) {

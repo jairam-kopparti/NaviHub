@@ -48,6 +48,7 @@ export type NewsArticle = {
   published_at: string;
   borough: Borough | null;
   category: string | null;
+  news_type?: string; // local, national, international
   created_at: string;
 };
 

@@ -8,15 +8,26 @@ const supabaseAdmin = createClient(
 );
 
 // ── GNews search queries for NYC-related news ───────────────
-const SEARCH_QUERIES = [
+const LOCAL_QUERIES = [
   "New York City",
   "NYC community",
-  "NYC nonprofit",
   "Manhattan",
   "Brooklyn",
   "Bronx",
   "Queens",
   "Staten Island",
+];
+
+const NATIONAL_QUERIES = [
+  "US News",
+  "United States politics",
+  "US national news",
+];
+
+const INTERNATIONAL_QUERIES = [
+  "World News",
+  "Global Event",
+  "International News",
 ];
 
 // ── Borough detection helper ────────────────────────────────
@@ -122,7 +133,9 @@ export async function POST(request: Request) {
   let totalSkipped = 0;
   const errors: string[] = [];
 
-  for (const query of SEARCH_QUERIES) {
+  const ALL_QUERIES = [...LOCAL_QUERIES, ...NATIONAL_QUERIES, ...INTERNATIONAL_QUERIES];
+
+  for (const query of ALL_QUERIES) {
     try {
       const url = new URL("https://gnews.io/api/v4/search");
       url.searchParams.set("q", query);
@@ -143,6 +156,11 @@ export async function POST(request: Request) {
 
       if (!data.articles?.length) continue;
 
+      // Determine news type based on query origin
+      let currentNewsType = "local";
+      if (NATIONAL_QUERIES.includes(query)) currentNewsType = "national";
+      if (INTERNATIONAL_QUERIES.includes(query)) currentNewsType = "international";
+
       // Normalize articles
       const rows = data.articles.map((a) => {
         const combined = `${a.title} ${a.description} ${a.content ?? ""}`;
@@ -156,6 +174,7 @@ export async function POST(request: Request) {
           published_at: a.publishedAt,
           borough: detectBorough(combined),
           category: detectCategory(combined),
+          news_type: currentNewsType, // Added news_type column for international, national, local
         };
       });
 

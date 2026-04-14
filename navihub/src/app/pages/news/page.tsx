@@ -66,6 +66,7 @@ export default function NewsPage() {
 
   const [borough, setBorough] = useState("");
   const [category, setCategory] = useState("");
+  const [newsType, setNewsType] = useState<"local" | "national" | "international">("local");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -83,7 +84,7 @@ export default function NewsPage() {
   // Reset page on filter change
   useEffect(() => {
     setPage(0);
-  }, [borough, category, debouncedSearch]);
+  }, [borough, category, newsType, debouncedSearch]);
 
   // ── Fetch articles from /api/news ─────────────────────────
   const fetchArticles = useCallback(async () => {
@@ -92,6 +93,7 @@ export default function NewsPage() {
       const params = new URLSearchParams();
       params.set("limit", String(PAGE_SIZE));
       params.set("offset", String(page * PAGE_SIZE));
+      params.set("newsType", newsType);
       if (borough) params.set("borough", borough);
       if (category) params.set("category", category);
       if (debouncedSearch) params.set("search", debouncedSearch);
@@ -106,7 +108,7 @@ export default function NewsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, borough, category, debouncedSearch]);
+  }, [page, borough, category, newsType, debouncedSearch]);
 
   useEffect(() => {
     fetchArticles();
@@ -291,36 +293,38 @@ export default function NewsPage() {
                 </div>
 
                 {/* Borough */}
-                <div className="mb-8">
-                  <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">
-                    Borough
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setBorough("")}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
-                        !borough
-                          ? "bg-[#997e67] text-white"
-                          : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
-                      }`}
-                    >
-                      All Boroughs
-                    </button>
-                    {BOROUGHS.map((b) => (
+                {newsType === "local" && (
+                  <div className="mb-8">
+                    <p className="text-gray-400 text-sm mb-4 font-medium uppercase tracking-wider">
+                      Borough
+                    </p>
+                    <div className="flex flex-wrap gap-2">
                       <button
-                        key={b}
-                        onClick={() => setBorough(borough === b ? "" : b)}
+                        onClick={() => setBorough("")}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
-                          borough === b
+                          !borough
                             ? "bg-[#997e67] text-white"
                             : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                         }`}
                       >
-                        {b}
+                        All Boroughs
                       </button>
-                    ))}
+                      {BOROUGHS.map((b) => (
+                        <button
+                          key={b}
+                          onClick={() => setBorough(borough === b ? "" : b)}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
+                            borough === b
+                              ? "bg-[#997e67] text-white"
+                              : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
+                          }`}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Category */}
                 <div className="mb-8">
@@ -379,6 +383,35 @@ export default function NewsPage() {
             </>
           )}
         </AnimatePresence>
+      </section>
+
+      {/* ══════════════ NEWS TYPE TABS ══════════════ */}
+      <section className="bg-white border-b border-gray-100 flex justify-center py-4">
+        <div className="flex gap-2 sm:gap-4 p-1 bg-gray-100/50 rounded-xl relative">
+          {(["local", "national", "international"] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => {
+                setNewsType(type);
+                if (type !== "local") setBorough("");
+              }}
+              className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold capitalize transition-all duration-300 relative z-10 cursor-pointer ${
+                newsType === type
+                  ? "text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+              }`}
+            >
+              {newsType === type && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-[#997e67] rounded-lg -z-10"
+                  transition={{ type: "spring", duration: 0.6, bounce: 0.2 }}
+                />
+              )}
+              {type}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* ══════════════ ACTIVE FILTERS STRIP ══════════════ */}
