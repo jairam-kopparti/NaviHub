@@ -9,25 +9,15 @@ const supabaseAdmin = createClient(
 
 // ── GNews search queries for NYC-related news ───────────────
 const LOCAL_QUERIES = [
-  "New York City",
-  "NYC community",
-  "Manhattan",
-  "Brooklyn",
-  "Bronx",
-  "Queens",
-  "Staten Island",
+  "New York City"
 ];
 
 const NATIONAL_QUERIES = [
-  "US News",
-  "United States politics",
-  "US national news",
+  "US News"
 ];
 
 const INTERNATIONAL_QUERIES = [
-  "World News",
-  "Global Event",
-  "International News",
+  "World News"
 ];
 
 // ── Borough detection helper ────────────────────────────────
@@ -137,10 +127,18 @@ export async function POST(request: Request) {
 
   for (const query of ALL_QUERIES) {
     try {
+      // Determine news type based on query origin early on
+      let currentNewsType = "local";
+      if (NATIONAL_QUERIES.includes(query)) currentNewsType = "national";
+      if (INTERNATIONAL_QUERIES.includes(query)) currentNewsType = "international";
+
       const url = new URL("https://gnews.io/api/v4/search");
       url.searchParams.set("q", query);
       url.searchParams.set("lang", "en");
-      url.searchParams.set("country", "us");
+      // Only restrict to US for local and national
+      if (currentNewsType !== "international") {
+        url.searchParams.set("country", "us");
+      }
       url.searchParams.set("max", "10");
       url.searchParams.set("from", fromISO);
       url.searchParams.set("apikey", apiKey);
@@ -155,11 +153,6 @@ export async function POST(request: Request) {
       totalFetched += data.articles?.length ?? 0;
 
       if (!data.articles?.length) continue;
-
-      // Determine news type based on query origin
-      let currentNewsType = "local";
-      if (NATIONAL_QUERIES.includes(query)) currentNewsType = "national";
-      if (INTERNATIONAL_QUERIES.includes(query)) currentNewsType = "international";
 
       // Normalize articles
       const rows = data.articles.map((a) => {
@@ -192,6 +185,9 @@ export async function POST(request: Request) {
       const insertedCount = inserted?.length ?? 0;
       totalInserted += insertedCount;
       totalSkipped += rows.length - insertedCount;
+
+      // Generous delay to prevent hitting 1-req/sec limit on free tiers
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (err) {
       errors.push(`Exception for "${query}": ${err instanceof Error ? err.message : String(err)}`);
     }

@@ -116,39 +116,52 @@ export default function NewsPage() {
 
   // ── GSAP scroll animations ────────────────────────────────
   useEffect(() => {
-    if (loading) return;
+    if (loading || articles.length === 0) return;
 
     const ctx = gsap.context(() => {
       if (sectionHeadingRef.current) {
-        gsap.from(sectionHeadingRef.current, {
-          scrollTrigger: {
-            trigger: sectionHeadingRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-          opacity: 0,
-          y: 40,
-          duration: 0.8,
-          ease: "power2.out",
-        });
+        gsap.fromTo(
+          sectionHeadingRef.current,
+          { opacity: 0, y: 40 },
+          {
+            scrollTrigger: {
+              trigger: sectionHeadingRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out",
+          }
+        );
       }
 
       if (gridRef.current) {
         const cards = gridRef.current.querySelectorAll(".news-card-wrapper");
-        gsap.from(cards, {
-          scrollTrigger: {
-            trigger: gridRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-          opacity: 0,
-          y: 50,
-          scale: 0.95,
-          duration: 0.6,
-          stagger: 0.08,
-          ease: "power2.out",
-        });
+        if (cards.length > 0) {
+          gsap.fromTo(
+            cards,
+            { opacity: 0, y: 50, scale: 0.95 },
+            {
+              scrollTrigger: {
+                trigger: gridRef.current,
+                start: "top 85%",
+                toggleActions: "play none none reverse",
+              },
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              stagger: 0.08,
+              ease: "power2.out",
+            }
+          );
+        }
       }
+      
+      // Ensure ScrollTrigger recalculates layouts after dynamic rendering
+      ScrollTrigger.refresh();
     });
 
     return () => {
@@ -225,38 +238,26 @@ export default function NewsPage() {
               updates, local politics, transit, and more.
             </motion.p>
 
-            {/* Search + filter bar */}
+            {/* Search bar */}
             <motion.div
               className="flex flex-col sm:flex-row gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-              <div className="flex-1 relative">
+              <div className="flex-1 relative max-w-lg">
                 <input
                   type="text"
                   placeholder="Search articles..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white border border-[#eae0d5]/60 rounded-xl sm:rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg"
+                  className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white border border-[#eae0d5]/60 rounded-xl sm:rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg shadow-lg"
                 />
                 <Search
                   className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   size={20}
                 />
               </div>
-              <button
-                onClick={() => setShowFilters(true)}
-                className="px-6 sm:px-8 py-4 sm:py-auto bg-white border border-[#eae0d5]/60 rounded-xl sm:rounded-2xl text-gray-900 hover:bg-gray-50 transition cursor-pointer flex items-center justify-center gap-2 font-medium"
-              >
-                <Filter size={20} />
-                <span>Filters</span>
-                {activeFilterCount > 0 && (
-                  <span className="ml-1 w-5 h-5 flex items-center justify-center rounded-full bg-[#997e67] text-white text-xs font-bold">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
             </motion.div>
           </div>
         </div>
@@ -342,7 +343,9 @@ export default function NewsPage() {
                     >
                       All Categories
                     </button>
-                    {NEWS_CATEGORIES.map((c) => (
+                    {NEWS_CATEGORIES.filter((c) => 
+                      newsType === "local" || !["community", "housing", "transit"].includes(c.value)
+                    ).map((c) => (
                       <button
                         key={c.value}
                         onClick={() =>
@@ -386,8 +389,8 @@ export default function NewsPage() {
       </section>
 
       {/* ══════════════ NEWS TYPE TABS ══════════════ */}
-      <section className="bg-white border-b border-gray-100 flex justify-center py-4">
-        <div className="flex gap-2 sm:gap-4 p-1 bg-gray-100/50 rounded-xl relative">
+      <section className="bg-white border-b border-gray-100 flex items-center justify-center py-4 relative">
+        <div className="flex gap-2 sm:gap-4 p-1 bg-gray-100/50 rounded-xl">
           {(["local", "national", "international"] as const).map((type) => (
             <button
               key={type}
@@ -395,22 +398,31 @@ export default function NewsPage() {
                 setNewsType(type);
                 if (type !== "local") setBorough("");
               }}
-              className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold capitalize transition-all duration-300 relative z-10 cursor-pointer ${
+              className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold capitalize relative cursor-pointer ${
                 newsType === type
-                  ? "text-white shadow-sm"
+                  ? "bg-[#997e67] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
-              {newsType === type && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute inset-0 bg-[#997e67] rounded-lg -z-10"
-                  transition={{ type: "spring", duration: 0.6, bounce: 0.2 }}
-                />
-              )}
               {type}
             </button>
           ))}
+        </div>
+
+        {/* Quick Filter Access (Sticky) */}
+        <div className="absolute right-4 sm:right-6 md:right-8">
+          <button
+            onClick={() => setShowFilters(true)}
+            className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white border border-gray-200 text-gray-800 rounded-xl text-sm font-medium hover:bg-gray-50 hover:text-gray-950 transition shadow-sm cursor-pointer"
+          >
+            <Filter size={18} />
+            <span className="hidden md:inline">Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="w-5 h-5 flex items-center justify-center rounded-full bg-[#997e67] text-white text-[10px] font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         </div>
       </section>
 
