@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Resource } from "../../lib/types";
@@ -44,6 +44,8 @@ export default function MapboxMap({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+
+  const [activeRouteDest, setActiveRouteDest] = useState<Resource | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -184,18 +186,36 @@ export default function MapboxMap({
     const map = mapRef.current;
     const start = [userLocation.longitude, userLocation.latitude];
     const end = [destination.longitude, destination.latitude];
+
+    setActiveRouteDest(destination);
     
     try {
       const query = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`
       );
       const json = await query.json();
+      
+      if (!json.routes || json.routes.length === 0) {
+        console.error("No route found:", json);
+        alert("Could not find a route for the selected mode.");
+        return;
+      }
+      
       const data = json.routes[0];
       const route = data.geometry.coordinates;
 
+      // Extract duration in seconds and format
+      const durationSecs = data.duration;
+      const mins = Math.ceil(durationSecs / 60);
+      const timeStr = mins >= 60 ? `${Math.floor(mins / 60)} hr ${mins % 60} min` : `${mins} min`;
+
+      // Extract distance in meters and convert to miles
+      const distanceMiles = (data.distance / 1609.34).toFixed(1);
+      const displayStr = `${timeStr} (${distanceMiles} mi)`;
+
       const geojson: GeoJSON.Feature<GeoJSON.LineString> = {
         type: 'Feature',
-        properties: {},
+        properties: { duration_str: displayStr },
         geometry: {
           type: 'LineString',
           coordinates: route
@@ -219,7 +239,25 @@ export default function MapboxMap({
           paint: {
             'line-color': '#4285F4',
             'line-width': 5,
-            'line-opacity': 0.8
+            'line-opacity': 0.75
+          }
+        });
+
+        map.addLayer({
+          id: 'route-label',
+          type: 'symbol',
+          source: 'route',
+          layout: {
+            'symbol-placement': 'line-center',
+            'text-field': ['get', 'duration_str'],
+            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+            'text-size': 13,
+            'text-offset': [0, -0.8],
+          },
+          paint: {
+            'text-color': '#ffffff',
+            'text-halo-color': '#4285F4',
+            'text-halo-width': 2
           }
         });
       }
@@ -241,6 +279,15 @@ export default function MapboxMap({
       console.error("Error fetching directions", err);
     }
   }, [userLocation]);
+
+  const clearRoute = useCallback(() => {
+    if (!mapRef.current) return;
+    const map = mapRef.current;
+    if (map.getLayer('route-label')) map.removeLayer('route-label');
+    if (map.getLayer('route')) map.removeLayer('route');
+    if (map.getSource('route')) map.removeSource('route');
+    setActiveRouteDest(null);
+  }, []);
 
   // Sync resource markers
   useEffect(() => {
@@ -332,10 +379,14 @@ export default function MapboxMap({
         });
 
         popupContainer.querySelector("#google-dir-btn")?.addEventListener("click", () => {
+          const destStr = resource.address 
+            ? encodeURIComponent(`${resource.address}, ${resource.location || 'New York'}, NY`)
+            : `${resource.latitude},${resource.longitude}`;
+          
           if (!userLocation) {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${resource.latitude},${resource.longitude}`, '_blank');
+            window.open(`https://www.google.com/maps/search/?api=1&query=${destStr}`, '_blank');
           } else {
-            window.open(`https://www.google.com/maps/dir/?api=1&origin=${userLocation.latitude},${userLocation.longitude}&destination=${resource.latitude},${resource.longitude}`, '_blank');
+            window.open(`https://www.google.com/maps/dir/?api=1&origin=${userLocation.latitude},${userLocation.longitude}&destination=${destStr}`, '_blank');
           }
         });
 
@@ -432,6 +483,20 @@ export default function MapboxMap({
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
         NYC Default View
       </button>
+
+      {/* Active Route Controls */}
+      {activeRouteDest && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white shadow-lg rounded-full px-4 py-2 flex gap-2 items-center border border-gray-100">
+          <span className="text-xs font-bold text-gray-700 mx-2">Driving Route</span>
+          <div className="w-px h-5 bg-gray-200 mx-1"></div>
+          <button 
+            onClick={clearRoute} 
+            className="px-3 py-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full text-xs font-bold transition"
+          >
+            Clear Route
+          </button>
+        </div>
+      )}
     </div>
   );
 }

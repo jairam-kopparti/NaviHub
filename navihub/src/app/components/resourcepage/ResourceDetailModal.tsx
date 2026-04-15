@@ -343,7 +343,7 @@ export default function ResourceDetailModal({
             {resource.latitude != null && resource.longitude != null && (
               <div className="flex gap-2 mb-6">
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${resource.latitude},${resource.longitude}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${resource.address ? encodeURIComponent(`${resource.address}, ${resource.location || 'New York'}, NY`) : `${resource.latitude},${resource.longitude}`}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 bg-[#34A853] text-white rounded-lg text-sm font-bold shadow-md hover:bg-[#2c8d46] transition-colors cursor-pointer"

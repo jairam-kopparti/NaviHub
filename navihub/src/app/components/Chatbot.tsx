@@ -36,17 +36,6 @@ interface ChatbotOptionProps {
   setHoverText: (text: string) => void;
 }
 
-function Loader() {
-  return (
-    <motion.div
-      animate={{ rotate: 360 }}
-      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-    >
-      <Loader2 className="w-5 h-5 text-white" />
-    </motion.div>
-  );
-}
-
 function ChatbotOption({ icon: Icon, content, action, setHoverText }: ChatbotOptionProps) {
   return (
     <button
@@ -151,7 +140,7 @@ export default function Chatbot() {
           fetchEvents()
         ]);
 
-        const safeStringify = (arr: any, limit: number) => {
+        const safeStringify = (arr: unknown, limit: number) => {
           if (!Array.isArray(arr)) return "None";
           // Only take top items to save tokens & prevent timeouts
           return JSON.stringify(arr.slice(0, limit)).substring(0, 2000);
@@ -205,7 +194,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         addMessage("I'm sorry. Looks like there is no recent news to summarize.", From.Chat);
         setIsLoading(false);
       }
-    } catch (e) {
+    } catch {
       addMessage("Failed to load news.", From.Chat);
       setIsLoading(false);
     }
@@ -246,9 +235,9 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         setIsLoading(false);
         return;
       }
-      const sorted = [...resources].sort((a: any, b: any) => (b.views || 0) - (a.views || 0));
+      const sorted = [...resources].sort((a: { views?: number }, b: { views?: number }) => (b.views || 0) - (a.views || 0));
       const top = sorted.slice(0, 5);
-      const list = top.map((r: any) => `• ${r.name} — ${r.category}, ${r.location}`).join('\n');
+      const list = top.map((r: { name: string; category: string; location: string }) => `• ${r.name} — ${r.category}, ${r.location}`).join('\n');
       const prompt = `Briefly introduce these top NaviHub community resources in 1 line each, in a friendly tone:\n${list}\nKeep it concise.`;
       await handleSendMessage("What are the top resources on NaviHub?", false, prompt);
     } catch {
@@ -271,14 +260,14 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       const events = await fetchEvents();
       const now = new Date();
       const upcoming = (events || [])
-        .filter((e: any) => new Date(e.event_date) >= now)
+        .filter((e: { event_date: string }) => new Date(e.event_date) >= now)
         .slice(0, 4);
       if (upcoming.length === 0) {
         addMessage("No upcoming events found right now. Check back soon!", From.Chat);
         setIsLoading(false);
         return;
       }
-      const list = upcoming.map((e: any) => {
+      const list = upcoming.map((e: { title: string; event_date: string; location?: string }) => {
         const d = new Date(e.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         return `• ${e.title} — ${d}${e.location ? ', ' + e.location : ''}`;
       }).join('\n');
@@ -294,7 +283,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     addMessage("Finding events near you...", From.You);
     setIsLoading(true);
     try {
-      const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
         if (!navigator.geolocation) {
           reject(new Error("Geolocation not supported"));
           return;
@@ -305,6 +294,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
           maximumAge: 300000,
         });
       });
+      const coords = pos.coords;
 
       const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
       const geoRes = await fetch(
@@ -319,7 +309,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       const events = await fetchEvents();
       const now = new Date();
       const upcoming = (events || [])
-        .filter((e: any) => new Date(e.event_date) >= now)
+        .filter((e: { event_date: string }) => new Date(e.event_date) >= now)
         .slice(0, 8);
 
       if (upcoming.length === 0) {
@@ -329,7 +319,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       }
 
       const list = upcoming
-        .map((e: any) => {
+        .map((e: { title: string; event_date: string; location_name?: string; address?: string }) => {
           const d = new Date(e.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           return `• ${e.title} — ${d}, ${e.location_name || e.address || 'NYC'}`;
         })
@@ -337,9 +327,9 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
 
       const prompt = `The user is near ${neighborhood}, NYC. From this list of upcoming events, highlight the most relevant ones for someone in their area. Be friendly and concise (3–4 sentences max):\n${list}`;
       await handleSendMessage(`Find events near me in ${neighborhood}`, false, prompt);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
-        err?.code === 1
+        (err as { code?: number })?.code === 1
           ? "Location access was denied. Please enable location permissions and try again."
           : "Couldn't get your location. Please try again.";
       addMessage(msg, From.Chat);
@@ -378,6 +368,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       { icon: BookOpen, content: 'Find by Need', action: handleFindResourceByNeed },
     ];
     if (pathname?.includes('events')) return [
+      { icon: Navigation, content: 'Upcoming Events', action: handleUpcomingEvents },
       { icon: Navigation, content: 'Events Near Me', action: handleEventsNearMe },
       { icon: CircleQuestionMark, content: 'How to RSVP', action: handleHowToRSVP },
     ];
@@ -431,7 +422,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             role="dialog"
             aria-modal="true"
             aria-labelledby="chatbot-title"
-            className="fixed bottom-6 right-6 w-[90vw] sm:w-[400px] h-[600px] max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
+            className="fixed bottom-6 right-6 w-[90vw] sm:w-100 h-150 max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-[#404E3B] text-white">
@@ -449,7 +440,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
               {messages.length === 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
                   <BotMessageSquare size={48} className="opacity-20" />
-                  <p className="text-sm font-medium">{hoverText}</p>
+                  <p className="text-sm font-medium text-gray-600!">{hoverText}</p>
                 </div>
               )}
               {messages.map((msg) => (
