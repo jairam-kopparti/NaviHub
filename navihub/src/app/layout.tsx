@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "./components/Navbar";
+import NavbarWrapper from "./components/NavbarWrapper";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot"
 import ScrollProgressBar from "./components/ScrollProgressBar";
@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={`antialiased min-h-screen flex flex-col`}>
         <a href="#main-content" className="skip-to-content">Skip to main content</a>
         <ScrollProgressBar />
-        <Navbar />
+        <NavbarWrapper />
         <main id="main-content" className="flex-1">
           {children}
         </main>
