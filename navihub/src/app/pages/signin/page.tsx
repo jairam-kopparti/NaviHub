@@ -14,7 +14,6 @@ export default function SignInPage() {
         fill
         priority
       />
-
       <div className="auth-overlay">
         <AuthCard type="signin" />
       </div>
