@@ -3,7 +3,7 @@
 .auth-page {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   display: flex;
   align-items: stretch;
@@ -54,11 +54,11 @@
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 500px;
   background: rgba(255, 255, 250, 0.97);
   border: 1px solid rgba(230, 220, 210, 0.6);
   border-radius: 20px;
-  padding: 2.5rem;
+  padding: 3rem;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(8px);
 }
@@ -71,7 +71,7 @@
 
 .auth-title {
   font-family: "Petrona", serif;
-  font-size: 2rem;
+  font-size: 2.4rem;
   margin-bottom: 0.4rem;
   color: #1F1F1F;
   line-height: 1.2;
@@ -79,9 +79,9 @@
 
 .auth-subtitle {
   font-family: "Open Sans", sans-serif;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #666;
-  margin-bottom: 1.75rem;
+  margin-bottom: 2rem;
 }
 
 /* ================= FORM ================= */
@@ -93,11 +93,11 @@
 }
 
 .auth-input {
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.1rem;
   border-radius: 10px;
   border: 1.5px solid #e5e0d8;
   font-family: "Open Sans", sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #1F1F1F;
   background: #fafaf8;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -146,13 +146,13 @@
 
 .auth-button {
   margin-top: 0.5rem;
-  padding: 0.9rem;
+  padding: 1rem;
   border-radius: 12px;
   border: none;
   background: #1F1F1F;
   color: white;
   font-family: "Open Sans", sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease;
@@ -177,13 +177,13 @@
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.875rem;
+  padding: 1rem;
   margin-bottom: 1.25rem;
   background-color: white;
   border: 1.5px solid #e5e0d8;
   border-radius: 12px;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1F1F1F;
   cursor: pointer;
@@ -280,7 +280,7 @@
 
 .auth-brand-title {
   font-family: "Petrona", serif;
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
   color: white;
   margin-bottom: 0.75rem;
@@ -288,7 +288,7 @@
 }
 
 .auth-brand-subtitle {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.65);
   line-height: 1.6;
   margin-bottom: 2.5rem;
@@ -307,13 +307,13 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.8);
 }
 
 .auth-feature-icon {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   background: rgba(153, 126, 103, 0.25);
   border: 1px solid rgba(153, 126, 103, 0.3);
@@ -330,36 +330,46 @@
 
 @media (max-width: 899px) {
   .auth-overlay {
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 1.5rem;
-    min-height: 100vh;
+    padding: 5rem 1.25rem 2rem;
+    min-height: 100svh;
   }
 
   .auth-split {
-    min-height: 100vh;
-    align-items: center;
+    min-height: 100svh;
+    align-items: flex-start;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 5rem 1.25rem 2rem;
   }
 
   .auth-form-panel {
     background: transparent;
     padding: 0;
+    width: 100%;
   }
 
   .auth-card {
+    max-width: 100%;
     padding: 1.75rem;
   }
 
   .auth-title {
-    font-size: 1.75rem;
+    font-size: 1.9rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.95rem;
   }
 }
 
 @media (max-width: 480px) {
+  .auth-overlay {
+    padding: 4rem 1rem 1.5rem;
+  }
+
   .auth-split {
-    padding: 1rem;
+    padding: 4rem 1rem 1.5rem;
   }
 
   .auth-card {
@@ -368,11 +378,11 @@
   }
 
   .auth-title {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
   }
 
   .auth-input {
     font-size: 16px; /* Prevent iOS zoom */
-    padding: 0.8rem 0.9rem;
+    padding: 0.875rem 1rem;
   }
 }

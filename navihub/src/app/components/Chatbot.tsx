@@ -12,9 +12,9 @@ import {
   X,
   Loader2,
   MapPin,
-  CalendarDays,
   BookOpen,
   Users,
+  Navigation,
 } from 'lucide-react';
 import type { NewsArticle } from "../lib/types";
 
@@ -290,6 +290,63 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     }
   }, [fetchEvents, handleSendMessage]);
 
+  const handleEventsNearMe = useCallback(async () => {
+    addMessage("Finding events near you...", From.You);
+    setIsLoading(true);
+    try {
+      const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation not supported"));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000,
+        });
+      });
+
+      const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      const geoRes = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json?access_token=${token}&types=neighborhood,place`
+      );
+      const geoData = await geoRes.json();
+      const neighborhood =
+        geoData.features?.[0]?.text ||
+        geoData.features?.[0]?.place_name?.split(',')[0] ||
+        "your area";
+
+      const events = await fetchEvents();
+      const now = new Date();
+      const upcoming = (events || [])
+        .filter((e: any) => new Date(e.event_date) >= now)
+        .slice(0, 8);
+
+      if (upcoming.length === 0) {
+        addMessage("No upcoming events found right now. Check back soon!", From.Chat);
+        setIsLoading(false);
+        return;
+      }
+
+      const list = upcoming
+        .map((e: any) => {
+          const d = new Date(e.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          return `• ${e.title} — ${d}, ${e.location_name || e.address || 'NYC'}`;
+        })
+        .join('\n');
+
+      const prompt = `The user is near ${neighborhood}, NYC. From this list of upcoming events, highlight the most relevant ones for someone in their area. Be friendly and concise (3–4 sentences max):\n${list}`;
+      await handleSendMessage(`Find events near me in ${neighborhood}`, false, prompt);
+    } catch (err: any) {
+      const msg =
+        err?.code === 1
+          ? "Location access was denied. Please enable location permissions and try again."
+          : "Couldn't get your location. Please try again.";
+      addMessage(msg, From.Chat);
+      setIsLoading(false);
+    }
+  }, [fetchEvents, handleSendMessage]);
+
   const handleHowToRSVP = () => {
     addMessage("How do I RSVP to an event?", From.You);
     setTimeout(() => addMessage(
@@ -321,14 +378,15 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       { icon: BookOpen, content: 'Find by Need', action: handleFindResourceByNeed },
     ];
     if (pathname?.includes('events')) return [
-      { icon: CalendarDays, content: 'Upcoming Events', action: handleUpcomingEvents },
+      { icon: Navigation, content: 'Events Near Me', action: handleEventsNearMe },
       { icon: CircleQuestionMark, content: 'How to RSVP', action: handleHowToRSVP },
     ];
     if (pathname?.includes('navilink')) return [
       { icon: Users, content: 'NaviLink Guide', action: handleNaviLinkGuide },
     ];
     if (pathname?.includes('news')) return [
-      { icon: Newspaper, content: 'News Categories', action: handleNewsCategories },
+      { icon: Newspaper, content: 'Summarize News', action: handleSummarizeNews },
+      { icon: BookOpen, content: 'News Categories', action: handleNewsCategories },
     ];
     return [];
   })();
@@ -424,7 +482,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             {/* Quick Actions */}
             <div className="bg-[#7B9669] px-4 pt-3 pb-2 flex flex-col gap-2">
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                <ChatbotOption icon={Newspaper} content="Summarize News" action={handleSummarizeNews} setHoverText={setHoverText} />
                 <ChatbotOption icon={CircleQuestionMark} content="About this Page" action={handlePageInfo} setHoverText={setHoverText} />
               </div>
               {pageButtons.length > 0 && (

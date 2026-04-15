@@ -106,8 +106,8 @@ export default function AuthCard({ type }: AuthCardProps) {
           <Image
             src="/main_logo.png"
             alt="NaviHub"
-            width={72}
-            height={52}
+            width={88}
+            height={64}
             className="object-contain mb-6"
           />
           <h2 className="auth-brand-title">
