@@ -325,15 +325,15 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                 <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
                   <AlertTriangle size={20} className="text-red-400" />
                 </div>
-                <p className="text-gray-600 text-sm">{error}</p>
+                <p className="text-sm font-medium text-gray-600" style={{ color: "#4B5563" }}>{error}</p>
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-6">
                 <div className="w-16 h-16 rounded-2xl bg-white border border-[#e8e0d8] shadow-sm flex items-center justify-center mb-4">
                   <MessageCircle size={28} className="text-[#997e67]" />
                 </div>
-                <p className="text-gray-700 text-sm font-semibold">No messages yet</p>
-                <p className="text-gray-400 text-xs mt-1.5">Be the first to start the conversation!</p>
+                <p className="text-sm font-semibold text-gray-700" style={{ color: "#374151" }}>No messages yet</p>
+                <p className="text-xs mt-1.5 text-gray-400" style={{ color: "#9CA3AF" }}>Be the first to start the conversation!</p>
               </div>
             ) : (
               <>
@@ -397,7 +397,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                               </button>
                             )}
                           </div>
-                          <p className={`text-[10px] text-gray-400 mt-1 ${isOwn ? "text-right mr-1" : "ml-1"}`}>
+                          <p className={`text-[10px] mt-1 text-gray-400 ${isOwn ? "text-right mr-1" : "ml-1"}`} style={{ color: "#9CA3AF" }}>
                             {formatChatTime(msg.created_at)}
                           </p>
                         </div>
@@ -480,7 +480,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                   <Send size={16} />
                 </motion.button>
               </div>
-              <p className="text-[10px] text-gray-400 mt-1.5 ml-1">Press Enter to send · Shift+Enter for new line</p>
+              <p className="text-[10px] mt-1.5 ml-1 text-gray-400" style={{ color: "#9CA3AF" }}>Press Enter to send · Shift+Enter for new line</p>
             </div>
           )}
         </motion.div>
