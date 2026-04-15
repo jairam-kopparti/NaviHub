@@ -280,42 +280,37 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           {/* ── Header ── */}
-          <div className="shrink-0 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1F1F1F] to-[#2d2d2d]" />
-            <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #997e67 0%, transparent 60%), radial-gradient(circle at 80% 20%, #997e67 0%, transparent 50%)" }} />
-            <div className="relative flex items-center justify-between px-5 py-4 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#997e67] to-[#7a6350] flex items-center justify-center shadow-lg">
-                  <MessageCircle size={18} />
-                </div>
-                <div>
-                  <h3 id="eventchat-title" className="font-bold text-sm tracking-wide">Event Chat</h3>
-                  <p className="text-xs text-white/50 mt-0.5">
-                    {messages.length} message{messages.length !== 1 ? "s" : ""} · Live
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 ml-1.5 mb-px animate-pulse" />
-                  </p>
-                </div>
+          <div className="flex items-center justify-between px-5 py-4 bg-[#1F1F1F] text-white shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#997e67] flex items-center justify-center">
+                <MessageCircle size={18} />
               </div>
-              <button
-                onClick={onClose}
-                aria-label="Close chat"
-                className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer"
-              >
-                <X size={18} />
-              </button>
+              <div>
+                <h3 id="eventchat-title" className="font-semibold text-sm">Event Chat</h3>
+                <p className="text-xs text-gray-400">
+                  {messages.length} message{messages.length !== 1 ? "s" : ""}
+                </p>
+              </div>
             </div>
+            <button
+              onClick={onClose}
+              aria-label="Close chat"
+              className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           {/* ── Messages Area ── */}
           <div
             ref={chatContainerRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[#F7F5F2]"
+            className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[#FAFAF8]"
           >
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <motion.div
-                  className="w-8 h-8 border-2 border-[#997e67] border-t-transparent rounded-full"
+                  className="w-8 h-8 border-3 border-[#997e67] border-t-transparent rounded-full"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
@@ -329,11 +324,11 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-6">
-                <div className="w-16 h-16 rounded-2xl bg-white border border-[#e8e0d8] shadow-sm flex items-center justify-center mb-4">
-                  <MessageCircle size={28} className="text-[#997e67]" />
+                <div className="w-14 h-14 rounded-full bg-[#F5F0EB] flex items-center justify-center mb-4">
+                  <MessageCircle size={24} className="text-[#997e67]" />
                 </div>
-                <p className="text-gray-700 text-sm font-semibold">No messages yet</p>
-                <p className="text-gray-400 text-xs mt-1.5">Be the first to start the conversation!</p>
+                <p className="!text-black text-sm font-medium">No messages yet</p>
+                <p className="!text-black text-xs mt-1">Be the first to start the conversation!</p>
               </div>
             ) : (
               <>
@@ -341,52 +336,38 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                   const isOwn = msg.user_id === currentUserId;
                   const showDate =
                     i === 0 || getDateKey(msg.created_at) !== getDateKey(messages[i - 1].created_at);
-                  const showAvatar =
-                    !isOwn && (i === messages.length - 1 || messages[i + 1].user_id !== msg.user_id);
                   const showName =
                     !isOwn && (i === 0 || messages[i - 1].user_id !== msg.user_id);
-                  const initials = msg.user_name?.slice(0, 2).toUpperCase() || "??";
 
                   return (
                     <React.Fragment key={msg.id}>
                       {/* Date separator */}
                       {showDate && (
-                        <div className="flex items-center gap-3 py-4">
-                          <div className="flex-1 h-px bg-gray-200" />
-                          <span className="px-3 py-1 bg-white border border-gray-200 rounded-full text-[11px] text-gray-500 font-medium shadow-sm">
+                        <div className="flex items-center justify-center py-3">
+                          <span className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-500 font-medium">
                             {formatChatDate(msg.created_at)}
                           </span>
-                          <div className="flex-1 h-px bg-gray-200" />
                         </div>
                       )}
 
                       {/* Message bubble */}
-                      <div className={`flex items-end gap-2 ${isOwn ? "justify-end" : "justify-start"} ${showName ? "mt-3" : "mt-0.5"}`}>
-                        {/* Avatar for other users */}
-                        {!isOwn && (
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 ${showAvatar ? "opacity-100" : "opacity-0"}`}
-                            style={{ background: `hsl(${(msg.user_name?.charCodeAt(0) || 0) * 37 % 360}, 50%, 45%)` }}
-                          >
-                            {initials}
-                          </div>
-                        )}
-
-                        <div className={`max-w-[72%] ${isOwn ? "items-end" : "items-start"} flex flex-col`}>
-                          {showName && (
-                            <p className="text-[11px] text-gray-500 font-medium ml-1 mb-1">{msg.user_name}</p>
-                          )}
+                      <div className={`flex ${isOwn ? "justify-end" : "justify-start"} ${showName ? "mt-3" : "mt-0.5"}`}>
+                        <div className={`max-w-[80%] ${isOwn ? "items-end" : "items-start"}`}>
+                          <p className={`text-xs !text-black mb-1 font-medium ${isOwn ? "text-right mr-3" : "ml-3"}`}>
+                            {isOwn ? "You" : msg.user_name}
+                          </p>
                           <div className="relative group">
                             <div
                               className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${
                                 isOwn
-                                  ? "bg-[#2d2d2d] text-white rounded-br-sm"
-                                  : "bg-white text-gray-800 border border-gray-100 shadow-sm rounded-bl-sm"
+                                  ? "bg-[#F5F0EB] !text-black rounded-br-md border border-[#E5E0DB]" 
+                                  : "bg-white !text-black border border-gray-100 rounded-bl-md"
                               }`}
                             >
                               {msg.message}
                             </div>
-
-                            {/* Delete button for own messages */}
+                            
+                            {/* Delete button only for own messages, visible on hover */}
                             {isOwn && (
                               <button
                                 onClick={() => handleDelete(msg.id)}
@@ -397,7 +378,11 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                               </button>
                             )}
                           </div>
-                          <p className={`text-[10px] text-gray-400 mt-1 ${isOwn ? "text-right mr-1" : "ml-1"}`}>
+                          <p
+                            className={`text-[10px] !text-black mt-1 ${
+                              isOwn ? "text-right mr-2" : "ml-3"
+                            }`}
+                          >
                             {formatChatTime(msg.created_at)}
                           </p>
                         </div>
@@ -462,7 +447,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                   placeholder="Type a message..."
                   aria-label="Type your message"
                   rows={1}
-                  className="flex-1 resize-none px-4 py-3 bg-[#F7F5F2] border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#997e67]/30 focus:border-[#997e67]/40 transition max-h-24 overflow-y-auto"
+                  className="flex-1 resize-none px-4 py-3 bg-[#F5F0EB] rounded-xl text-sm !text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#997e67]/30 transition max-h-24 overflow-y-auto"
                   style={{ minHeight: "44px" }}
                   disabled={sending}
                 />
@@ -472,7 +457,7 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                   aria-label="Send message"
                   className={`p-3 rounded-xl transition cursor-pointer shrink-0 ${
                     input.trim() && !sending
-                      ? "bg-[#2d2d2d] text-white hover:bg-black"
+                      ? "bg-[#1F1F1F] text-white hover:bg-black"
                       : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
                   whileTap={{ scale: 0.95 }}
@@ -480,7 +465,6 @@ export default function EventChat({ eventId, isOpen, onClose }: EventChatProps) 
                   <Send size={16} />
                 </motion.button>
               </div>
-              <p className="text-[10px] text-gray-400 mt-1.5 ml-1">Press Enter to send · Shift+Enter for new line</p>
             </div>
           )}
         </motion.div>

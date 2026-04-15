@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -10,11 +9,7 @@ import {
   LucideProps,
   SendHorizontal,
   X,
-  Loader2,
-  MapPin,
-  CalendarDays,
-  BookOpen,
-  Users,
+  Loader2
 } from 'lucide-react';
 import type { NewsArticle } from "../lib/types";
 
@@ -62,7 +57,6 @@ function ChatbotOption({ icon: Icon, content, action, setHoverText }: ChatbotOpt
 }
 
 export default function Chatbot() {
-  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -235,104 +229,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     setTimeout(() => addMessage(text, From.Chat), 600);
   };
 
-  // ── Page-specific handlers ──
-
-  const handleTopResources = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const resources = await fetchResources();
-      if (!resources || resources.length === 0) {
-        addMessage("No resources found right now. Try browsing the full directory!", From.Chat);
-        setIsLoading(false);
-        return;
-      }
-      const sorted = [...resources].sort((a: any, b: any) => (b.views || 0) - (a.views || 0));
-      const top = sorted.slice(0, 5);
-      const list = top.map((r: any) => `• ${r.name} — ${r.category}, ${r.location}`).join('\n');
-      const prompt = `Briefly introduce these top NaviHub community resources in 1 line each, in a friendly tone:\n${list}\nKeep it concise.`;
-      await handleSendMessage("What are the top resources on NaviHub?", false, prompt);
-    } catch {
-      addMessage("Failed to load resources.", From.Chat);
-      setIsLoading(false);
-    }
-  }, [fetchResources, handleSendMessage]);
-
-  const handleFindResourceByNeed = () => {
-    addMessage("What kind of help are you looking for?", From.You);
-    setTimeout(() => addMessage(
-      "I can help you find resources for:\n• 🍎 Food & basic needs\n• 🏠 Housing & utilities\n• 💼 Jobs & career support\n• ⚕️ Health & wellness\n• 📚 Education & learning\n• ⚖️ Legal & government services\n\nJust type what you need and I'll point you in the right direction!",
-      From.Chat
-    ), 500);
-  };
-
-  const handleUpcomingEvents = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const events = await fetchEvents();
-      const now = new Date();
-      const upcoming = (events || [])
-        .filter((e: any) => new Date(e.event_date) >= now)
-        .slice(0, 4);
-      if (upcoming.length === 0) {
-        addMessage("No upcoming events found right now. Check back soon!", From.Chat);
-        setIsLoading(false);
-        return;
-      }
-      const list = upcoming.map((e: any) => {
-        const d = new Date(e.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `• ${e.title} — ${d}${e.location ? ', ' + e.location : ''}`;
-      }).join('\n');
-      const prompt = `Briefly describe these upcoming NYC community events in 1 line each, keeping it exciting and friendly:\n${list}\nBe concise.`;
-      await handleSendMessage("What events are coming up?", false, prompt);
-    } catch {
-      addMessage("Failed to load events.", From.Chat);
-      setIsLoading(false);
-    }
-  }, [fetchEvents, handleSendMessage]);
-
-  const handleHowToRSVP = () => {
-    addMessage("How do I RSVP to an event?", From.You);
-    setTimeout(() => addMessage(
-      "RSVPing is easy!\n\n1. Browse the events list and click on any event card\n2. Sign in if you haven't already\n3. Click the RSVP button in the event details\n4. Check your email — you'll receive a confirmation with the event date, time, and location\n\nYou can cancel your RSVP at any time from the event page. 🎉",
-      From.Chat
-    ), 500);
-  };
-
-  const handleNaviLinkGuide = () => {
-    addMessage("How does NaviLink work?", From.You);
-    setTimeout(() => addMessage(
-      "NaviLink is NaviHub's community forum!\n\n• 📝 Create posts to share resources, ask questions, or start discussions\n• 🏷️ Browse by category: Sports, Education, Careers, Community, Wellness\n• 💬 Reply to others and build connections\n• 🔒 Sign in required to post — keeps the community authentic\n• 🛡️ All content is auto-moderated to keep things respectful\n\nWhat would you like to discuss?",
-      From.Chat
-    ), 500);
-  };
-
-  const handleNewsCategories = () => {
-    addMessage("What news categories are available?", From.You);
-    setTimeout(() => addMessage(
-      "NaviHub covers NYC news across multiple categories:\n\n🗳️ Politics & Government\n🏘️ Community & Neighborhoods\n⚕️ Health & Public Safety\n🏠 Real Estate & Housing\n📚 Education\n🌱 Environment\n🚇 Transportation\n💰 Economy & Business\n\nUse the Filters button on the news page to narrow down to what matters to you!",
-      From.Chat
-    ), 500);
-  };
-
-  // ── Page-specific quick action buttons ──
-  const pageButtons: { icon: React.ElementType<LucideProps>; content: string; action: () => void }[] = (() => {
-    if (pathname?.includes('resources')) return [
-      { icon: MapPin, content: 'Top Resources', action: handleTopResources },
-      { icon: BookOpen, content: 'Find by Need', action: handleFindResourceByNeed },
-    ];
-    if (pathname?.includes('events')) return [
-      { icon: CalendarDays, content: 'Upcoming Events', action: handleUpcomingEvents },
-      { icon: CircleQuestionMark, content: 'How to RSVP', action: handleHowToRSVP },
-    ];
-    if (pathname?.includes('navilink')) return [
-      { icon: Users, content: 'NaviLink Guide', action: handleNaviLinkGuide },
-    ];
-    if (pathname?.includes('news')) return [
-      { icon: Newspaper, content: 'News Categories', action: handleNewsCategories },
-    ];
-    return [];
-  })();
-
   return (
     <>
       <AnimatePresence>
@@ -422,18 +318,9 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-[#7B9669] px-4 pt-3 pb-2 flex flex-col gap-2">
-              <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                <ChatbotOption icon={Newspaper} content="Summarize News" action={handleSummarizeNews} setHoverText={setHoverText} />
-                <ChatbotOption icon={CircleQuestionMark} content="About this Page" action={handlePageInfo} setHoverText={setHoverText} />
-              </div>
-              {pageButtons.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                  {pageButtons.map((btn) => (
-                    <ChatbotOption key={btn.content} icon={btn.icon} content={btn.content} action={btn.action} setHoverText={setHoverText} />
-                  ))}
-                </div>
-              )}
+            <div className="bg-[#7B9669] px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar">
+              <ChatbotOption icon={Newspaper} content="Summarize News" action={handleSummarizeNews} setHoverText={setHoverText} />
+              <ChatbotOption icon={CircleQuestionMark} content="About this Page" action={handlePageInfo} setHoverText={setHoverText} />
             </div>
 
             {/* Input Area */}
