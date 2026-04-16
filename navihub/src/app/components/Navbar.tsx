@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu, ChevronDown, LogOut, User, X } from 'lucide-react'
+import { Menu, ChevronDown, LogOut, User, X, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUser } from '../lib/useUser'
@@ -174,15 +174,27 @@ export default function Navbar() {
                         {user.user_metadata?.full_name || user.email}
                       </p>
                     </div>
-                    <Link
-                      href="/pages/account"
-                      className="nav-dropdown-item"
-                      role="menuitem"
-                      onClick={() => setOpen(false)}
-                    >
-                      <User size={15} />
-                      Account Settings
-                    </Link>
+                    {user.email === 'admin@navihub.com' ? (
+                      <Link
+                        href="/pages/admin"
+                        className="nav-dropdown-item"
+                        role="menuitem"
+                        onClick={() => setOpen(false)}
+                      >
+                        <ShieldCheck size={15} />
+                        Admin Panel
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/pages/account"
+                        className="nav-dropdown-item"
+                        role="menuitem"
+                        onClick={() => setOpen(false)}
+                      >
+                        <User size={15} />
+                        Account Settings
+                      </Link>
+                    )}
                     <button onClick={handleSignOut} className="nav-dropdown-item" role="menuitem">
                       <LogOut size={15} />
                       Sign Out

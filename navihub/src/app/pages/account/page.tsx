@@ -61,6 +61,11 @@ export default function AccountPage() {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationsFetched, setNotificationsFetched] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [myApprovals, setMyApprovals] = useState<any[]>([]);
+  const [loadingApprovals, setLoadingApprovals] = useState(false);
+  const [approvalsFetched, setApprovalsFetched] = useState(false);
+
   useEffect(() => {
     if (user?.user_metadata?.full_name) {
       setFullName(user.user_metadata.full_name);
@@ -96,6 +101,26 @@ export default function AccountPage() {
       });
     }
     
+    if (activeTab === "approvals" && !approvalsFetched && !loadingApprovals) {
+      setLoadingApprovals(true);
+
+      const fetchApprovals = async () => {
+        const { data: resources } = await supabase.from("resources").select("id, title, description, status, created_at").eq("user_id", user.id).in("status", ["pending", "rejected", "approved"]);
+        const { data: events } = await supabase.from("events").select("id, title, description, status, created_at").eq("user_id", user.id).in("status", ["pending", "rejected", "approved"]);
+        
+        const combined = [
+          ...(resources || []).map(r => ({ ...r, type: "Resource" })),
+          ...(events || []).map(e => ({ ...e, type: "Event" }))
+        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        if (combined.length > 0) setMyApprovals(combined);
+        setApprovalsFetched(true);
+        setLoadingApprovals(false);
+      };
+      
+      fetchApprovals();
+    }
+
     if (activeTab === "notifications" && !notificationsFetched && !loadingNotifications) {
       setLoadingNotifications(true);
       supabase.from("event_signups").select("event_id").eq("user_id", user.id).then(({ data: signups }) => {
@@ -112,7 +137,7 @@ export default function AccountPage() {
         }
       });
     }
-  }, [activeTab, user, postsFetched, loadingPosts, eventsFetched, loadingEvents, notificationsFetched, loadingNotifications]);
+  }, [activeTab, user, postsFetched, loadingPosts, eventsFetched, loadingEvents, notificationsFetched, loadingNotifications, approvalsFetched, loadingApprovals]);
 
   // If user is not logged in after loading, you might want to redirect.
   // For now, we'll just show a placeholder or loading state.
@@ -370,19 +395,50 @@ export default function AccountPage() {
 
       case "approvals":
         return (
-          <motion.div key="approvals" variants={fadeIn} initial="hidden" animate="visible" exit={{ opacity: 0 }} className="p-8 sm:p-10 h-full flex flex-col relative">
+          <motion.div key="approvals" variants={fadeIn} initial="hidden" animate="visible" exit={{ opacity: 0 }} className="p-8 sm:p-10 h-full flex flex-col relative text-left">
             <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-[#4a3b32]! tracking-tight flex items-center gap-2">
               Approvals <span className="text-[#a3958a]! text-lg font-medium">&bull; Moderation</span>
             </h2>
-            <div className="flex-1 bg-linear-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center text-[#6b5a4e]! flex flex-col items-center justify-center min-h-75 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[#997e67]/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#eae0d5]/60 relative z-10">
-                <ShieldCheck className="w-8 h-8 text-[#997e67]!" />
+            {loadingApprovals ? (
+              <div className="flex-1 flex items-center justify-center min-h-75"><Loader2 className="w-8 h-8 text-[#997e67] animate-spin" /></div>
+            ) : myApprovals.length > 0 ? (
+              <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-125 hide-scrollbar">
+                {myApprovals.map(approval => {
+                  let statusColor = "bg-yellow-50 text-yellow-700 border-yellow-200";
+                  if (approval.status === "approved") statusColor = "bg-green-50 text-green-700 border-green-200";
+                  if (approval.status === "rejected") statusColor = "bg-red-50 text-red-700 border-red-200";
+                  
+                  return (
+                    <div key={approval.id} className="bg-white border border-[#eae0d5] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-[#4a3b32]! mb-1">{approval.title}</h3>
+                          <p className="text-[#6b5a4e]! text-sm line-clamp-2">{approval.description}</p>
+                        </div>
+                        <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold border capitalize ${statusColor}`}>
+                          {approval.status || "pending"}
+                        </span>
+                      </div>
+                      <div className="mt-4 flex items-center gap-3 text-xs text-[#a3958a]! font-medium">
+                        <span>{new Date(approval.created_at || Date.now()).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span className="w-1 h-1 rounded-full bg-[#eae0d5]" />
+                        <span className="capitalize">{approval.type || "Submission"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-xl font-bold text-[#4a3b32]! mb-2 relative z-10">Nothing to Review</p>
-              <p className="text-[#a3958a]! text-base mb-2 relative z-10">No posts currently pending moderation.</p>
-              <p className="text-xs mt-2 text-[#a3958a]! opacity-80 font-medium bg-[#fcfbf9] px-3 py-1 rounded-full border border-[#eae0d5] inline-block relative z-10">Pending approval statuses will appear here</p>
-            </div>
+            ) : (
+              <div className="flex-1 bg-linear-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center text-[#6b5a4e]! flex flex-col items-center justify-center min-h-75 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[#997e67]/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#eae0d5]/60 relative z-10">
+                  <ShieldCheck className="w-8 h-8 text-[#997e67]!" />
+                </div>
+                <p className="text-xl font-bold text-[#4a3b32]! mb-2 relative z-10">Nothing to Review</p>
+                <p className="text-[#a3958a]! text-base mb-2 relative z-10">No posts currently pending moderation.</p>
+                <p className="text-xs mt-2 text-[#a3958a]! opacity-80 font-medium bg-[#fcfbf9] px-3 py-1 rounded-full border border-[#eae0d5] inline-block relative z-10">Pending approval statuses will appear here</p>
+              </div>
+            )}
           </motion.div>
         );
 

@@ -16,6 +16,8 @@ export type Resource = {
   isFavorited?: boolean;
   reviewCount?: number;
   avgRating?: number;
+  status?: "pending" | "approved" | "rejected";
+  user_id?: string;
 };
 
 export type Review = {

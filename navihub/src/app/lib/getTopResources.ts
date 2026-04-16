@@ -9,6 +9,7 @@ export async function getTopResources(): Promise<Resource[]> {
   const { data, error } = await supabase
     .from("resources")
     .select("id, title, category, description, image_url, views")
+    .or("status.eq.approved,status.is.null")
     .order("views", { ascending: false })
     .limit(9);
 
