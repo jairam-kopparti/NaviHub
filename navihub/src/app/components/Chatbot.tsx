@@ -219,6 +219,9 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     else if (url.toLowerCase().includes("about")) {
       text = "You are on the About Us page.\n\nHere you can learn all about Navihub's mission to create genuine, barrier-free connections in NYC. Scroll down to see our philosophy, meet our development goals, and check out our platform roadmap.";
     }
+    else if (url.toLowerCase().includes("account")) {
+      text = "You are on your Account Dashboard.\n\nThis is your personal space to manage your NaviHub experience.\n\nSpecial Features:\n• Profile Settings: Update your name and change your password securely.\n• My Posts: Keep track of all the resources and events you've shared with the community.\n• Signed-Up Events: Easily view the local NYC events you've registered for.\n• Approvals & Notifications: Check the status of your submitted posts and stay updated with your event groups.";
+    }
 
     addMessage("Tell me about this page.", From.You);
     setTimeout(() => addMessage(text, From.Chat), 600);

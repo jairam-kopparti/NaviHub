@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import AuthCard from "../../components/auth/AuthCard"
+// @ts-expect-error - CSS side effect import
 import "../../styles/auth.css"
 
 export default function SignInPage() {

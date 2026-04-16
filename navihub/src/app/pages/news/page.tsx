@@ -17,6 +17,7 @@ import NewsCard from "../../components/news/NewsCard";
 import NewsCardSkeleton from "../../components/news/NewsCardSkeleton";
 import type { NewsArticle, Borough } from "../../lib/types";
 import { NEWS_CATEGORIES } from "../../lib/types";
+// @ts-expect-error - CSS side effect import
 import "../../styles/news.css";
 
 gsap.registerPlugin(ScrollTrigger);

@@ -174,6 +174,15 @@ export default function Navbar() {
                         {user.user_metadata?.full_name || user.email}
                       </p>
                     </div>
+                    <Link
+                      href="/pages/account"
+                      className="nav-dropdown-item"
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                    >
+                      <User size={15} />
+                      Account Settings
+                    </Link>
                     <button onClick={handleSignOut} className="nav-dropdown-item" role="menuitem">
                       <LogOut size={15} />
                       Sign Out
@@ -295,6 +304,24 @@ export default function Navbar() {
                     {user.user_metadata?.full_name || user.email}
                   </span>
                 </div>
+                
+                <Link
+                  href="/pages/account"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="
+                    w-full px-5 py-3 mt-2
+                    flex items-center justify-center gap-2
+                    text-white/80 hover:text-white
+                    bg-white/5 hover:bg-white/10
+                    border border-white/10 hover:border-white/20
+                    rounded-lg text-sm font-medium
+                    transition-all duration-200
+                  "
+                >
+                  <User size={16} />
+                  Account Settings
+                </Link>
+
                 <button
                   onClick={handleSignOut}
                   className="

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+// @ts-expect-error - CSS side effect import
 import "./globals.css";
 import NavbarWrapper from "./components/NavbarWrapper";
-import Footer from "./components/Footer";
+import FooterWrapper from "./components/FooterWrapper";
 import Chatbot from "./components/Chatbot"
 import ScrollProgressBar from "./components/ScrollProgressBar";
 
@@ -25,7 +26,7 @@ export default function RootLayout({
           {children}
         </main>
         <Chatbot />
-        <Footer />
+        <FooterWrapper />
       </body>
     </html>
   );

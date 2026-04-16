@@ -1,0 +1,76 @@
+/* Account Dashboard Styles - Professional Light Theme */
+
+.account-input {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #eae0d5;
+  border-radius: 0.75rem; /* rounded-xl */
+  padding: 0.75rem 1rem;
+  color: #4a3b32;
+  font-size: 0.875rem; /* text-sm */
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.account-input:focus {
+  outline: none;
+  border-color: #997e67; 
+  box-shadow: 0 0 0 3px rgba(153, 126, 103, 0.15);
+  background-color: #fdfaf7;
+}
+
+.account-input::placeholder {
+  color: #a3958a;
+}
+
+.account-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background-color: #997e67;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.75rem; /* rounded-xl */
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(153, 126, 103, 0.2), 0 2px 4px -1px rgba(153, 126, 103, 0.1);
+}
+
+.account-btn-primary:hover {
+  background-color: #866d58;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(153, 126, 103, 0.25), 0 4px 6px -1px rgba(153, 126, 103, 0.15);
+}
+
+.account-btn-primary:active {
+  transform: translateY(0);
+}
+
+.account-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #a3958a;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Scrollbar customization for the dashboard */
+.dashboard-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(153, 126, 103, 0.2);
+  border-radius: 10px;
+}
+
+.dashboard-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(153, 126, 103, 0.4);
+}

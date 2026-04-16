@@ -1,10 +1,9 @@
 'use client'
 import { usePathname } from 'next/navigation'
-import Navbar from './Navbar'
+import Footer from './Footer'
 
-export default function NavbarWrapper() {
+export default function FooterWrapper() {
   const pathname = usePathname()
   if (pathname?.includes('/pages/signin') || pathname?.includes('/pages/signup') || pathname?.includes('/pages/account')) return null
-  return <Navbar />
+  return <Footer />
 }
-
