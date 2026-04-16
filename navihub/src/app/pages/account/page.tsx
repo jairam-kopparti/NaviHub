@@ -489,7 +489,12 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbf9] pt-4 pb-20 selection:bg-[#997e67]/20 flex flex-col">
+    <motion.div 
+      initial={{ x: "-100vw" }}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="min-h-screen bg-[#fcfbf9] pt-4 pb-20 selection:bg-[#997e67]/20 flex flex-col"
+    >
       
       {/* Background Decor - minimal light theme decor */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -619,6 +624,6 @@ export default function AccountPage() {
           
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

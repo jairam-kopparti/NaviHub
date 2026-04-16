@@ -5,16 +5,16 @@ import {
   FileText, Calendar, ShieldCheck,
   CheckCircle, XCircle, Loader2, ArrowLeft
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useUser } from "../../lib/useUser";
 import { supabase } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import "../../styles/account.css";
 
 // Animation Variants
-const fadeIn = {
+const fadeIn: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.4, ease: "easeOut" } }
+  visible: { opacity: 1, transition: { duration: 0.4, ease: "easeOut" as const } }
 };
 
 type TabId = "resources" | "events";
@@ -91,8 +91,9 @@ export default function AdminPanel() {
       setPendingResources((prev) => prev.filter(r => r.id !== id));
       setMessage({ type: "success", text: `Resource has been ${newStatus}.` });
       setTimeout(() => setMessage(null), 3000);
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to update resource." });
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to update resource.";
+      setMessage({ type: "error", text: errorMsg });
       setTimeout(() => setMessage(null), 3000);
     }
   };
@@ -109,8 +110,9 @@ export default function AdminPanel() {
       setPendingEvents((prev) => prev.filter(e => e.id !== id));
       setMessage({ type: "success", text: `Event has been ${newStatus}.` });
       setTimeout(() => setMessage(null), 3000);
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to update event." });
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to update event.";
+      setMessage({ type: "error", text: errorMsg });
       setTimeout(() => setMessage(null), 3000);
     }
   };
@@ -157,11 +159,11 @@ export default function AdminPanel() {
             )}
 
             {loadingResources ? (
-              <div className="flex-1 flex items-center justify-center min-h-[300px]">
+              <div className="flex-1 flex items-center justify-center min-h-75">
                 <Loader2 className="w-8 h-8 text-[#997e67] animate-spin" />
               </div>
             ) : pendingResources.length > 0 ? (
-              <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[500px] hide-scrollbar">
+              <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-125 hide-scrollbar">
                 {pendingResources.map(resource => (
                   <div key={resource.id} className="bg-white border border-[#eae0d5] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
                     <div className="flex justify-between items-start gap-4">
@@ -196,7 +198,7 @@ export default function AdminPanel() {
                 ))}
               </div>
             ) : (
-              <div className="flex-1 bg-gradient-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
+              <div className="flex-1 bg-linear-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-75">
                 <ShieldCheck className="w-12 h-12 text-[#997e67]/50 mb-4" />
                 <p className="text-xl font-bold text-[#4a3b32]! mb-2">No Pending Resources</p>
                 <p className="text-[#a3958a]! max-w-sm text-base">You have caught up with all user submissions!</p>
@@ -223,11 +225,11 @@ export default function AdminPanel() {
             )}
 
             {loadingEvents ? (
-              <div className="flex-1 flex items-center justify-center min-h-[300px]">
+              <div className="flex-1 flex items-center justify-center min-h-75">
                 <Loader2 className="w-8 h-8 text-[#997e67] animate-spin" />
               </div>
             ) : pendingEvents.length > 0 ? (
-              <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[500px] hide-scrollbar">
+              <div className="flex-1 overflow-y-auto pr-2 space-y-4 max-h-125 hide-scrollbar">
                 {pendingEvents.map(event => (
                   <div key={event.id} className="bg-white border border-[#eae0d5] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
                     <div className="flex justify-between items-start gap-4">
@@ -262,7 +264,7 @@ export default function AdminPanel() {
                 ))}
               </div>
             ) : (
-              <div className="flex-1 bg-gradient-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
+              <div className="flex-1 bg-linear-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center flex flex-col items-center justify-center min-h-75">
                 <Calendar className="w-12 h-12 text-[#997e67]/50 mb-4" />
                 <p className="text-xl font-bold text-[#4a3b32]! mb-2">No Pending Events</p>
                 <p className="text-[#a3958a]! max-w-sm text-base">You have caught up with all user submissions!</p>
@@ -274,7 +276,12 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbf9] pt-28 pb-12 font-sans overflow-x-hidden">
+    <motion.div 
+      initial={{ y: "-100vh" }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="min-h-screen bg-[#fcfbf9] pt-28 pb-12 font-sans overflow-x-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-8 md:mb-10 max-w-2xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
@@ -296,7 +303,7 @@ export default function AdminPanel() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-3 bg-white/50 backdrop-blur-md rounded-[2rem] p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#eae0d5]/60 sticky top-32">
+          <div className="lg:col-span-3 bg-white/50 backdrop-blur-md rounded-4xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#eae0d5]/60 sticky top-32">
             <div className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 hide-scrollbar scroll-smooth">
               {TABS.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -307,7 +314,7 @@ export default function AdminPanel() {
                     className={`
                       relative flex items-center gap-3.5 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 w-full text-left shrink-0
                       ${isActive 
-                        ? "text-white bg-gradient-to-br from-[#997e67] to-[#866d58] shadow-md hover:shadow-lg! scale-[1.02]" 
+                        ? "text-white bg-linear-to-br from-[#997e67] to-[#866d58] shadow-md hover:shadow-lg! scale-[1.02]" 
                         : "text-[#6b5a4e] opacity-80 hover:opacity-100 hover:bg-white hover:shadow-sm"
                       }
                     `}
@@ -322,8 +329,8 @@ export default function AdminPanel() {
             </div>
           </div>
 
-          <div className="lg:col-span-9 bg-white rounded-[2rem] lg:min-h-[600px] shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-[#eae0d5]/60 relative overflow-hidden flex flex-col">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#997e67]/[0.02] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="lg:col-span-9 bg-white rounded-4xl lg:min-h-150 shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-[#eae0d5]/60 relative overflow-hidden flex flex-col">
+            <div className="absolute top-0 right-0 w-125 h-125 bg-[#997e67]/2 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
             <AnimatePresence mode="wait">
               {renderContent()}
             </AnimatePresence>
@@ -331,6 +338,6 @@ export default function AdminPanel() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
