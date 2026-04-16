@@ -1,5 +1,4 @@
 "use client"
-// @ts-expect-error - CSS side effect import
 import "../../styles/references.css"
 import Link from "next/link"
 

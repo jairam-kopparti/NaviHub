@@ -1,5 +1,4 @@
 "use client"
-// @ts-expect-error - CSS side effect import
 import "../../styles/aboutus.css"
 import { Users, Search, Layers, Plus, Minus } from "lucide-react"
 import { useEffect, useRef, useState } from "react"

@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import EventChat from "../../components/events/EventChat";
-// @ts-expect-error - CSS side effect import
-
 import "../../styles/events.css";
 
 // Animation variants

@@ -23,7 +23,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
-// @ts-expect-error - CSS side effect import
 import "../../styles/navilink.css";
 import Link from "next/link";
 

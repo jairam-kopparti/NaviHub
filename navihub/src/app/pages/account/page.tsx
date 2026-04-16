@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "../../lib/useUser";
 import { supabase } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
-// @ts-expect-error - CSS side effect import
 import "../../styles/account.css";
 
 // Animation Variants
