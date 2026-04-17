@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Loader, FileText, Tag, MapPin, Image as ImageIcon, AlignLeft, Plus, CheckCircle } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
+import { useUser } from "../../lib/useUser";
 
 const CATEGORIES = [
   "Nonprofit & Charitable Organizations",
@@ -35,6 +36,7 @@ export default function AddResourceModal({
   onClose,
   onSuccess,
 }: AddResourceModalProps) {
+  const { user } = useUser();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("Manhattan");
@@ -92,6 +94,8 @@ export default function AddResourceModal({
             image_url: imageUrl.trim() || "",
             location: location,
             views: 0,
+            status: "pending",
+            user_id: user?.id ?? null,
           },
         ]);
 
@@ -181,7 +185,7 @@ export default function AddResourceModal({
               </div>
               <h3 className="text-xl font-bold !text-gray-900 mb-2">Success!</h3>
               <p className="!text-gray-600">
-                Your resource has been added successfully.
+                Your resource has been submitted for admin review.
               </p>
             </div>
           ) : (

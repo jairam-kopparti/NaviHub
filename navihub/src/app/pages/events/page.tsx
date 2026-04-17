@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, MessageCircle, ChevronLeft, ChevronRight, Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
@@ -78,6 +78,9 @@ interface Event {
   capacity: number | null;
   spots_taken: number;
   signup_required: boolean;
+  status: string | null;
+  user_id: string | null;
+  creator_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -115,6 +118,11 @@ const formatTime = (time: string) => {
   const ampm = hour >= 12 ? "PM" : "AM";
   const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
   return `${displayHour}:${minutes} ${ampm}`;
+};
+
+const getCreatorName = (creatorName?: string | null) => {
+  const clean = creatorName?.trim();
+  return clean && clean.length > 0 ? clean : "Community Sponsored";
 };
 
 // ---------- Event Detail Modal ----------
@@ -246,6 +254,14 @@ const EventModal = ({
           >
             {formatDate(event.event_date)}
           </motion.p>
+          <motion.p
+            className="text-white/90 text-sm mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            Hosted by {getCreatorName(event.creator_name)}
+          </motion.p>
         </div>
 
         {/* Content */}
@@ -366,6 +382,20 @@ export default function CommunityEvents() {
   const [userSignups, setUserSignups] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [chatEventId, setChatEventId] = useState<string | null>(null);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
+  const [suggestSubmitting, setSuggestSubmitting] = useState(false);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+  const [suggestSuccess, setSuggestSuccess] = useState<string | null>(null);
+  const [suggestTitle, setSuggestTitle] = useState("");
+  const [suggestDescription, setSuggestDescription] = useState("");
+  const [suggestCategory, setSuggestCategory] = useState<Category>("community_meetings");
+  const [suggestDate, setSuggestDate] = useState("");
+  const [suggestStartTime, setSuggestStartTime] = useState("");
+  const [suggestEndTime, setSuggestEndTime] = useState("");
+  const [suggestBorough, setSuggestBorough] = useState<Borough>("Manhattan");
+  const [suggestAddress, setSuggestAddress] = useState("");
+  const [suggestVirtual, setSuggestVirtual] = useState(false);
+  const [suggestCapacity, setSuggestCapacity] = useState("");
 
   // Pagination new
   const [page, setPage] = useState(0);
@@ -395,7 +425,12 @@ export default function CommunityEvents() {
       const todayStr = `${year}-${month}-${day}`;
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-      let query = supabase.from("events").select("*").gte("event_date", todayStr).order("event_date", { ascending: true });
+      let query = supabase
+        .from("events")
+        .select("*")
+        .eq("status", "approved")
+        .gte("event_date", todayStr)
+        .order("event_date", { ascending: true });
       
       if (activeCategory !== "all") query = query.eq("category", activeCategory);
       if (activeBorough !== "all") query = query.eq("location_name", activeBorough);
@@ -450,6 +485,99 @@ export default function CommunityEvents() {
         ...prev,
         spots_taken: signed ? prev.spots_taken + 1 : Math.max(0, prev.spots_taken - 1)
       }) : null);
+    }
+  };
+
+  const resetSuggestForm = () => {
+    setSuggestTitle("");
+    setSuggestDescription("");
+    setSuggestCategory("community_meetings");
+    setSuggestDate("");
+    setSuggestStartTime("");
+    setSuggestEndTime("");
+    setSuggestBorough("Manhattan");
+    setSuggestAddress("");
+    setSuggestVirtual(false);
+    setSuggestCapacity("");
+  };
+
+  const handleSuggestEventSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSuggestError(null);
+    setSuggestSuccess(null);
+
+    if (!user) {
+      setSuggestError("Please sign in to suggest an event.");
+      return;
+    }
+
+    if (!suggestTitle.trim() || !suggestDescription.trim() || !suggestDate || !suggestStartTime || !suggestEndTime) {
+      setSuggestError("Please complete all required fields.");
+      return;
+    }
+
+    if (suggestEndTime <= suggestStartTime) {
+      setSuggestError("End time must be later than start time.");
+      return;
+    }
+
+    setSuggestSubmitting(true);
+
+    try {
+      const moderationRes = await fetch("/api/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: `${suggestTitle}\n${suggestDescription}` }),
+      });
+
+      const moderationData = await moderationRes.json();
+      if (!moderationData.safe) {
+        throw new Error(moderationData.message || "Content did not pass moderation.");
+      }
+
+      const creatorName =
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
+        "Community Sponsored";
+
+      const parsedCapacity = suggestCapacity.trim() ? Number(suggestCapacity) : null;
+      const capacityValue = Number.isNaN(parsedCapacity) ? null : parsedCapacity;
+
+      const { error: insertError } = await supabase.from("events").insert([
+        {
+          title: suggestTitle.trim(),
+          description: suggestDescription.trim(),
+          category: suggestCategory,
+          event_date: suggestDate,
+          start_time: suggestStartTime,
+          end_time: suggestEndTime,
+          location_name: suggestVirtual ? "Virtual" : suggestBorough,
+          address: suggestVirtual ? null : suggestAddress.trim() || null,
+          is_virtual: suggestVirtual,
+          capacity: capacityValue,
+          spots_taken: 0,
+          signup_required: true,
+          status: "pending",
+          user_id: user.id,
+          creator_name: creatorName,
+        },
+      ]);
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      setSuggestSuccess("Event submitted. It is now pending admin approval.");
+      resetSuggestForm();
+
+      setTimeout(() => {
+        setShowSuggestModal(false);
+        setSuggestSuccess(null);
+      }, 1400);
+    } catch (err) {
+      setSuggestError(err instanceof Error ? err.message : "Failed to submit event");
+    } finally {
+      setSuggestSubmitting(false);
     }
   };
 
@@ -629,6 +757,37 @@ export default function CommunityEvents() {
         </div>
       </section>
 
+      {user && !userLoading && (
+        <section className="px-4 sm:px-6 py-8 sm:py-10 bg-[var(--surface)] border-b border-gray-100">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              className="rounded-3xl border border-[#E5E0DB] bg-[#F5F0EB] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.45 }}
+            >
+              <div>
+                <p className="!text-[#997e67] text-xs sm:text-sm uppercase tracking-widest font-semibold">Community Contribution</p>
+                <h2 className="!text-[#1F1F1F] text-2xl sm:text-3xl font-bold mt-1">Suggest an Event</h2>
+                <p className="!text-gray-600 mt-2 text-sm sm:text-base">Share a local event idea with NaviHub. Submissions are reviewed by the admin team before publishing.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setSuggestError(null);
+                  setSuggestSuccess(null);
+                  setShowSuggestModal(true);
+                }}
+                className="px-6 py-3 rounded-2xl bg-[#1F1F1F] text-white font-semibold hover:bg-black transition inline-flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Plus size={18} />
+                Suggest Event
+              </button>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* My Events Section */}
       {user && myEvents.length > 0 && (
         <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)] border-b border-gray-100">
@@ -683,6 +842,7 @@ export default function CommunityEvents() {
                   <h3 className="text-[#1F1F1F] font-bold text-lg mb-2 group-hover:text-[#997e67] transition">
                     {event.title}
                   </h3>
+                  <p className="!text-[#6b5a4e] text-xs sm:text-sm mb-2">Hosted by {getCreatorName(event.creator_name)}</p>
                   <div className="flex items-center gap-4 text-gray-500 text-sm">
                     <span className="flex items-center gap-1">
                       <Clock size={14} />
@@ -760,6 +920,9 @@ export default function CommunityEvents() {
                       <h3 className={`!text-black font-bold mb-2 sm:mb-3 group-hover:text-[#997e67] transition ${index === 0 ? "text-xl sm:text-2xl lg:text-3xl" : "text-base sm:text-lg"}`}>
                         {event.title}
                       </h3>
+                      <p className={`!text-[#6b5a4e] ${index === 0 ? "text-sm sm:text-base" : "text-xs sm:text-sm"} mb-3`}>
+                        Hosted by {getCreatorName(event.creator_name)}
+                      </p>
 
                       {event.description && (
                         <p className={`!text-gray-500 mb-4 sm:mb-6 ${index === 0 ? "text-base sm:text-lg line-clamp-2 sm:line-clamp-3" : "text-xs sm:text-sm line-clamp-2"}`}>
@@ -899,6 +1062,7 @@ export default function CommunityEvents() {
                       <h3 className="font-semibold !text-black group-hover:text-[#997e67] transition text-sm sm:text-base line-clamp-1">
                         {event.title}
                       </h3>
+                      <p className="!text-[#6b5a4e] text-xs mt-1">Hosted by {getCreatorName(event.creator_name)}</p>
                       <div className="flex items-center gap-3 sm:gap-4 mt-2 text-xs sm:text-sm !text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock size={14} />
@@ -971,6 +1135,220 @@ export default function CommunityEvents() {
           )}
         </div>
       </section>
+
+      <AnimatePresence>
+        {showSuggestModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              if (!suggestSubmitting) setShowSuggestModal(false);
+            }}
+          >
+            <div className="absolute inset-0 bg-black/70" />
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="suggest-event-title"
+              className="relative z-10 w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.97 }}
+              transition={{ duration: 0.22 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-6 sm:px-8 py-6 border-b border-gray-100 bg-[#F5F0EB]">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 id="suggest-event-title" className="!text-gray-900 text-2xl font-bold">Suggest Event</h3>
+                    <p className="!text-gray-600 text-sm mt-1">Submit your event idea for admin review.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!suggestSubmitting) setShowSuggestModal(false);
+                    }}
+                    className="p-2 rounded-full hover:bg-black/5 transition text-gray-500 hover:text-gray-700"
+                    aria-label="Close suggest event form"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 sm:p-8">
+                {suggestSuccess ? (
+                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold">
+                    {suggestSuccess}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSuggestEventSubmit} className="space-y-5">
+                    <div>
+                      <label htmlFor="suggest-title" className="block !text-gray-900 text-sm font-semibold mb-2">Event Title</label>
+                      <input
+                        id="suggest-title"
+                        type="text"
+                        value={suggestTitle}
+                        onChange={(e) => setSuggestTitle(e.target.value)}
+                        placeholder="Neighborhood Career Workshop"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900 placeholder:!text-gray-400"
+                        style={{ color: "#111827" }}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="suggest-description" className="block !text-gray-900 text-sm font-semibold mb-2">Description</label>
+                      <textarea
+                        id="suggest-description"
+                        value={suggestDescription}
+                        onChange={(e) => setSuggestDescription(e.target.value)}
+                        placeholder="Share what this event is about, who should join, and what attendees can expect."
+                        rows={4}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none resize-none !text-gray-900 placeholder:!text-gray-400"
+                        style={{ color: "#111827" }}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="suggest-category" className="block !text-gray-900 text-sm font-semibold mb-2">Category</label>
+                        <select
+                          id="suggest-category"
+                          value={suggestCategory}
+                          onChange={(e) => setSuggestCategory(e.target.value as Category)}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900"
+                          style={{ color: "#111827" }}
+                        >
+                          {CATEGORIES.map((category) => (
+                            <option key={category} value={category} style={{ color: "#111827" }}>
+                              {CATEGORY_LABELS[category]}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="suggest-borough" className="block !text-gray-900 text-sm font-semibold mb-2">Borough</label>
+                        <select
+                          id="suggest-borough"
+                          value={suggestBorough}
+                          onChange={(e) => setSuggestBorough(e.target.value as Borough)}
+                          disabled={suggestVirtual}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900 disabled:opacity-60"
+                          style={{ color: "#111827" }}
+                        >
+                          {BOROUGHS.map((borough) => (
+                            <option key={borough} value={borough} style={{ color: "#111827" }}>
+                              {borough}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label htmlFor="suggest-date" className="block !text-gray-900 text-sm font-semibold mb-2">Date</label>
+                        <input
+                          id="suggest-date"
+                          type="date"
+                          value={suggestDate}
+                          onChange={(e) => setSuggestDate(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900"
+                          style={{ color: "#111827" }}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="suggest-start-time" className="block !text-gray-900 text-sm font-semibold mb-2">Start</label>
+                        <input
+                          id="suggest-start-time"
+                          type="time"
+                          value={suggestStartTime}
+                          onChange={(e) => setSuggestStartTime(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900"
+                          style={{ color: "#111827" }}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="suggest-end-time" className="block !text-gray-900 text-sm font-semibold mb-2">End</label>
+                        <input
+                          id="suggest-end-time"
+                          type="time"
+                          value={suggestEndTime}
+                          onChange={(e) => setSuggestEndTime(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900"
+                          style={{ color: "#111827" }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="suggest-address" className="block !text-gray-900 text-sm font-semibold mb-2">Address (optional)</label>
+                      <input
+                        id="suggest-address"
+                        type="text"
+                        value={suggestAddress}
+                        onChange={(e) => setSuggestAddress(e.target.value)}
+                        placeholder={suggestVirtual ? "Virtual event selected" : "123 Community St, NY"}
+                        disabled={suggestVirtual}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900 placeholder:!text-gray-400 disabled:opacity-60"
+                        style={{ color: "#111827" }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <label className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={suggestVirtual}
+                          onChange={(e) => setSuggestVirtual(e.target.checked)}
+                          className="accent-[#997e67]"
+                        />
+                        <span className="!text-gray-900 text-sm font-semibold">This is a virtual event</span>
+                      </label>
+
+                      <div>
+                        <label htmlFor="suggest-capacity" className="block !text-gray-900 text-sm font-semibold mb-2">Capacity (optional)</label>
+                        <input
+                          id="suggest-capacity"
+                          type="number"
+                          min={1}
+                          value={suggestCapacity}
+                          onChange={(e) => setSuggestCapacity(e.target.value)}
+                          placeholder="50"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#997e67] focus:ring-2 focus:ring-[#997e67]/20 outline-none !text-gray-900 placeholder:!text-gray-400"
+                          style={{ color: "#111827" }}
+                        />
+                      </div>
+                    </div>
+
+                    {suggestError && (
+                      <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                        {suggestError}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={suggestSubmitting}
+                      className="w-full py-3.5 rounded-xl bg-[#1F1F1F] text-white font-semibold hover:bg-black transition disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                    >
+                      {suggestSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus size={16} />}
+                      {suggestSubmitting ? "Submitting..." : "Submit Event Suggestion"}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Event Chat */}
       <EventChat

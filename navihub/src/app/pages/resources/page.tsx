@@ -129,7 +129,7 @@ export default function ResourcesPage() {
 
   // Fetch category counts for the dashboard
   useEffect(() => {
-    supabase.from('resources').select('id, category').then(({data}) => {
+    supabase.from('resources').select('id, category').eq('status', 'approved').then(({data}) => {
        if(data) {
           const counts: Record<string, number> = {};
           data.forEach(r => {
@@ -171,6 +171,8 @@ export default function ResourcesPage() {
             image_url: inlineImageUrl.trim() || "",
             location: inlineLocation,
             views: 0,
+            status: "pending",
+            user_id: user?.id ?? null,
           },
         ]);
 
@@ -241,7 +243,7 @@ export default function ResourcesPage() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        let query = supabase.from("resources").select("*");
+        let query = supabase.from("resources").select("*").eq("status", "approved");
 
         // Filter by categories if selected
         if (selectedCategories.length > 0) {
@@ -403,7 +405,7 @@ export default function ResourcesPage() {
       }
 
       try {
-        let query = supabase.from("resources").select("*");
+        let query = supabase.from("resources").select("*").eq("status", "approved");
 
         if (selectedCategories.length > 0) {
           query = query.in("category", selectedCategories);
@@ -506,7 +508,7 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-(--bg)">
+    <div className="resource-page min-h-screen bg-(--bg)">
       {/* Section 1: Hero Image */}
       <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] overflow-hidden">
         <motion.div
@@ -1361,6 +1363,18 @@ export default function ResourcesPage() {
           handleResourceCardClick(resource);
         }}
       />
+
+      <style jsx global>{`
+        .resource-page button,
+        .resource-page a,
+        .resource-page [role="button"] {
+          cursor: pointer;
+        }
+
+        .resource-page button:disabled {
+          cursor: not-allowed;
+        }
+      `}</style>
     </div>
   );
 }

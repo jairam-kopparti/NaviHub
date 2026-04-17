@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useUser } from '../lib/useUser'
 import { supabase } from '../lib/supabaseClient'
+import { isAdminEmail } from '../lib/admin'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -17,6 +18,7 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading } = useUser()
+  const isAdmin = isAdminEmail(user?.email)
 
   const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources')
 
@@ -175,13 +177,13 @@ export default function Navbar() {
                       </p>
                     </div>
                     <Link
-                      href="/pages/account"
+                      href={isAdmin ? '/pages/admin' : '/pages/account'}
                       className="nav-dropdown-item"
                       role="menuitem"
                       onClick={() => setOpen(false)}
                     >
                       <User size={15} />
-                      Account Settings
+                      {isAdmin ? 'Admin Panel' : 'Account Settings'}
                     </Link>
                     <button onClick={handleSignOut} className="nav-dropdown-item" role="menuitem">
                       <LogOut size={15} />
@@ -306,7 +308,7 @@ export default function Navbar() {
                 </div>
                 
                 <Link
-                  href="/pages/account"
+                  href={isAdmin ? '/pages/admin' : '/pages/account'}
                   onClick={() => setMobileMenuOpen(false)}
                   className="
                     w-full px-5 py-3 mt-2
@@ -319,7 +321,7 @@ export default function Navbar() {
                   "
                 >
                   <User size={16} />
-                  Account Settings
+                  {isAdmin ? 'Admin Panel' : 'Account Settings'}
                 </Link>
 
                 <button

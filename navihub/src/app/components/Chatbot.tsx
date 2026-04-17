@@ -98,7 +98,7 @@ export default function Chatbot() {
 
   const fetchResources = useCallback(async () => {
     try {
-      const { data, error } = await supabase.from("resources").select("*");
+      const { data, error } = await supabase.from("resources").select("*").eq("status", "approved");
       if (error) return [];
       return data;
     } catch {
@@ -107,7 +107,11 @@ export default function Chatbot() {
   }, []);
 
   const fetchEvents = useCallback(async () => {
-    const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
+    const { data } = await supabase
+      .from("events")
+      .select("*")
+      .eq("status", "approved")
+      .order("event_date", { ascending: true });
     return data;
   }, []);
 

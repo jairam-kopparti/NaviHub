@@ -61,6 +61,13 @@ export default function AccountPage() {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationsFetched, setNotificationsFetched] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [myResourceSubmissions, setMyResourceSubmissions] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [myEventSubmissions, setMyEventSubmissions] = useState<any[]>([]);
+  const [loadingApprovals, setLoadingApprovals] = useState(false);
+  const [approvalsFetched, setApprovalsFetched] = useState(false);
+
   useEffect(() => {
     if (user?.user_metadata?.full_name) {
       setFullName(user.user_metadata.full_name);
@@ -112,13 +119,54 @@ export default function AccountPage() {
         }
       });
     }
-  }, [activeTab, user, postsFetched, loadingPosts, eventsFetched, loadingEvents, notificationsFetched, loadingNotifications]);
+
+    if (activeTab === "approvals" && !approvalsFetched && !loadingApprovals) {
+      setLoadingApprovals(true);
+
+      Promise.all([
+        supabase
+          .from("resources")
+          .select("id, title, category, status, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("events")
+          .select("id, title, event_date, start_time, status, created_at, creator_name")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+      ])
+        .then(([{ data: resources }, { data: events }]) => {
+          if (resources) setMyResourceSubmissions(resources);
+          if (events) setMyEventSubmissions(events);
+          setApprovalsFetched(true);
+        })
+        .catch(() => {
+          setMyResourceSubmissions([]);
+          setMyEventSubmissions([]);
+          setApprovalsFetched(true);
+        })
+        .finally(() => {
+          setLoadingApprovals(false);
+        });
+    }
+  }, [
+    activeTab,
+    user,
+    postsFetched,
+    loadingPosts,
+    eventsFetched,
+    loadingEvents,
+    notificationsFetched,
+    loadingNotifications,
+    approvalsFetched,
+    loadingApprovals,
+  ]);
 
   // If user is not logged in after loading, you might want to redirect.
   // For now, we'll just show a placeholder or loading state.
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fcfbf9] flex items-center justify-center">
+      <div className="account-page min-h-screen bg-[#fcfbf9] flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-[#997e67] animate-spin" />
       </div>
     );
@@ -127,7 +175,7 @@ export default function AccountPage() {
   if (!user && !loading) {
     // If there's a routing error or user is unauthenticated, show a neat error and home button
     return (
-      <div className="min-h-screen bg-[#fcfbf9] flex flex-col items-center justify-center text-[#4a3b32]! gap-6">
+      <div className="account-page min-h-screen bg-[#fcfbf9] flex flex-col items-center justify-center text-[#4a3b32]! gap-6">
         <p className="text-xl font-medium">Please sign in to view your account.</p>
         <button 
           onClick={() => router.push('/pages/signin')}
@@ -374,15 +422,91 @@ export default function AccountPage() {
             <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-[#4a3b32]! tracking-tight flex items-center gap-2">
               Approvals <span className="text-[#a3958a]! text-lg font-medium">&bull; Moderation</span>
             </h2>
-            <div className="flex-1 bg-linear-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center text-[#6b5a4e]! flex flex-col items-center justify-center min-h-75 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[#997e67]/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#eae0d5]/60 relative z-10">
-                <ShieldCheck className="w-8 h-8 text-[#997e67]!" />
+            {loadingApprovals ? (
+              <div className="flex-1 flex items-center justify-center min-h-75"><Loader2 className="w-8 h-8 text-[#997e67] animate-spin" /></div>
+            ) : myResourceSubmissions.length === 0 && myEventSubmissions.length === 0 ? (
+              <div className="flex-1 bg-linear-to-b from-[#fdfaf7] to-white border border-dashed border-[#eae0d5] rounded-3xl p-10 text-center text-[#6b5a4e]! flex flex-col items-center justify-center min-h-75 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-[#997e67]/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#eae0d5]/60 relative z-10">
+                  <ShieldCheck className="w-8 h-8 text-[#997e67]!" />
+                </div>
+                <p className="text-xl font-bold text-[#4a3b32]! mb-2 relative z-10">No Submissions Yet</p>
+                <p className="text-[#a3958a]! text-base mb-2 relative z-10">Submit a resource or suggest an event to track moderation here.</p>
+                <p className="text-xs mt-2 text-[#a3958a]! opacity-80 font-medium bg-[#fcfbf9] px-3 py-1 rounded-full border border-[#eae0d5] inline-block relative z-10">Statuses: pending, approved, rejected</p>
               </div>
-              <p className="text-xl font-bold text-[#4a3b32]! mb-2 relative z-10">Nothing to Review</p>
-              <p className="text-[#a3958a]! text-base mb-2 relative z-10">No posts currently pending moderation.</p>
-              <p className="text-xs mt-2 text-[#a3958a]! opacity-80 font-medium bg-[#fcfbf9] px-3 py-1 rounded-full border border-[#eae0d5] inline-block relative z-10">Pending approval statuses will appear here</p>
-            </div>
+            ) : (
+              <div className="space-y-7 overflow-y-auto pr-1 max-h-125 hide-scrollbar">
+                <div>
+                  <h3 className="text-lg font-bold text-[#4a3b32]! mb-3">Resource Submissions</h3>
+                  {myResourceSubmissions.length === 0 ? (
+                    <p className="text-sm text-[#a3958a]!">No resources submitted yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {myResourceSubmissions.map((item) => {
+                        const status = (item.status || "pending").toLowerCase();
+                        const badgeClass =
+                          status === "approved"
+                            ? "bg-green-50 text-green-700 border-green-200"
+                            : status === "rejected"
+                            ? "bg-red-50 text-red-700 border-red-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200";
+
+                        return (
+                          <div key={item.id} className="bg-white border border-[#eae0d5] rounded-2xl p-4 sm:p-5 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <h4 className="font-bold text-[#4a3b32]! text-base line-clamp-1">{item.title}</h4>
+                                <p className="text-xs text-[#a3958a]! mt-1">
+                                  {item.category || "Uncategorized"} • {new Date(item.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-bold border capitalize ${badgeClass}`}>
+                                {status}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-[#4a3b32]! mb-3">Event Suggestions</h3>
+                  {myEventSubmissions.length === 0 ? (
+                    <p className="text-sm text-[#a3958a]!">No events suggested yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {myEventSubmissions.map((item) => {
+                        const status = (item.status || "pending").toLowerCase();
+                        const badgeClass =
+                          status === "approved"
+                            ? "bg-green-50 text-green-700 border-green-200"
+                            : status === "rejected"
+                            ? "bg-red-50 text-red-700 border-red-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200";
+
+                        return (
+                          <div key={item.id} className="bg-white border border-[#eae0d5] rounded-2xl p-4 sm:p-5 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <h4 className="font-bold text-[#4a3b32]! text-base line-clamp-1">{item.title}</h4>
+                                <p className="text-xs text-[#a3958a]! mt-1">
+                                  {(item.event_date || "Date TBD") + (item.start_time ? ` at ${item.start_time}` : "")} • {new Date(item.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-bold border capitalize ${badgeClass}`}>
+                                {status}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </motion.div>
         );
 
@@ -433,7 +557,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbf9] pt-4 pb-20 selection:bg-[#997e67]/20 flex flex-col">
+    <div className="account-page min-h-screen bg-[#fcfbf9] pt-4 pb-20 selection:bg-[#997e67]/20 flex flex-col">
       
       {/* Background Decor - minimal light theme decor */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -563,6 +687,18 @@ export default function AccountPage() {
           
         </div>
       </div>
+
+      <style jsx global>{`
+        .account-page button,
+        .account-page a,
+        .account-page [role="button"] {
+          cursor: pointer;
+        }
+
+        .account-page button:disabled {
+          cursor: not-allowed;
+        }
+      `}</style>
     </div>
   );
 }
