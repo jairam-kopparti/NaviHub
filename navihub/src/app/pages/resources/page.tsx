@@ -171,8 +171,6 @@ export default function ResourcesPage() {
             image_url: inlineImageUrl.trim() || "",
             location: inlineLocation,
             views: 0,
-            status: "pending",
-            user_id: user?.id,
           },
         ]);
 
@@ -243,7 +241,7 @@ export default function ResourcesPage() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        let query = supabase.from("resources").select("*").or("status.eq.approved,status.is.null");
+        let query = supabase.from("resources").select("*");
 
         // Filter by categories if selected
         if (selectedCategories.length > 0) {

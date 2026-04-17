@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import EventChat from "../../components/events/EventChat";
-import AddEventModal from "../../components/events/AddEventModal";
 import "../../styles/events.css";
 
 // Animation variants
@@ -79,8 +78,6 @@ interface Event {
   capacity: number | null;
   spots_taken: number;
   signup_required: boolean;
-  status?: string;
-  creator_name?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -242,20 +239,12 @@ const EventModal = ({
             {event.title}
           </motion.h2>
           <motion.p 
-            className="text-white/90 text-sm mb-1"
+            className="text-white/90 text-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
           >
             {formatDate(event.event_date)}
-          </motion.p>
-          <motion.p
-            className="text-white/70 text-xs italic"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            Organized by: {event.creator_name || "Community Sponsored"}
           </motion.p>
         </div>
 
@@ -376,7 +365,6 @@ export default function CommunityEvents() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [userSignups, setUserSignups] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [chatEventId, setChatEventId] = useState<string | null>(null);
 
   // Pagination new
@@ -407,7 +395,7 @@ export default function CommunityEvents() {
       const todayStr = `${year}-${month}-${day}`;
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-      let query = supabase.from("events").select("*").or("status.eq.approved,status.is.null").gte("event_date", todayStr).order("event_date", { ascending: true });
+      let query = supabase.from("events").select("*").gte("event_date", todayStr).order("event_date", { ascending: true });
       
       if (activeCategory !== "all") query = query.eq("category", activeCategory);
       if (activeBorough !== "all") query = query.eq("location_name", activeBorough);
@@ -479,18 +467,15 @@ export default function CommunityEvents() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30" />
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-32 md:py-40 w-full">
-          <div className="max-w-2xl mt-6 sm:mt-10 relative">
-            <div className="flex justify-between items-start mb-4">
-              <motion.p 
-                className="text-[#CCBEB1] font-medium tracking-wide uppercase text-xs sm:text-sm"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                Community Events
-              </motion.p>
-            </div>
-            
+          <div className="max-w-2xl mt-6 sm:mt-10">
+            <motion.p 
+              className="text-[#CCBEB1] font-medium mb-4 sm:mb-6 tracking-wide uppercase text-xs sm:text-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Community Events
+            </motion.p>
             <motion.h1 
               className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 sm:mb-8"
               initial={{ opacity: 0, y: 30 }}
@@ -772,12 +757,9 @@ export default function CommunityEvents() {
                         )}
                       </div>
 
-                      <h3 className={`!text-black font-bold mb-1 group-hover:text-[#997e67] transition ${index === 0 ? "text-xl sm:text-2xl lg:text-3xl" : "text-base sm:text-lg"}`}>
+                      <h3 className={`!text-black font-bold mb-2 sm:mb-3 group-hover:text-[#997e67] transition ${index === 0 ? "text-xl sm:text-2xl lg:text-3xl" : "text-base sm:text-lg"}`}>
                         {event.title}
                       </h3>
-                      <p className="text-xs text-gray-500 italic mb-2 sm:mb-3">
-                        Organized by {event.creator_name || "Community Sponsored"}
-                      </p>
 
                       {event.description && (
                         <p className={`!text-gray-500 mb-4 sm:mb-6 ${index === 0 ? "text-base sm:text-lg line-clamp-2 sm:line-clamp-3" : "text-xs sm:text-sm line-clamp-2"}`}>
@@ -834,31 +816,17 @@ export default function CommunityEvents() {
       {/* All Events List */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--surface)]">
         <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-end mb-6 sm:mb-10">
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={fadeInUp}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="!text-black text-2xl sm:text-3xl font-bold">All Events</h2>
-              <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">{filteredEvents.length} events available</p>
-            </motion.div>
-            
-            {user && (
-              <motion.button
-                onClick={() => setShowAddModal(true)}
-                className="bg-[#997e67] hover:bg-[#8a6d5a] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-transform hover:scale-105"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                + Suggest Event
-              </motion.button>
-            )}
-          </div>
+          <motion.div 
+            className="mb-6 sm:mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeInUp}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="!text-black text-2xl sm:text-3xl font-bold">All Events</h2>
+            <p className="!text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">{filteredEvents.length} events available</p>
+          </motion.div>
 
           {loading ? (
             <div className="flex items-center justify-center py-12 sm:py-20">
@@ -931,9 +899,6 @@ export default function CommunityEvents() {
                       <h3 className="font-semibold !text-black group-hover:text-[#997e67] transition text-sm sm:text-base line-clamp-1">
                         {event.title}
                       </h3>
-                      <p className="text-xs text-gray-500 italic mt-0.5 mb-1">
-                        Organized by {event.creator_name || "Community Sponsored"}
-                      </p>
                       <div className="flex items-center gap-3 sm:gap-4 mt-2 text-xs sm:text-sm !text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock size={14} />
@@ -1012,12 +977,6 @@ export default function CommunityEvents() {
         eventId={chatEventId || ""}
         isOpen={!!chatEventId}
         onClose={() => setChatEventId(null)}
-      />
-
-      <AddEventModal 
-        isOpen={showAddModal} 
-        onClose={() => setShowAddModal(false)} 
-        onSuccess={() => {}} 
       />
 
       {/* Modal */}
