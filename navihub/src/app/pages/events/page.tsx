@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { X, MapPin, Clock, Users, Search, Filter, ArrowRight, MessageCircle, ChevronLeft, ChevronRight, Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabaseClient";
@@ -375,8 +376,12 @@ const EventModal = ({
 
 // ---------- Main Component ----------
 
-export default function CommunityEvents() {
+function CommunityEventsInner() {
   const { user, loading: userLoading } = useUser();
+  const searchParams = useSearchParams();
+  const deepLinkEventId = searchParams.get("eventId");
+  const [deepLinkHandled, setDeepLinkHandled] = useState(false);
+
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -466,6 +471,16 @@ export default function CommunityEvents() {
     };
     fetchEvents();
   }, [activeCategory, activeBorough]);
+
+  useEffect(() => {
+    if (deepLinkEventId && events.length > 0 && !deepLinkHandled) {
+      const matched = events.find(e => e.id === deepLinkEventId);
+      if (matched) {
+        setSelectedEvent(matched);
+      }
+      setDeepLinkHandled(true);
+    }
+  }, [deepLinkEventId, events, deepLinkHandled]);
 
   const filteredEvents = events.filter((e) => {
     const q = searchTerm.toLowerCase();
@@ -1342,5 +1357,13 @@ export default function CommunityEvents() {
         </motion.div>
       )}
     </div>
+  );
+}
+
+export default function CommunityEvents() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[var(--background)] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#997e67]" /></div>}>
+      <CommunityEventsInner />
+    </Suspense>
   );
 }

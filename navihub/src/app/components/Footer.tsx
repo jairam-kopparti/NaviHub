@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Instagram, Youtube, Bot, Sparkles } from "lucide-react";
+import { Twitter, Instagram, Youtube, Bot, Sparkles, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -86,6 +86,25 @@ export default function Footer() {
               </div>
               <Sparkles size={14} className="text-gray-500 group-hover:text-[#997e67] transition-colors" />
             </button>
+
+            <button
+              onClick={() => window.dispatchEvent(new Event('open-newsletter-modal'))}
+              aria-label="Subscribe to NaviHub weekly newsletter"
+              className="w-full bg-[#997e67]/20 hover:bg-[#997e67]/35 border border-[#997e67]/40 rounded-xl py-2.5 px-4 text-xs text-white transition-all flex items-center justify-between group cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Mail size={16} className="text-[#CCBEB1] group-hover:text-white transition-colors" />
+                <span>Subscribe to Weekly Newsletter</span>
+              </div>
+              <Sparkles size={14} className="text-[#CCBEB1] group-hover:text-white transition-colors" />
+            </button>
+
+            <Link
+              href="/pages/newsletter"
+              className="text-xs text-[#CCBEB1] hover:text-white transition-colors text-center pt-1"
+            >
+              View newsletter archive
+            </Link>
           </div>
         </div>
       </div>
