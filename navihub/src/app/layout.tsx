@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased min-h-screen flex flex-col`}>
-        <a href="#main-content" className="skip-to-content">Skip to main content</a>
+        {/*<a href="#main-content" className="skip-to-content">Skip to main content</a>*/}
         <NewsletterSubscriptionModal />
         <ScrollProgressBar />
         <NavbarWrapper />
