@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Check, ChevronDown, MapPin, Star, Eye, Grid3X3, SlidersHorizontal, X,
@@ -90,9 +91,12 @@ const slideInDrawer = {
   exit: { x: "-100%", transition: { duration: 0.2 } }
 };
 
-export default function ResourcesPage() {
+function ResourcesPageInner() {
   const [viewMode, setViewMode] = useState<"dashboard" | "list">("dashboard");
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const searchParams = useSearchParams();
+  const inlineResourceId = searchParams.get("resourceId");
+  const [deepLinkHandled, setDeepLinkHandled] = useState(false);
   
   // Inline Form States
   const [inlineTitle, setInlineTitle] = useState("");
@@ -341,6 +345,16 @@ export default function ResourcesPage() {
 
     fetchResources();
   }, [selectedCategories, selectedLocations, selectedRating, selectedView, userFavorites]);
+
+  useEffect(() => {
+    if (inlineResourceId && resources.length > 0 && !deepLinkHandled) {
+      const match = resources.find(r => r.id === inlineResourceId);
+      if (match) {
+        setSelectedCard(match);
+      }
+      setDeepLinkHandled(true);
+    }
+  }, [inlineResourceId, resources, deepLinkHandled]);
 
   // Filter search locally (null-safe)
   const queryLower = searchQuery.trim().toLowerCase();
@@ -1376,5 +1390,13 @@ export default function ResourcesPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function ResourcesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#fdfaf7] flex items-center justify-center"><Loader className="w-8 h-8 text-[#997e67] animate-spin" /></div>}>
+      <ResourcesPageInner />
+    </Suspense>
   );
 }

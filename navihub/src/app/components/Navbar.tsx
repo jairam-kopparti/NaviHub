@@ -20,7 +20,7 @@ export default function Navbar() {
   const { user, loading } = useUser()
   const isAdmin = isAdminEmail(user?.email)
 
-  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources')
+  const isSpecialPage = pathname.includes('/pages/signin') || pathname.includes('/pages/signup') || pathname.includes('/pages/resources') || pathname.includes('/pages/newsletter')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)

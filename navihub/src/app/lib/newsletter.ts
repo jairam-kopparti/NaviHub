@@ -78,6 +78,35 @@ export interface NewsletterPostItem {
   href: string;
 }
 
+export interface NewsletterEditorialSeed {
+  headline: string;
+  summary: string;
+  imageUrl?: string;
+  source?: string;
+  category?: string;
+  location?: string;
+}
+
+export interface NewsletterEditorialStory {
+  headline: string;
+  summary: string;
+  imageUrl?: string;
+  source?: string;
+}
+
+export interface NewsletterEditorial {
+  kicker: string;
+  headline: string;
+  subhead: string;
+  byline: string;
+  location: string;
+  paragraphs: string[];
+  imageUrl: string;
+  imageAlt: string;
+  imageCaption: string;
+  sideStories: NewsletterEditorialStory[];
+}
+
 export interface NewsletterSections {
   highlights: string[];
   events: NewsletterEventItem[];
@@ -85,6 +114,7 @@ export interface NewsletterSections {
   topRatedResources: NewsletterResourceItem[];
   news: NewsletterNewsItem[];
   latestPosts: NewsletterPostItem[];
+  editorial?: NewsletterEditorial;
 }
 
 interface NewsletterBaseContent {
@@ -103,6 +133,110 @@ const PAGE_EVENTS_HREF = "/pages/events";
 const PAGE_RESOURCES_HREF = "/pages/resources";
 const PAGE_NEWS_HREF = "/pages/news";
 
+const EDITORIAL_FALLBACK_IMAGES = [
+  "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
+];
+
+const EDITORIAL_CATEGORY_IMAGES: Array<{ keywords: string[]; url: string }> = [
+  {
+    keywords: ["volunteer", "cleanup", "community", "neighborhood"],
+    url: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    keywords: ["education", "workshop", "training", "leadership", "school", "class"],
+    url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    keywords: ["wellness", "health", "fitness", "coaching"],
+    url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    keywords: ["food", "culinary", "kitchen", "market"],
+    url: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    keywords: ["environment", "sustain", "garden", "park", "nature"],
+    url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    keywords: ["arts", "music", "culture", "creative"],
+    url: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    keywords: ["housing", "home", "shelter"],
+    url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=80",
+  },
+];
+
+const UNSAFE_EDITORIAL_KEYWORDS = [
+  "crime",
+  "sexual",
+  "rape",
+  "shooting",
+  "shoot",
+  "gun",
+  "knife",
+  "murder",
+  "assault",
+  "violence",
+  "abuse",
+  "kidnap",
+  "hostage",
+  "drugs",
+  "overdose",
+  "death",
+  "suicide",
+  "war",
+  "attack",
+  "strike",
+  "airstrike",
+  "bomb",
+  "bombing",
+  "explosion",
+  "missile",
+  "military",
+  "army",
+  "navy",
+  "blockade",
+  "election",
+  "vote",
+  "politic",
+  "president",
+  "prime minister",
+  "congress",
+  "parliament",
+  "senator",
+  "governor",
+  "trump",
+  "biden",
+  "iran",
+  "ukraine",
+  "russia",
+  "china",
+  "israel",
+  "gaza",
+  "hamas",
+  "nato",
+  "protest",
+  "trial",
+  "verdict",
+  "court",
+  "lawsuit",
+  "arrest",
+  "jail",
+  "terror",
+  "fire",
+  "disaster",
+  "collapse",
+  "outbreak",
+  "controvers",
+];
+
+const UNSAFE_EDITORIAL_CATEGORIES = new Set(["politics", "crime"]);
+
 const DEFAULT_PREFERENCES: Required<NewsletterPreferenceInput> = {
   favoriteBoroughs: [],
   favoriteCategories: [],
@@ -116,6 +250,17 @@ const DEFAULT_PREFERENCES: Required<NewsletterPreferenceInput> = {
 function safeString(value: unknown, fallback = ""): string {
   if (typeof value !== "string") return fallback;
   return value.trim();
+}
+
+function pickEditorialFallbackImage(seed?: NewsletterEditorialSeed, index = 0): string {
+  const tag = `${safeString(seed?.category)} ${safeString(seed?.headline)} ${safeString(seed?.summary)}`.toLowerCase();
+  for (const entry of EDITORIAL_CATEGORY_IMAGES) {
+    if (entry.keywords.some((keyword) => tag.includes(keyword))) {
+      return entry.url;
+    }
+  }
+
+  return EDITORIAL_FALLBACK_IMAGES[index % EDITORIAL_FALLBACK_IMAGES.length];
 }
 
 function slugify(input: string): string {
@@ -203,6 +348,141 @@ function extractTimeLabel(startTime: string): string {
 function truncate(input: string, maxChars: number): string {
   if (input.length <= maxChars) return input;
   return `${input.slice(0, maxChars - 1).trim()}...`;
+}
+
+function isSafeEditorialSeed(seed: NewsletterEditorialSeed): boolean {
+  const category = safeString(seed.category).toLowerCase();
+  if (category && UNSAFE_EDITORIAL_CATEGORIES.has(category)) return false;
+
+  const text = `${safeString(seed.headline)} ${safeString(seed.summary)} ${safeString(seed.location)}`.toLowerCase();
+  return !UNSAFE_EDITORIAL_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+function scoreEditorialSeed(seed: NewsletterEditorialSeed): number {
+  let score = 0;
+  if (safeString(seed.imageUrl)) score += 2;
+  if (safeString(seed.summary)) score += 1;
+  if (safeString(seed.source)) score += 0.5;
+  if (safeString(seed.category)) score += 0.25;
+  return score;
+}
+
+export function selectEditorialSeeds(
+  seeds: NewsletterEditorialSeed[],
+  limit = 4
+): NewsletterEditorialSeed[] {
+  const safeItems = seeds.filter(isSafeEditorialSeed);
+  return [...safeItems]
+    .map((item) => ({ item, score: scoreEditorialSeed(item) }))
+    .sort((a, b) => b.score - a.score)
+    .map(({ item }) => item)
+    .slice(0, limit);
+}
+
+export function buildEditorialSeeds(content: NewsletterBaseContent): NewsletterEditorialSeed[] {
+  const eventSeeds = content.events.slice(0, 4).map((event, index) => {
+    const seedBase: NewsletterEditorialSeed = {
+      headline: event.title,
+      summary: event.description,
+      category: event.category,
+      location: event.locationName,
+      source: "Events Desk",
+    };
+    return {
+      ...seedBase,
+      imageUrl: pickEditorialFallbackImage(seedBase, index),
+    };
+  });
+
+  const resourceSeeds = content.resources.slice(0, 4).map((resource, index) => {
+    const seedBase: NewsletterEditorialSeed = {
+      headline: resource.title,
+      summary: resource.description,
+      category: resource.category,
+      location: resource.location,
+      source: "Resource Desk",
+      imageUrl: resource.imageUrl,
+    };
+    return {
+      ...seedBase,
+      imageUrl: resource.imageUrl || pickEditorialFallbackImage(seedBase, index + 2),
+    };
+  });
+
+  const combined = [...eventSeeds, ...resourceSeeds];
+  const unique = new Map<string, NewsletterEditorialSeed>();
+  for (const seed of combined) {
+    if (!unique.has(seed.headline)) unique.set(seed.headline, seed);
+  }
+
+  return Array.from(unique.values());
+}
+
+export function buildEditorialFallback(args: {
+  issueDate: string;
+  seeds: NewsletterEditorialSeed[];
+}): NewsletterEditorial {
+  const safeSeeds = args.seeds.filter(isSafeEditorialSeed);
+  const primary = safeSeeds[0];
+  const imageUrl = safeString(primary?.imageUrl) || pickEditorialFallbackImage(primary, 0);
+  const imageAlt = safeString(primary?.headline, "Neighborhood helpers sharing a city story");
+
+  const fallbackParagraphs = [
+    "This week in NaviHub, neighbors across the city shared bright ideas, helpful guides, and small wins that make everyday life easier. The biggest theme: people are finding simple ways to support one another.",
+    "From community centers to local events, new programs are popping up that focus on learning, wellness, and creative projects. Families and teens are exploring these spaces together and building new connections.",
+    "Looking ahead, the city calendar is full of gentle, welcoming gatherings. Keep an eye out for events that match your interests, and invite a friend to join you.",
+  ];
+
+  const fallbackSideStories: NewsletterEditorialStory[] = [
+    {
+      headline: "Neighborhood helpers team up",
+      summary: "Local volunteers are sharing resources to make everyday tasks simpler for families.",
+      imageUrl: EDITORIAL_FALLBACK_IMAGES[1],
+      source: "Community Desk",
+    },
+    {
+      headline: "After-school clubs grow",
+      summary: "New programs focus on creativity, sports, and science for kids and teens.",
+      imageUrl: EDITORIAL_FALLBACK_IMAGES[2],
+      source: "Youth Beat",
+    },
+    {
+      headline: "Weekend events to watch",
+      summary: "A calm guide to local meetups, markets, and community celebrations.",
+      imageUrl: EDITORIAL_FALLBACK_IMAGES[3],
+      source: "City Notes",
+    },
+  ];
+
+  const seedStories = (safeSeeds.slice(1, 4).length > 0
+    ? safeSeeds.slice(1, 4)
+    : safeSeeds
+  ).map((seed, index) => ({
+    headline: safeString(seed.headline, `Community Spotlight ${index + 1}`),
+    summary: truncate(
+      safeString(seed.summary, "A quick update from across the city, focused on everyday wins."),
+      120
+    ),
+    imageUrl: safeString(seed.imageUrl) || pickEditorialFallbackImage(seed, index + 1),
+    source: safeString(seed.source, "Community Desk"),
+  }));
+
+  const sideStories = seedStories.length > 0 ? seedStories : fallbackSideStories;
+
+  return {
+    kicker: "NaviHub Youth Press",
+    headline: safeString(primary?.headline, "A Friendly Week of City Highlights"),
+    subhead:
+      "A calm, kid-friendly recap of the people, places, and programs shaping the week ahead.",
+    byline: "NaviHub Newsroom",
+    location: "New York City",
+    paragraphs: fallbackParagraphs,
+    imageUrl,
+    imageAlt,
+    imageCaption: safeString(primary?.summary, "Neighbors sharing resources and community updates.") ||
+      "Neighbors sharing resources and community updates.",
+    sideStories,
+  };
 }
 
 function toPreferenceRow(
@@ -399,10 +679,6 @@ export function buildNewsletterSections(
     .filter((resource) => matchesCategory(resource.category, categoryFilters))
     .filter((resource) => matchesBorough(resource.location, boroughFilters));
 
-  const filteredNews = content.news
-    .filter((item) => matchesCategory(item.category, categoryFilters))
-    .filter((item) => matchesBorough(item.borough, boroughFilters));
-
   const topRatedResources = [...filteredResources]
     .sort((a, b) => {
       if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating;
@@ -421,14 +697,14 @@ export function buildNewsletterSections(
 
   const events = (filters?.wantsEvents ?? true) ? filteredEvents.slice(0, 5) : [];
   const resources = (filters?.wantsResources ?? true) ? filteredResources.slice(0, 5) : [];
-  const news = (filters?.wantsNews ?? true) ? filteredNews.slice(0, 5) : [];
+  const news: NewsletterNewsItem[] = [];
 
   const reviews = (filters?.wantsReviews ?? true)
     ? (topRatedResources.length > 0 ? topRatedResources : fallbackTopRated)
     : [];
 
   const latestPosts = (filters?.wantsLatestPosts ?? true)
-    ? content.latestPosts.slice(0, 6)
+    ? content.latestPosts.filter((post) => post.postType !== "news").slice(0, 6)
     : [];
 
   const highlights: string[] = [];
@@ -586,6 +862,66 @@ function renderListRows(items: Array<{ label: string; value: string }>): string 
     .join("");
 }
 
+function splitEmailParagraphs(text?: string): string[] {
+  if (!text) return [];
+  const raw = text.trim();
+  const newlineParagraphs = raw
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (newlineParagraphs.length > 1) return newlineParagraphs;
+
+  const sentences = raw
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+
+  if (sentences.length <= 1) return newlineParagraphs;
+
+  const targetCount = Math.min(4, Math.max(2, Math.ceil(sentences.length / 2)));
+  const chunkSize = Math.ceil(sentences.length / targetCount);
+  const chunks: string[] = [];
+
+  for (let index = 0; index < sentences.length; index += chunkSize) {
+    chunks.push(sentences.slice(index, index + chunkSize).join(" "));
+  }
+
+  return chunks;
+}
+
+function resolveEmailEditorial(args: {
+  issueTitle: string;
+  summary: string;
+  sections: NewsletterSections;
+}): {
+  headline: string;
+  subhead: string;
+  byline: string;
+  paragraphs: string[];
+  imageUrl?: string;
+  imageCaption?: string;
+} {
+  const provided = args.sections.editorial;
+  if (provided) {
+    return {
+      headline: provided.headline,
+      subhead: provided.subhead,
+      byline: provided.byline,
+      paragraphs: provided.paragraphs?.length ? provided.paragraphs : splitEmailParagraphs(args.summary),
+      imageUrl: provided.imageUrl,
+      imageCaption: provided.imageCaption,
+    };
+  }
+
+  return {
+    headline: args.issueTitle,
+    subhead: "A calm, kid-friendly recap of the people, places, and programs shaping the week ahead.",
+    byline: "NaviHub Newsroom",
+    paragraphs: splitEmailParagraphs(args.summary),
+  };
+}
+
 export function renderNewsletterEmail(args: {
   issueTitle: string;
   issueDate: string;
@@ -613,11 +949,6 @@ export function renderNewsletterEmail(args: {
     value: resource.title,
   }));
 
-  const newsRows = args.sections.news.map((item) => ({
-    label: `${item.sourceName} | ${formatDate(item.publishedAt)}`,
-    value: item.title,
-  }));
-
   const latestRows = args.sections.latestPosts.map((item) => ({
     label: `${item.postType.toUpperCase()} | ${formatDate(item.publishedAt)}`,
     value: item.title,
@@ -628,6 +959,21 @@ export function renderNewsletterEmail(args: {
     : "";
 
   const modeBadge = args.mode === "personalized" ? "Personalized Weekly" : "Universal Weekly";
+  const editorial = resolveEmailEditorial({
+    issueTitle: args.issueTitle,
+    summary: args.summary,
+    sections: args.sections,
+  });
+
+  const editorialParagraphs = (editorial.paragraphs ?? [])
+    .slice(0, 4)
+    .map(
+      (paragraph) =>
+        `<p style="margin: 0 0 12px; color: #4d4035; font-size: 14px; line-height: 1.6;">${escapeHtml(
+          paragraph
+        )}</p>`
+    )
+    .join("");
 
   return `
     <!doctype html>
@@ -659,6 +1005,37 @@ export function renderNewsletterEmail(args: {
                 </tr>
 
                 <tr>
+                  <td style="padding:10px 30px 0;">
+                    <h2 style="margin:0 0 6px; font-family:'Petrona', Georgia, serif; font-size:22px; color:#1f1f1f;">${escapeHtml(
+                      editorial.headline
+                    )}</h2>
+                    <p style="margin:0 0 8px; color:#6f645a; font-size:14px; font-style:italic;">${escapeHtml(
+                      editorial.subhead
+                    )}</p>
+                    <p style="margin:0 0 14px; color:#997e67; font-size:11px; text-transform:uppercase; letter-spacing:1px;">${escapeHtml(
+                      editorial.byline
+                    )}</p>
+                    ${
+                      editorial.imageUrl
+                        ? `<img src="${escapeHtml(
+                            editorial.imageUrl
+                          )}" alt="${escapeHtml(
+                            editorial.headline
+                          )}" style="width:100%; border-radius:16px; display:block; margin:0 0 12px;" />`
+                        : ""
+                    }
+                    ${editorialParagraphs}
+                    ${
+                      editorial.imageCaption
+                        ? `<p style="margin:0 0 12px; color:#8a7868; font-size:12px; font-style:italic;">${escapeHtml(
+                            editorial.imageCaption
+                          )}</p>`
+                        : ""
+                    }
+                  </td>
+                </tr>
+
+                <tr>
                   <td style="padding:8px 30px 0;">
                     <h2 style="margin:0 0 8px; font-family:'Petrona', Georgia, serif; font-size:22px; color:#1f1f1f;">Upcoming Events</h2>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${renderListRows(eventRows)}</table>
@@ -678,14 +1055,6 @@ export function renderNewsletterEmail(args: {
                   <td style="padding:18px 30px 0;">
                     <h2 style="margin:0 0 8px; font-family:'Petrona', Georgia, serif; font-size:22px; color:#1f1f1f;">Top Community Reviews</h2>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${renderListRows(reviewRows)}</table>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:18px 30px 0;">
-                    <h2 style="margin:0 0 8px; font-family:'Petrona', Georgia, serif; font-size:22px; color:#1f1f1f;">Latest News Highlights</h2>
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${renderListRows(newsRows)}</table>
-                    <p style="margin:12px 0 0;"><a href="${escapeHtml(`${args.siteUrl}${PAGE_NEWS_HREF}`)}" style="color:#997e67; text-decoration:none; font-weight:600;">Read latest news</a></p>
                   </td>
                 </tr>
 
