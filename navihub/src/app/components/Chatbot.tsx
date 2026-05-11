@@ -17,23 +17,43 @@ import {
   Navigation,
 } from 'lucide-react';
 import type { NewsArticle } from "../lib/types";
+import WeatherCard from './WeatherCard';
+import { pinSubway, unpinSubway, isSubwayPinned } from '../lib/pinUtils';
+import WidgetRenderer from './WidgetRenderer';
+// dynamic import removed (not used here)
 
-enum From {
-  You,
-  Chat
+interface SubwayMessage {
+  type: 'subway';
+  data: unknown;
 }
 
-interface Message {
-  id: string;
-  content: string;
-  from: From;
+interface WeatherMessage {
+  type: 'weather';
+  data: unknown;
 }
+
+type ChatContent = string | Record<string, unknown> | NaviHubResponse | SubwayMessage | WeatherMessage;
 
 interface ChatbotOptionProps {
   icon: React.ElementType<LucideProps>;
   content: string;
   action: () => void;
   setHoverText: (text: string) => void;
+}
+
+interface NaviHubResponse {
+  format_version: string;
+  title?: string;
+  summary?: string;
+  body_markdown?: string;
+  actions?: Array<{ label: string; url?: string; command?: string }>;
+  code_blocks?: Array<{ language: string; code: string }>;
+  metadata?: Record<string, unknown> & {
+    widget?: { render_in_chatbot?: boolean; sandbox?: boolean };
+    widget_filename?: string;
+  };
+  error?: string;
+  reason?: string;
 }
 
 function ChatbotOption({ icon: Icon, content, action, setHoverText }: ChatbotOptionProps) {
@@ -54,13 +74,108 @@ export default function Chatbot() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [hoverText, setHoverText] = useState("Questions? I can help!");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [, setPinTick] = useState(0);
+  const [messages, setMessages] = useState<Array<{ id: string; content: string | ChatContent; from: 'you' | 'chat'; timestamp: number }>>([]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Minimal markdown -> JSX renderer for headings, lists, and links
+  const renderMarkdown = (md?: string) => {
+    if (!md) return null;
+    const lines = md.split(/\r?\n/);
+    const elements: React.ReactNode[] = [];
+    let listBuffer: string[] | null = null;
+    const flushList = () => {
+      if (listBuffer && listBuffer.length > 0) {
+        elements.push(
+          <ul className="list-disc ml-5 mb-3" key={elements.length}>
+            {listBuffer.map((li, i) => (
+              <li key={i} className="mb-2 text-black !text-black text-sm leading-relaxed">{renderInlineMarkdown(li)}</li>
+            ))}
+          </ul>
+        );
+        listBuffer = null;
+      }
+    };
+
+    const renderInlineMarkdown = (text: string): React.ReactNode => {
+      const inlineRegex = /(\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\(([^)]+)\))/g;
+      const parts: React.ReactNode[] = [];
+      let lastIndex = 0;
+      let m: RegExpExecArray | null;
+
+      while ((m = inlineRegex.exec(text)) !== null) {
+        if (m.index > lastIndex) {
+          parts.push(text.slice(lastIndex, m.index));
+        }
+
+        if (m[2] !== undefined) {
+          // Bold text **bold**
+          parts.push(
+            <strong key={parts.length} className="font-semibold">
+              {renderInlineMarkdown(m[2])}
+            </strong>
+          );
+        } else if (m[3] !== undefined) {
+          // Italic text *italic*
+          parts.push(
+            <em key={parts.length} className="not-italic italic">
+              {renderInlineMarkdown(m[3])}
+            </em>
+          );
+        } else if (m[4] !== undefined && m[5] !== undefined) {
+          // Link [text](url)
+          parts.push(
+            <a
+              key={parts.length}
+              href={m[5]}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 underline"
+            >
+              {renderInlineMarkdown(m[4])}
+            </a>
+          );
+        } else {
+          parts.push(m[0]);
+        }
+
+        lastIndex = m.index + m[0].length;
+      }
+
+      if (lastIndex < text.length) {
+        parts.push(text.slice(lastIndex));
+      }
+
+      return <>{parts}</>;
+    };
+
+    for (const line of lines) {
+      if (!line.trim()) {
+        flushList();
+        elements.push(<div className="my-3" key={elements.length} />);
+        continue;
+      }
+      if (line.startsWith('### ')) { flushList(); elements.push(<h3 className="text-base font-semibold mb-2 text-black !text-black" key={elements.length}>{renderInlineMarkdown(line.slice(4))}</h3>); continue; }
+      if (line.startsWith('## ')) { flushList(); elements.push(<h2 className="text-lg font-semibold mb-2 text-black !text-black" key={elements.length}>{renderInlineMarkdown(line.slice(3))}</h2>); continue; }
+      if (line.startsWith('# ')) { flushList(); elements.push(<h1 className="text-xl font-semibold mb-3 text-black !text-black" key={elements.length}>{renderInlineMarkdown(line.slice(2))}</h1>); continue; }
+      if (line.startsWith('- ')) {
+        if (!listBuffer) listBuffer = [];
+        listBuffer.push(line.slice(2));
+        continue;
+      }
+      // default paragraph
+      flushList();
+      elements.push(<p className="mb-2 text-sm leading-relaxed text-black !text-black" key={elements.length}>{renderInlineMarkdown(line)}</p>);
+    }
+    flushList();
+    return <div className="space-y-2 text-sm text-black !text-black">{elements}</div>;
   };
 
   useEffect(() => {
@@ -79,12 +194,28 @@ export default function Chatbot() {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  const addMessage = (content: string, from: From) => {
+  useEffect(() => {
+    const h = () => setPinTick(t => t + 1);
+    window.addEventListener('pin-subway', h as EventListener);
+    return () => window.removeEventListener('pin-subway', h as EventListener);
+  }, []);
+
+  const addMessage = (content: string | ChatContent, from: 'you' | 'chat') => {
     setMessages(prev => [...prev, {
       id: `${Date.now()}-${Math.random()}`,
-      content: typeof content === "string" ? content : "There was an error. Please try again.",
-      from
+      content: content,
+      from,
+      timestamp: Date.now()
     }]);
+  };
+
+  const replaceLastMessage = (newContent: ChatContent) => {
+    setMessages(prev => {
+      if (prev.length === 0) return prev;
+      const copy = [...prev];
+      copy[copy.length - 1] = { ...copy[copy.length - 1], content: newContent };
+      return copy;
+    });
   };
 
   // Hoisted data fetchers natively
@@ -118,7 +249,7 @@ export default function Chatbot() {
   const handleSendMessage = useCallback(async (displayText: string, openEnded: boolean = true, hiddenPrompt?: string) => {
     if (!displayText.trim() || isLoading) return;
 
-    addMessage(displayText, From.You);
+    addMessage(displayText, 'you');
     setInputValue("");
     setIsLoading(true);
 
@@ -131,7 +262,7 @@ export default function Chatbot() {
       const modData = await modRes.json();
 
       if (!modData.safe) {
-        addMessage("I'm sorry. Your message included inappropriate language. Please word your question with more appropriate language. Thank you!", From.Chat);
+        addMessage("I'm sorry. Your message included inappropriate language. Please word your question with more appropriate language. Thank you!", 'chat');
         setIsLoading(false);
         return;
       }
@@ -150,12 +281,15 @@ export default function Chatbot() {
           return JSON.stringify(arr.slice(0, limit)).substring(0, 2000);
         };
 
-        toSend = `You are a helpful community hub assistant for NYC. 
-Resources available: ${safeStringify(resources, 5)}. 
-Recent News: ${safeStringify(articles, 3)}. 
-Events: ${safeStringify(events, 3)}. 
-User's question: ${displayText}. 
-Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. Be extremely concise (max 2-3 sentences).`;
+        toSend = `You are a helpful community hub assistant for NYC.
+Use the available local resources, recent news, and events information when it is relevant, but do not restrict your answer only to those items.
+If the user asks about New York City generally, answer using broader NYC context and web-aware knowledge.
+Resources available: ${safeStringify(resources, 5)}.
+Recent News: ${safeStringify(articles, 3)}.
+Events: ${safeStringify(events, 3)}.
+User's question: ${displayText}.
+Instructions: Do not hallucinate. Answer accurately with NYC context where possible. If the question is only loosely related to Navihub, answer generally and concisely (2-3 sentences), while still mentioning relevant hub resources when helpful.
+Use markdown formatting when appropriate, including *italics* and **bold** for emphasis.`;
       }
 
       const chatRes = await fetch(`/api/chatbot`, {
@@ -164,10 +298,10 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         body: JSON.stringify(toSend)
       });
       const chatData = await chatRes.json();
-      addMessage(chatData, From.Chat);
+      addMessage(chatData, 'chat');
     } catch (error) {
       console.error(error);
-      addMessage("Sorry, I encountered an error fulfilling your request.", From.Chat);
+      addMessage("Sorry, I encountered an error fulfilling your request.", 'chat');
     } finally {
       setIsLoading(false);
     }
@@ -179,12 +313,12 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       const data = await fetchArticles();
       let weeklyNews = "";
       const today = new Date();
-      
+
       data.forEach((article: NewsArticle) => {
         const articleDate = new Date(article.published_at);
         const msDifference = today.getTime() - articleDate.getTime();
         const daysDifference = Math.floor(msDifference / (1000 * 60 * 60 * 24));
-        if (daysDifference < 25) { 
+        if (daysDifference < 25) {
           // Truncate to just title and a short snippet to dramatically shorten payload
           const snippet = article.content ? article.content.substring(0, 120) : "";
           weeklyNews += `- ${article.title || 'News'}: ${snippet}...\n`;
@@ -195,11 +329,11 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         const prompt = `Provide a very brief 3-bullet summary of this week's news highlights:\n${weeklyNews}\nFocus on the top events. Keep it extremely short.`;
         await handleSendMessage("Summarize this week's news.", false, prompt);
       } else {
-        addMessage("I'm sorry. Looks like there is no recent news to summarize.", From.Chat);
+        addMessage("I'm sorry. Looks like there is no recent news to summarize.", 'chat');
         setIsLoading(false);
       }
     } catch {
-      addMessage("Failed to load news.", From.Chat);
+      addMessage("Failed to load news.", 'chat');
       setIsLoading(false);
     }
   };
@@ -207,7 +341,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
   const handlePageInfo = () => {
     const url = window.location.href;
     let text = "Welcome to Navihub!\n\nHere on our Homepage, you get a bird's-eye view of our platform's mission to bridge communities across New York City.\n\nSpecial Features:\n• Browse our top highlighted tools and resources\n• Jump straight into any section of the site\n• Learn about our core philosophy and what drives us";
-    
+
     if (url.toLowerCase().includes("resources")) {
       text = "You are currently on the Resources page, the core directory of Navihub!\n\nSpecial Features:\n• Map View: Toggle the interactive map to find location-based resources visually.\n• Category Filters: Sort resources easily out of dozens of categories (Housing, Food, Legal, etc.) and by NYC borough.\n• Suggest a Resource: Know a community initiative? Click 'Suggest a Resource' to propose it for our database.\n• Direct Links: Click any resource card to view detailed contact info or go straight to their official page.";
     }
@@ -227,8 +361,8 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       text = "You are on your Account Dashboard.\n\nThis is your personal space to manage your NaviHub experience.\n\nSpecial Features:\n• Profile Settings: Update your name and change your password securely.\n• My Posts: Keep track of all the resources and events you've shared with the community.\n• Signed-Up Events: Easily view the local NYC events you've registered for.\n• Approvals & Notifications: Check the status of your submitted posts and stay updated with your event groups.";
     }
 
-    addMessage("Tell me about this page.", From.You);
-    setTimeout(() => addMessage(text, From.Chat), 600);
+    addMessage("Tell me about this page.", 'you');
+    setTimeout(() => addMessage(text, 'chat'), 600);
   };
 
   // ── Page-specific handlers ──
@@ -238,7 +372,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     try {
       const resources = await fetchResources();
       if (!resources || resources.length === 0) {
-        addMessage("No resources found right now. Try browsing the full directory!", From.Chat);
+        addMessage("No resources found right now. Try browsing the full directory!", 'chat');
         setIsLoading(false);
         return;
       }
@@ -248,16 +382,16 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       const prompt = `Briefly introduce these top NaviHub community resources in 1 line each, in a friendly tone:\n${list}\nKeep it concise.`;
       await handleSendMessage("What are the top resources on NaviHub?", false, prompt);
     } catch {
-      addMessage("Failed to load resources.", From.Chat);
+      addMessage("Failed to load resources.", 'chat');
       setIsLoading(false);
     }
   }, [fetchResources, handleSendMessage]);
 
   const handleFindResourceByNeed = () => {
-    addMessage("What kind of help are you looking for?", From.You);
+    addMessage("What kind of help are you looking for?", 'you');
     setTimeout(() => addMessage(
       "I can help you find resources for:\n• 🍎 Food & basic needs\n• 🏠 Housing & utilities\n• 💼 Jobs & career support\n• ⚕️ Health & wellness\n• 📚 Education & learning\n• ⚖️ Legal & government services\n\nJust type what you need and I'll point you in the right direction!",
-      From.Chat
+      'chat'
     ), 500);
   };
 
@@ -270,7 +404,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         .filter((e: { event_date: string }) => new Date(e.event_date) >= now)
         .slice(0, 4);
       if (upcoming.length === 0) {
-        addMessage("No upcoming events found right now. Check back soon!", From.Chat);
+        addMessage("No upcoming events found right now. Check back soon!", 'chat');
         setIsLoading(false);
         return;
       }
@@ -281,13 +415,13 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       const prompt = `Briefly describe these upcoming NYC community events in 1 line each, keeping it exciting and friendly:\n${list}\nBe concise.`;
       await handleSendMessage("What events are coming up?", false, prompt);
     } catch {
-      addMessage("Failed to load events.", From.Chat);
+      addMessage("Failed to load events.", 'chat');
       setIsLoading(false);
     }
   }, [fetchEvents, handleSendMessage]);
 
   const handleEventsNearMe = useCallback(async () => {
-    addMessage("Finding events near you...", From.You);
+    addMessage("Finding events near you...", 'you');
     setIsLoading(true);
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -320,7 +454,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         .slice(0, 8);
 
       if (upcoming.length === 0) {
-        addMessage("No upcoming events found right now. Check back soon!", From.Chat);
+        addMessage("No upcoming events found right now. Check back soon!", 'chat');
         setIsLoading(false);
         return;
       }
@@ -339,32 +473,70 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         (err as { code?: number })?.code === 1
           ? "Location access was denied. Please enable location permissions and try again."
           : "Couldn't get your location. Please try again.";
-      addMessage(msg, From.Chat);
+      addMessage(msg, 'chat');
       setIsLoading(false);
     }
   }, [fetchEvents, handleSendMessage]);
 
   const handleHowToRSVP = () => {
-    addMessage("How do I RSVP to an event?", From.You);
+    addMessage("How do I RSVP to an event?", 'you');
     setTimeout(() => addMessage(
       "RSVPing is easy!\n\n1. Browse the events list and click on any event card\n2. Sign in if you haven't already\n3. Click the RSVP button in the event details\n4. Check your email — you'll receive a confirmation with the event date, time, and location\n\nYou can cancel your RSVP at any time from the event page. 🎉",
-      From.Chat
+      'chat'
     ), 500);
   };
 
   const handleNaviLinkGuide = () => {
-    addMessage("How does NaviLink work?", From.You);
+    addMessage("How does NaviLink work?", 'you');
     setTimeout(() => addMessage(
       "NaviLink is NaviHub's community forum!\n\n• 📝 Create posts to share resources, ask questions, or start discussions\n• 🏷️ Browse by category: Sports, Education, Careers, Community, Wellness\n• 💬 Reply to others and build connections\n• 🔒 Sign in required to post — keeps the community authentic\n• 🛡️ All content is auto-moderated to keep things respectful\n\nWhat would you like to discuss?",
-      From.Chat
+      'chat'
     ), 500);
   };
 
+  const handleShowWeather = async () => {
+    addMessage('Loading weather for NYC...', 'chat');
+    try {
+      const lat = '40.7128';
+      const lon = '-74.0060';
+      const res = await fetch(`/api/weather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+      if (!res.ok) {
+        const text = await res.text().catch(() => 'no body');
+        console.error('Weather fetch failed', res.status, text);
+        throw new Error('Weather fetch failed');
+      }
+      const data = await res.json();
+      replaceLastMessage({ type: 'weather', data });
+    } catch (err) {
+      console.error('handleShowWeather error', err);
+      replaceLastMessage('Failed to load weather for NYC.');
+    }
+  };
+
+  const handleShowSubway = async () => {
+    addMessage('Loading live subway status...', 'chat');
+    try {
+      const res = await fetch('/api/subway/status');
+      if (!res.ok) {
+        const text = await res.text().catch(() => 'no body');
+        console.error('Subway fetch failed', res.status, text);
+        replaceLastMessage('Failed to load live subway status.');
+        return;
+      }
+      const data = await res.json();
+      // render as a subway message object so Chatbot displays a full SubwayCard in-chat
+      replaceLastMessage({ type: 'subway', data });
+    } catch (err) {
+      console.error('handleShowSubway error', err);
+      replaceLastMessage('Failed to load live subway status.');
+    }
+  };
+
   const handleNewsCategories = () => {
-    addMessage("What news categories are available?", From.You);
+    addMessage("What news categories are available?", 'you');
     setTimeout(() => addMessage(
       "NaviHub covers NYC news across multiple categories:\n\n🗳️ Politics & Government\n🏘️ Community & Neighborhoods\n⚕️ Health & Public Safety\n🏠 Real Estate & Housing\n📚 Education\n🌱 Environment\n🚇 Transportation\n💰 Economy & Business\n\nUse the Filters button on the news page to narrow down to what matters to you!",
-      From.Chat
+      'chat'
     ), 500);
   };
 
@@ -389,36 +561,15 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     return [];
   })();
 
+  // Global quick actions (left-most row)
+  const globalQuickActions = [
+    { icon: CircleQuestionMark, content: 'About this Page', action: handlePageInfo },
+    { icon: MapPin, content: 'Show Weather', action: handleShowWeather },
+    { icon: Navigation, content: 'Live Subway Status', action: handleShowSubway },
+  ];
+
   return (
     <>
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
-          >
-            <motion.div 
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-              className="bg-white text-[#404E3B] px-4 py-2 rounded-lg shadow-md border border-gray-100 text-sm font-medium relative mr-2 cursor-pointer" 
-              onClick={() => setIsOpen(true)}
-            >
-              Need help? Ask NaviBot!
-              <div className="absolute -bottom-1.5 right-4 w-3 h-3 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
-            </motion.div>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="p-4 rounded-full bg-[#404E3B] text-white shadow-lg hover:bg-[#7B9669] hover:shadow-xl transition-all focus:outline-none"
-              aria-label="Open Chatbot"
-            >
-              <BotMessageSquare size={32} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -429,7 +580,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             role="dialog"
             aria-modal="true"
             aria-labelledby="chatbot-title"
-            className="fixed bottom-6 right-6 w-[90vw] sm:w-100 h-150 max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
+            className={`fixed right-6 top-6 bottom-6 ${isExpanded ? 'w-[min(48rem,calc(100%-3rem))]' : 'w-[clamp(20rem,34vw,36rem)]'} ${isExpanded ? '' : ''} min-h-[18rem] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-[#404E3B] text-white">
@@ -437,36 +588,126 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
                 <BotMessageSquare size={24} />
                 <h2 id="chatbot-title" className="text-xl font-semibold">NaviBot</h2>
               </div>
-              <button onClick={() => setIsOpen(false)} aria-label="Close chatbot" className="text-white/80 hover:text-white transition-colors">
-                <X size={24} />
-              </button>
+              <div className="flex items-center">
+                <button onClick={() => setIsExpanded(s => !s)} aria-label={isExpanded ? "Collapse chat" : "Expand chat"} className="text-white/80 hover:text-white transition-colors mr-3">
+                  {isExpanded ? '⤡' : '⤢'}
+                </button>
+                <button onClick={() => setIsOpen(false)} aria-label="Close chatbot" className="text-white/80 hover:text-white transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-4">
+
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-4 selection:text-black selection:bg-[#fff9c4]">
               {messages.length === 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
                   <BotMessageSquare size={48} className="opacity-20" />
                   <p className="text-sm font-medium text-gray-600!">{hoverText}</p>
                 </div>
               )}
-              {messages.map((msg) => (
+              {messages.map((msg) => {
+                const content = msg.content;
+                const isSubwayMsg = typeof content === 'object' && content !== null && 'type' in content && content.type === 'subway';
+                const normalized = isSubwayMsg ? ((content as SubwayMessage).data as { data?: unknown })?.data ?? (content as SubwayMessage).data : null;
+                const subPinnedLocal = isSubwayMsg ? isSubwayPinned(normalized) : false;
+                return (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
                   key={msg.id}
-                  className={`flex ${msg.from === From.You ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${msg.from === 'you' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-                    msg.from === From.You 
-                      ? 'bg-[#404E3B] text-white rounded-br-none' 
-                      : 'bg-[#E2E8F0] text-gray-800 rounded-bl-none'
-                  } whitespace-pre-line`}>
-                    {msg.content}
+                  <div className={`${isSubwayMsg ? 'w-full' : 'max-w-[80%]'} rounded-2xl px-5 py-3 text-sm ${
+                    msg.from === 'you'
+                      ? 'bg-[#404E3B] text-white rounded-br-none'
+                      : 'bg-white !text-black text-black border border-gray-200 rounded-bl-none shadow-sm'
+                  }`}>
+                    {(() => {
+                      const content = msg.content;
+                      if (typeof content === 'object') {
+                        const rec = content as Record<string, unknown>;
+                        if (rec.type === 'weather') {
+                          const data = rec.data as unknown;
+                          return <WeatherCard data={data} onPin={() => window.dispatchEvent(new CustomEvent('pin-weather', { detail: data }))} />;
+                        }
+                      }
+
+                      const contentObj = (typeof content === 'object' && content) ? (content as Record<string, unknown>) : null;
+                      const aiResp = contentObj && contentObj['format_version'] === '1.0' ? (contentObj as unknown as NaviHubResponse) : null;
+                      if (aiResp) {
+                        if (aiResp.error === 'cannot_comply') {
+                          return (
+                            <div>
+                              <div className="font-semibold">Error</div>
+                              <div className="text-sm text-black">{aiResp.reason || 'The AI could not comply with the requested format.'}</div>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="space-y-4 text-black !text-black">
+                            {aiResp.title && <div className="font-semibold text-xl mb-2 text-black !text-black">{aiResp.title}</div>}
+                            {aiResp.summary && <div className="text-base text-black !text-black mb-3 leading-7">{aiResp.summary}</div>}
+                            {renderMarkdown(aiResp.body_markdown)}
+                            {Array.isArray(aiResp.actions) && aiResp.actions.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-4">
+                                {aiResp.actions.map((a, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => {
+                                      try {
+                                        if (a.url) {
+                                          window.location.href = a.url;
+                                        } else if (a.command) {
+                                          window.dispatchEvent(new CustomEvent(a.command));
+                                        }
+                                      } catch {}
+                                    }}
+                                    className="bg-[#404E3B] hover:bg-[#7B9669] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                  >
+                                    {a.label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            {/* Render chat-only widget with runtime compilation */}
+                            {aiResp.metadata?.widget?.render_in_chatbot && Array.isArray(aiResp.code_blocks) && aiResp.code_blocks.length > 0 && (
+                              <div className="mt-4">
+                                <WidgetRenderer
+                                  code={aiResp.code_blocks[0].code}
+                                  onAction={(cmd, url) => {
+                                    try {
+                                      if (cmd) window.dispatchEvent(new CustomEvent(cmd));
+                                      if (url) window.open(url, '_blank');
+                                    } catch (e) {
+                                      console.error('Widget action error:', e);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      if (isSubwayMsg) {
+                        return (
+                          <div className="w-full flex items-center justify-between gap-3">
+                            <div className="text-sm text-black">{(normalized as { summary?: string })?.summary || 'Live subway status available'}</div>
+                            <div className="flex gap-2">
+                              <button onClick={() => window.dispatchEvent(new CustomEvent('open-subway', { detail: normalized }))} className="bg-[#404E3B] text-white px-3 py-1 rounded text-sm">Open Subway Status</button>
+                              <button onClick={() => { if (subPinnedLocal) { unpinSubway(); } else { pinSubway(normalized); } }} className="bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded text-sm">{subPinnedLocal ? 'Unpin' : 'Pin'}</button>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return (<div className={`whitespace-pre-line ${msg.from === 'you' ? 'text-white' : 'text-black'}`}>{String(content)}</div>);
+                    })()}
                   </div>
                 </motion.div>
-              ))}
+              )})}
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-[#E2E8F0] rounded-2xl rounded-bl-none px-4 py-2">
@@ -480,7 +721,9 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             {/* Quick Actions */}
             <div className="bg-[#7B9669] px-4 pt-3 pb-2 flex flex-col gap-2">
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                <ChatbotOption icon={CircleQuestionMark} content="About this Page" action={handlePageInfo} setHoverText={setHoverText} />
+                {globalQuickActions.map((g) => (
+                  <ChatbotOption key={g.content} icon={g.icon} content={g.content} action={g.action} setHoverText={setHoverText} />
+                ))}
               </div>
               {pageButtons.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -493,7 +736,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
 
             {/* Input Area */}
             <div className="p-4 bg-white border-t border-gray-100">
-              <form 
+              <form
                 onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputValue); }}
                 className="flex items-center gap-2"
               >

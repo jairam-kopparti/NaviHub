@@ -1,142 +1,169 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import HighlightsCarousel from "./components/highlights/HighlightsCarousel";
 import { getTopResources } from "./lib/getTopResources";
 import { Resource } from "./lib/types";
 import "./styles/home.css";
+
+const HighlightsCarousel = dynamic(
+  () => import("./components/highlights/HighlightsCarousel"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="text-center py-12 !text-white/50 uppercase tracking-widest text-sm">
+        Loading highlights...
+      </div>
+    ),
+  }
+);
 
 // ─── Aupale-inspired Mission Section ─────────────────────────────────────────
 function HomeMissionSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      const subsections = gsap.utils.toArray<HTMLElement>(".ms-sub");
+    let ctx: any = null;
+    let ScrollTrigger: any = null;
 
-      subsections.forEach((sub) => {
-        // ── Line-by-line text reveals (Aupale's signature) ──
-        sub.querySelectorAll<HTMLElement>(".ms-line-inner").forEach((inner, i) => {
-          gsap.fromTo(inner, 
-            { yPercent: 120 },
-            {
-              yPercent: 0,
-              duration: 1.4,
-              ease: "expo.out",
-              delay: i * 0.1,
-              scrollTrigger: {
-                trigger: sub,
-                start: "top 85%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        });
+    const loadGsap = async () => {
+      const gsapModule = await import("gsap");
+      const scrollTriggerModule = await import("gsap/ScrollTrigger");
+      const gsap = gsapModule?.default ?? gsapModule;
+      ScrollTrigger = scrollTriggerModule?.ScrollTrigger ?? scrollTriggerModule?.default ?? scrollTriggerModule;
+      gsap.registerPlugin(ScrollTrigger);
 
-        // ── Tag / label fade ──
-        sub.querySelectorAll(".ms-tag").forEach((tag) => {
-          gsap.fromTo(tag, 
-            { opacity: 0, y: 15 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 1.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: sub,
-                start: "top 85%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        });
+      ctx = gsap.context(() => {
+        const subsections = gsap.utils.toArray<HTMLElement>(".ms-sub");
 
-        // ── Body text fade up ──
-        sub.querySelectorAll(".ms-body").forEach((body) => {
-          gsap.fromTo(body, 
-            { y: 35, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 1.4,
-              ease: "power3.out",
-              delay: 0.35,
-              scrollTrigger: {
-                trigger: sub,
-                start: "top 85%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        });
-
-        // ── Rule scales from left ──
-        sub.querySelectorAll(".ms-rule").forEach((rule) => {
-          gsap.fromTo(rule, 
-            { scaleX: 0 },
-            {
-              scaleX: 1,
-              duration: 1.6,
-              ease: "expo.out",
-              transformOrigin: "left center",
-              scrollTrigger: {
-                trigger: sub,
-                start: "top 85%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-        });
-
-        // ── Image: slide in from side + inner parallax ──
-        sub.querySelectorAll<HTMLElement>(".ms-img-outer").forEach((outer) => {
-          const fromLeft = outer.dataset.from === "left";
-          gsap.fromTo(outer, 
-            { x: fromLeft ? -50 : 50, y: 30, opacity: 0 },
-            {
-              x: 0,
-              y: 0,
-              opacity: 1,
-              duration: 1.5,
-              ease: "expo.out",
-              scrollTrigger: {
-                trigger: sub,
-                start: "top 80%",
-                toggleActions: "play none none none",
-              },
-            }
-          );
-
-          const inner = outer.querySelector<HTMLElement>(".ms-img-inner");
-          if (inner) {
-            gsap.fromTo(
-              inner,
-              { yPercent: 8, scale: 1.12 },
+        subsections.forEach((sub) => {
+          // ── Line-by-line text reveals (Aupale's signature) ──
+          sub.querySelectorAll<HTMLElement>(".ms-line-inner").forEach((inner, i) => {
+            gsap.fromTo(inner,
+              { yPercent: 120 },
               {
-                yPercent: -8,
-                scale: 1.12,
-                ease: "none",
+                yPercent: 0,
+                duration: 1.4,
+                ease: "expo.out",
+                delay: i * 0.1,
                 scrollTrigger: {
-                  trigger: outer,
-                  start: "top bottom",
-                  end: "bottom top",
-                  scrub: 1.6,
+                  trigger: sub,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
                 },
               }
             );
-          }
-        });
-      });
-    }, sectionRef);
+          });
 
-    return () => ctx.revert();
+          // ── Tag / label fade ──
+          sub.querySelectorAll(".ms-tag").forEach((tag) => {
+            gsap.fromTo(tag,
+              { opacity: 0, y: 15 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: sub,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+
+          // ── Body text fade up ──
+          sub.querySelectorAll(".ms-body").forEach((body) => {
+            gsap.fromTo(body,
+              { y: 35, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 1.4,
+                ease: "power3.out",
+                delay: 0.35,
+                scrollTrigger: {
+                  trigger: sub,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+
+          // ── Rule scales from left ──
+          sub.querySelectorAll(".ms-rule").forEach((rule) => {
+            gsap.fromTo(rule,
+              { scaleX: 0 },
+              {
+                scaleX: 1,
+                duration: 1.6,
+                ease: "expo.out",
+                transformOrigin: "left center",
+                scrollTrigger: {
+                  trigger: sub,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+
+          // ── Image: slide in from side + inner parallax ──
+          sub.querySelectorAll<HTMLElement>(".ms-img-outer").forEach((outer) => {
+            const fromLeft = outer.dataset.from === "left";
+            gsap.fromTo(outer,
+              { x: fromLeft ? -50 : 50, y: 30, opacity: 0 },
+              {
+                x: 0,
+                y: 0,
+                opacity: 1,
+                duration: 1.5,
+                ease: "expo.out",
+                scrollTrigger: {
+                  trigger: sub,
+                  start: "top 80%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+
+            const inner = outer.querySelector<HTMLElement>(".ms-img-inner");
+            if (inner) {
+              gsap.fromTo(
+                inner,
+                { yPercent: 8, scale: 1.12 },
+                {
+                  yPercent: -8,
+                  scale: 1.12,
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: outer,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 1.6,
+                  },
+                }
+              );
+            }
+          });
+        });
+      }, sectionRef);
+    };
+
+    loadGsap();
+
+    return () => {
+      if (ctx?.revert) ctx.revert();
+      if (ScrollTrigger?.getAll) {
+        ScrollTrigger.getAll().forEach((trigger: any) => trigger.kill());
+      }
+    };
   }, []);
 
   return (
@@ -389,93 +416,109 @@ function HomeArchSection() {
   const photoLeftBotRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    let ctx: any = null;
+    let ScrollTrigger: any = null;
 
-    const ctx = gsap.context(() => {
-      const outer = outerRef.current;
-      if (!outer) return;
+    const loadGsap = async () => {
+      const gsapModule = await import("gsap");
+      const scrollTriggerModule = await import("gsap/ScrollTrigger");
+      const gsap = gsapModule?.default ?? gsapModule;
+      ScrollTrigger = scrollTriggerModule?.ScrollTrigger ?? scrollTriggerModule?.default ?? scrollTriggerModule;
+      gsap.registerPlugin(ScrollTrigger);
 
-      ScrollTrigger.create({
-        trigger: outer,
-        start: "top top",
-        end: "bottom bottom",
-        pin: stageRef.current,
-        pinSpacing: false,
-      });
+      ctx = gsap.context(() => {
+        const outer = outerRef.current;
+        if (!outer) return;
 
-      // Arch text line reveals
-      if (archTextRef.current) {
-        const lines = archTextRef.current.querySelectorAll(".arch-line-inner");
-        gsap.fromTo(lines, 
-          { yPercent: 120, rotate: 2, opacity: 0 },
+        ScrollTrigger.create({
+          trigger: outer,
+          start: "top top",
+          end: "bottom bottom",
+          pin: stageRef.current,
+          pinSpacing: false,
+        });
+
+        // Arch text line reveals
+        if (archTextRef.current) {
+          const lines = archTextRef.current.querySelectorAll(".arch-line-inner");
+          gsap.fromTo(lines,
+            { yPercent: 120, rotate: 2, opacity: 0 },
+            {
+              yPercent: 0,
+              rotate: 0,
+              opacity: 1,
+              stagger: 0.1,
+              duration: 1,
+              ease: "expo.out",
+              scrollTrigger: {
+                trigger: outer,
+                start: "top top",
+                end: "8% top",
+                toggleActions: "play none none none",
+              },
+            }
+          );
+        }
+
+        // Photo LEFT — enters from bottom
+        gsap.fromTo(
+          photoLeftRef.current,
+          { y: "65vh", opacity: 0, rotate: -8, scale: 0.95 },
           {
-            yPercent: 0,
-            rotate: 0,
-            opacity: 1,
-            stagger: 0.1,
-            duration: 1,
-            ease: "expo.out",
-            scrollTrigger: {
-              trigger: outer,
-              start: "top top",
-              end: "8% top",
-              toggleActions: "play none none none",
-            },
+            y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
           }
         );
+
+        // Photo RIGHT TOP — enters from upper-right
+        gsap.fromTo(
+          photoRightTopRef.current,
+          { y: "-40vh", x: "12vw", opacity: 0, rotate: 10, scale: 0.95 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
+          }
+        );
+
+        // Photo LEFT BOTTOM
+        gsap.fromTo(
+          photoLeftBotRef.current,
+          { y: "55vh", opacity: 0, rotate: 6, scale: 0.95 },
+          {
+            y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
+          }
+        );
+
+        // Photo RIGHT BOTTOM
+        gsap.fromTo(
+          photoRightBotRef.current,
+          { y: "60vh", x: "8vw", opacity: 0, rotate: -8, scale: 0.95 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
+          }
+        );
+
+        // Central Arch Pill — Expand horizontally on scroll
+        if (archPillRef.current) {
+          gsap.to(archPillRef.current, {
+            width: "clamp(380px, 42vw, 550px)", // noticeable but controlled expansion that shouldn't touch images
+            ease: "none",
+            scrollTrigger: { trigger: outer, start: "top top", end: "75% top", scrub: true },
+          });
+        }
+      }, outerRef);
+    };
+
+    loadGsap();
+
+    return () => {
+      if (ctx?.revert) ctx.revert();
+      if (ScrollTrigger?.getAll) {
+        ScrollTrigger.getAll().forEach((trigger: any) => trigger.kill());
       }
-
-      // Photo LEFT — enters from bottom
-      gsap.fromTo(
-        photoLeftRef.current,
-        { y: "65vh", opacity: 0, rotate: -8, scale: 0.95 },
-        {
-          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Photo RIGHT TOP — enters from upper-right
-      gsap.fromTo(
-        photoRightTopRef.current,
-        { y: "-40vh", x: "12vw", opacity: 0, rotate: 10, scale: 0.95 },
-        {
-          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Photo LEFT BOTTOM
-      gsap.fromTo(
-        photoLeftBotRef.current,
-        { y: "55vh", opacity: 0, rotate: 6, scale: 0.95 },
-        {
-          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Photo RIGHT BOTTOM
-      gsap.fromTo(
-        photoRightBotRef.current,
-        { y: "60vh", x: "8vw", opacity: 0, rotate: -8, scale: 0.95 },
-        {
-          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Central Arch Pill — Expand horizontally on scroll
-      if (archPillRef.current) {
-        gsap.to(archPillRef.current, {
-          width: "clamp(380px, 42vw, 550px)", // noticeable but controlled expansion that shouldn't touch images
-          ease: "none",
-          scrollTrigger: { trigger: outer, start: "top top", end: "75% top", scrub: true },
-        });
-      }
-    }, outerRef);
-
-    return () => ctx.revert();
+    };
   }, []);
 
   return (
@@ -601,15 +644,33 @@ export default function Home() {
   const heroRef = useRef<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const heroCtx = gsap.context(() => {
-      gsap.to(".hero-video", {
-        yPercent: 30,
-        ease: "none",
-        scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: true },
+    let heroCtx: any = null;
+    let ScrollTrigger: any = null;
+
+    const loadAnimator = async () => {
+      const gsapModule = await import("gsap");
+      const scrollTriggerModule = await import("gsap/ScrollTrigger");
+      const gsap = gsapModule?.default ?? gsapModule;
+      ScrollTrigger = scrollTriggerModule?.ScrollTrigger ?? scrollTriggerModule?.default ?? scrollTriggerModule;
+      gsap.registerPlugin(ScrollTrigger);
+
+      heroCtx = gsap.context(() => {
+        gsap.to(".hero-video", {
+          yPercent: 30,
+          ease: "none",
+          scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: true },
+        });
       });
-    });
-    return () => heroCtx.revert();
+    };
+
+    loadAnimator();
+
+    return () => {
+      if (heroCtx?.revert) heroCtx.revert();
+      if (ScrollTrigger?.getAll) {
+        ScrollTrigger.getAll().forEach((trigger: any) => trigger.kill());
+      }
+    };
   }, []);
 
   const [slideProgress, setSlideProgress] = useState(0);
@@ -763,7 +824,13 @@ export default function Home() {
 
       {/* ═══════════ HIGHLIGHTS — dark bg, white text ═══════════ */}
       <section className="w-full bg-[#1F1F1F] py-24 overflow-hidden relative">
-        <div className="absolute inset-0 mix-blend-overlay opacity-5 pointer-events-none bg-[url('/noise.png')]" />
+        <div
+          className="absolute inset-0 mix-blend-overlay opacity-5 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px)',
+            backgroundSize: '4px 4px',
+          }}
+        />
         <div className="w-full overflow-hidden mb-12">
           <div 
             className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent"

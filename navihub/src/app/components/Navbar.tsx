@@ -120,6 +120,7 @@ export default function Navbar() {
               height={70}
               className="object-contain"
               priority
+              sizes="(min-width: 1024px) 96px, 48px"
             />
           </div>
         </Link>
@@ -240,6 +241,7 @@ export default function Navbar() {
                   width={48}
                   height={36}
                   className="object-contain"
+                  sizes="48px"
                 />
               </div>
             </Link>

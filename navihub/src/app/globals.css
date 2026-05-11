@@ -42,6 +42,16 @@ body {
   overflow-x: hidden !important;
 }
 
+::selection {
+  background: rgba(255, 246, 227, 0.8);
+  color: #111;
+}
+
+::-moz-selection {
+  background: rgba(255, 246, 227, 0.8);
+  color: #111;
+}
+
 h1 {
   font-family: var(--font-heading);
   font-weight: 700;

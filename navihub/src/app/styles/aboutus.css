@@ -1,286 +1,314 @@
-/* ===== HERO PARALLAX EFFECT ===== */
+﻿/* ===== FRESH ABOUT PAGE DESIGN ===== */
 
-.hero-section {
+:root {
+  color-scheme: light;
+}
+
+.about-page-root {
+  background: #ffffff;
+  color: #000000;
+}
+
+.hero-panel {
   position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
   overflow: hidden;
 }
 
-.hero-section img {
-  will-change: transform;
-}
-
-.hero-section .absolute {
+.hero-image-layer {
   position: absolute;
+  inset: 0;
+  z-index: 0;
 }
 
-.about-mission-wrapper {
-  max-width: 1100px;
+.hero-image {
+  object-fit: cover;
+  filter: brightness(0.65);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.15));
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 10;
+  max-width: 650px;
   margin: 0 auto;
-  padding: 6rem 1.5rem;
   text-align: center;
 }
 
-.about-mission-heading {
-  font-family: "Petrona", serif;
-  font-weight: 500;
-  font-size: clamp(3rem, 6vw, 5.5rem);
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.15rem;
+  background: rgba(153, 126, 103, 0.12);
+  color: #404E3B;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 5vw, 4rem);
   line-height: 1.05;
-  letter-spacing: -0.02em;
-  margin-bottom: 3rem;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
 }
 
-.about-mission-heading .primary {
-  color: #1f1f1f; /* primary text */
+.hero-highlight {
+  display: block;
+  background: linear-gradient(135deg, #997e67, #404E3B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.about-mission-heading .secondary {
-  color: #ccbeb1; /* secondary text */
+.hero-copytext {
+  max-width: 650px;
+  margin: 1.5rem auto 0;
+  font-size: 1.06rem;
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.88);
 }
-
-.about-mission-text {
-  max-width: 820px;
-  margin: 0 auto;
-  font-family: "Open Sans", sans-serif;
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: #1f1f1f;
-}
-
-/* subtle divider like navieats */
-.about-mission-divider {
-  width: 60px;
-  height: 2px;
-  background-color: #ccbeb1;
-  margin: 2.5rem auto;
-}
-
-/* ===== SHARED SECTION WRAPPER ===== */
 
 .about-section {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 4rem 1.5rem;
 }
 
-.about-section-heading {
-  font-family: "Petrona", serif;
-  font-weight: 500;
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 2rem;
+.about-values-section,
+.about-faq-section {
+  background: #ffffff;
 }
 
-.about-section-heading .primary {
-  color: #1f1f1f;
-}
-
-.about-section-heading .secondary {
-  color: #997e67;
-  font-style: italic;
-}
-
-.about-section-heading .tertiary {
-  color: #404E3B; /* Maybe matched to NaviHub theme */
-  font-style: italic;
-}
-
-.about-section-text {
-  font-family: "Open Sans", sans-serif;
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: #1f1f1f;
-  max-width: 850px;
-}
-
-/* ===== WHAT WE DO ===== */
-
-.what-we-do-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3rem;
-  margin-top: 3.5rem;
-}
-
-.what-we-do-item h4 {
-  font-family: "Petrona", serif;
-  font-size: 1.3rem;
-  margin-bottom: 0.75rem;
-  color: #1f1f1f;
-}
-
-.what-we-do-item p {
-  font-family: "Open Sans", sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: #1f1f1f;
-}
-
-/* ===== HOW IT WORKS ===== */
-
-.how-it-works-list {
-  margin-top: 3.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.how-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
+.section-head {
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
   text-align: center;
-  position: relative;
-  max-width: 200px;
 }
 
-.how-step-number {
-  font-family: "Petrona", serif;
-  font-size: 2.5rem;
-  color: white;
-  background: #997e67 !important;
-  width: 100px !important;
-  height: 100px !important;
-  border-radius: 50% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.how-step-content h4 {
-  font-family: "Petrona", serif;
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  color: #1f1f1f;
-}
-
-.how-step-content p {
-  font-family: "Open Sans", sans-serif;
+.section-pill {
+  display: inline-flex;
+  padding: 0.6rem 1rem;
+  border-radius: 9999px;
+  background: rgba(153, 126, 103, 0.12);
+  color: #404E3B;
   font-size: 0.9rem;
-  line-height: 1.6;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+.section-head h2 {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-weight: 800;
+  margin: 0 0 1rem;
+  color: #1f1f1f;
+  line-height: 1.08;
+}
+
+.section-head p {
+  margin: 0 auto;
+  max-width: 680px;
+  font-size: 1rem;
+  line-height: 1.9;
+  color: #444444;
+}
+
+.value-grid,
+.faq-stack {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.value-grid {
+  max-width: 860px;
+  margin: 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.value-card,
+.faq-card {
+  background: #ffffff;
+  border: 1px solid #e8e4db;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
+  text-align: center;
+}
+
+.value-card {
+  transition: border-color 0.25s ease, transform 0.2s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(153, 126, 103, 0.18);
+}
+
+.value-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.value-icon.search {
+  background: linear-gradient(135deg, #997e67, #ccbeb1);
+}
+
+.value-icon.organize {
+  background: linear-gradient(135deg, #404E3B, #997e67);
+}
+
+.value-icon.community {
+  background: linear-gradient(135deg, #6c8d5c, #404E3B);
+}
+
+.icon-svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  color: white;
+}
+
+.value-card h3,
+.process-step h3 {
+  font-size: 1.35rem;
+  margin: 0 0 0.9rem;
   color: #1f1f1f;
 }
 
-/* ===== RESPONSIVE ===== */
+.value-card p,
+.process-step p,
+.faq-answer-wrapper p,
+.section-head p {
+  color: #20222a;
+  line-height: 1.8;
+  margin: 0;
+}
 
-@media (max-width: 900px) {
-  .what-we-do-grid {
+
+.faq-stack {
+  grid-template-columns: 1fr;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.faq-card {
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.faq-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.6rem 1.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid #e5e5e5;
+  background: #faf8f3;
+  color: #1f1f1f;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.faq-toggle:hover {
+  background: #ffffff;
+  border-color: #d0c4b1;
+}
+
+.faq-toggle.open {
+  background: linear-gradient(135deg, #404E3B, #997e67);
+  color: white;
+  border-color: transparent;
+}
+
+.faq-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: rgba(64, 78, 59, 0.1);
+  font-size: 1.35rem;
+}
+
+.faq-toggle.open .faq-symbol {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.faq-answer-wrapper {
+  overflow: hidden;
+  padding: 1.4rem 1.75rem 1.75rem;
+  border: 1px solid #e5e5e5;
+  border-top: none;
+  border-radius: 0 0 1.25rem 1.25rem;
+  background: #f7f3ec;
+}
+
+@media (max-width: 1024px) {
+  .value-grid,
+  .process-grid {
     grid-template-columns: 1fr;
-  }
-
-  .how-it-works-list {
-    flex-direction: column;
-    gap: 2rem;
   }
 }
 
 @media (max-width: 768px) {
-  .about-mission-wrapper {
+  .hero-panel {
+    min-height: auto;
     padding: 3rem 1rem;
   }
 
-  .about-mission-heading {
-    font-size: clamp(2rem, 8vw, 3.5rem);
-    margin-bottom: 2rem;
+  .hero-title {
+    font-size: clamp(2.5rem, 8vw, 3.6rem);
   }
 
-  .about-mission-text {
+  .hero-copytext {
     font-size: 1rem;
-    line-height: 1.7;
-  }
-
-  .about-mission-divider {
-    width: 40px;
-    margin: 1.5rem auto;
   }
 
   .about-section {
-    padding: 2rem 1rem;
+    padding: 3.5rem 1rem;
   }
 
-  .about-section-heading {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
-    margin-bottom: 1.5rem;
-  }
-
-  .about-section-text {
-    font-size: 0.95rem;
-  }
-
-  .what-we-do-grid {
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-
-  .what-we-do-item h4 {
-    font-size: 1.15rem;
-  }
-
-  .what-we-do-item p {
-    font-size: 0.9rem;
-  }
-
-  .how-it-works-list {
-    margin-top: 2rem;
-    gap: 1.5rem;
-  }
-
-  .how-step {
-    max-width: 100%;
-  }
-
-  .how-step-number {
-    font-size: 2rem;
-    width: 80px !important;
-    height: 80px !important;
-  }
-
-  .how-step-content h4 {
-    font-size: 1.1rem;
-  }
-
-  .how-step-content p {
-    font-size: 0.85rem;
-  }
-
-  .hero-section h1 {
-    font-size: 2.5rem !important;
+  .section-head h2 {
+    font-size: 2.3rem;
   }
 }
 
 @media (max-width: 480px) {
-  .about-mission-wrapper {
-    padding: 2rem 0.75rem;
+  .hero-panel {
+    padding: 2.5rem 1rem;
   }
 
-  .about-mission-heading {
-    font-size: 1.75rem;
+  .hero-title {
+    font-size: 2.4rem;
   }
 
-  .about-mission-text {
-    font-size: 0.95rem;
+  .section-head h2 {
+    font-size: 2rem;
   }
 
-  .about-section {
-    padding: 1.5rem 0.75rem;
-  }
-
-  .about-section-heading {
-    font-size: 1.5rem;
-  }
-
-  .how-step-number {
-    font-size: 1.75rem;
-    width: 70px !important;
-    height: 70px !important;
-  }
-
-  .hero-section h1 {
-    font-size: 2rem !important;
+  .faq-toggle {
+    padding: 1.25rem 1.25rem;
   }
 }

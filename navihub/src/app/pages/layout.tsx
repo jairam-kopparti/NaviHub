@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
 
-// 📝 Update this list with the Supabase UUIDs of users 
+// 📝 Update this list with the Supabase UUIDs of users
 // who are allowed to access the restricted pages.
 const ALLOWED_UUIDS = [
   "83f18768-6f8d-4b74-99a5-837282b8e3b7", // me
@@ -30,7 +30,7 @@ export default function PagesLayout({ children }: { children: React.ReactNode })
 
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (isPublicPage) {
         setIsAuthorized(true);
         return;
@@ -43,7 +43,7 @@ export default function PagesLayout({ children }: { children: React.ReactNode })
       }
 
       const userId = session.user.id;
-      
+
       if (ALLOWED_UUIDS.includes(userId)) {
         setIsAuthorized(true);
       } else {
@@ -57,7 +57,7 @@ export default function PagesLayout({ children }: { children: React.ReactNode })
     // Listen for state changes (e.g. signing out or logging in on another tab)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (pathname === "/pages/signin" || pathname === "/pages/signup") return;
-      
+
       if (!session || !ALLOWED_UUIDS.includes(session.user.id)) {
         router.push("/");
       } else {
@@ -76,5 +76,5 @@ export default function PagesLayout({ children }: { children: React.ReactNode })
     return <div className="min-h-screen grid items-center justify-center">Verifying access...</div>;
   }
 
-  return <>{children}</>;
+  return children;
 }

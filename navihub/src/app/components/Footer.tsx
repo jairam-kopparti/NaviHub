@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Instagram, Youtube, Bot, Sparkles, Mail } from "lucide-react";
+import Image from "next/image";
+import { Twitter, Instagram, Youtube, Cpu, Sparkles, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -10,7 +11,9 @@ export default function Footer() {
         {/* Brand Section */}
         <div className="flex flex-col gap-6">
           <Link href="/" className="inline-block">
-            <img src="/main_logo.png" alt="NaviHub Logo" className="h-10 brightness-0 invert opacity-90 hover:opacity-100 transition" />
+            <div className="relative h-10 w-[120px] brightness-0 invert opacity-90 hover:opacity-100 transition">
+              <Image src="/main_logo.png" alt="NaviHub Logo" fill className="object-contain" priority sizes="120px" />
+            </div>
           </Link>
           <p className="!text-[15px] text-gray-400 leading-relaxed max-w-sm">
             Empowering the community to connect, learn, and grow together. Discover resources, local events, and real-time news tailored for you.
@@ -77,12 +80,17 @@ export default function Footer() {
           <div className="flex flex-col gap-2 mt-1">
             <button
               onClick={() => window.dispatchEvent(new Event('open-chatbot'))}
-              aria-label="Open NaviBot AI chat assistant"
+              aria-label="Ask NaviBot"
               className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl py-2.5 px-4 text-xs text-white transition-all flex items-center justify-between group cursor-pointer"
             >
-              <div className="flex items-center gap-2">
-                <Bot size={16} className="text-[#997e67] group-hover:text-white transition-colors" />
-                <span>Chat with NaviBot</span>
+              <div className="flex items-center gap-3">
+                <span className="grid place-items-center h-9 w-9 rounded-2xl bg-white/10 text-[#F5F1E8]">
+                  <Cpu size={16} />
+                </span>
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-[#CCBEB1]">Ask NaviBot</span>
+                  <span className="text-sm font-semibold text-white">AI</span>
+                </div>
               </div>
               <Sparkles size={14} className="text-gray-500 group-hover:text-[#997e67] transition-colors" />
             </button>
