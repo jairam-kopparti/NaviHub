@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 export default function App() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [activeQuestion, setActiveQuestion] = useState<number | null>(null);
   const heroRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -37,7 +38,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <motion.div
         className="fixed w-96 h-96 rounded-full pointer-events-none z-0 opacity-30"
         style={{
@@ -51,22 +52,23 @@ export default function App() {
       />
       <section
         ref={heroRef}
-        className="relative pt-67 pb-67 px-8 overflow-hidden"
-        style={{ backgroundColor: "#1A1A1A" }}
+        className="relative pt-[200px] mb-8 pb-[200px] px-8 sm:pt-[250px] sm:pb-[250px]"
+        style={{ clipPath: "inset(0)" }}
       >
-        <motion.div
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.5 }}
-          style={{
-            background: "radial-gradient(ellipse at 50% 30%, rgba(204, 190, 177, 0.08) 0%, transparent 60%)",
-          }}
-        />
+        <div className="fixed inset-0 -z-10 w-full h-full">
+          <Image
+            src="/page-images/aboutus.jpg"
+            alt="About Us Background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
 
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}
-          className="max-w-4xl mx-auto relative z-10"
+          className="max-w-4xl mx-auto relative z-10 text-center flex flex-col items-center"
         >
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
@@ -81,7 +83,7 @@ export default function App() {
               letterSpacing: "-2px",
             }}
           >
-            We're building bridges
+            We&apos;re building bridges
             <br />
             to community support
           </motion.h1>
@@ -89,7 +91,7 @@ export default function App() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-lg max-w-2xl"
+            className="text-lg max-w-2xl mx-auto"
             style={{
               color: "#B3A394",
               lineHeight: "1.8",
@@ -97,7 +99,7 @@ export default function App() {
             }}
           >
             NaviHub started with a simple observation: finding community support
-            shouldn't be this hard. We're creating a central hub where New Yorkers
+            shouldn&apos;t be this hard. We&apos;re creating a central hub where New Yorkers
             can discover local organizations, programs, and services—all verified,
             organized, and accessible in one place.
           </motion.p>
@@ -116,7 +118,7 @@ export default function App() {
       />
       <section
         className="py-32 px-8"
-        style={{ backgroundColor: "#FAF8F5" }}
+        style={{ backgroundColor: "#FFFFFF" }}
       >
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -195,7 +197,7 @@ export default function App() {
                   color: "#664930",
                 }}
               >
-                We realized that finding support shouldn't require hours of research
+                We realized that finding support shouldn&apos;t require hours of research
                 and dozens of phone calls. Communities deserve better.
               </motion.p>
             </motion.div>
@@ -219,6 +221,7 @@ export default function App() {
                 alt="Community service"
                 width={765.6}
                 height={574.2}
+                className="object-cover w-full h-full"
                 ></Image>
               </motion.div>
             </motion.div>
@@ -263,6 +266,7 @@ export default function App() {
                 alt="Community service"
                 width={765.6}
                 height={574.2}
+                className="object-cover w-full h-full"
                 ></Image>
               </motion.div>
             </motion.div>
@@ -310,7 +314,7 @@ export default function App() {
                   letterSpacing: "-1.5px",
                 }}
               >
-                What we're building
+                What we&apos;re building
               </motion.h2>
 
               <motion.p
@@ -426,7 +430,7 @@ export default function App() {
                   color: "#664930",
                 }}
               >
-                Since launching, we've connected community members all over New York 
+                Since launching, we&apos;ve connected community members all over New York 
                 with the resources they need, continuing to make a lasting impact across the city.
               </motion.p>
 
@@ -441,7 +445,7 @@ export default function App() {
                   color: "#664930",
                 }}
               >
-                But we're just getting started. Our vision is to become the trusted
+                But we&apos;re just getting started. Our vision is to become the trusted
                 hub for community support across New York—and eventually, beyond.
               </motion.p>
             </motion.div>
@@ -465,6 +469,7 @@ export default function App() {
                 alt="Community service"
                 width={765.6}
                 height={574.2}
+                className="object-cover w-full h-full"
                 ></Image>
               </motion.div>
             </motion.div>
@@ -548,7 +553,7 @@ export default function App() {
                 icon: Users,
                 title: "Community",
                 description:
-                  "We're built for and by the community, prioritizing their needs above all.",
+                  "We&apos;re built for and by the community, prioritizing their needs above all.",
               },
             ].map((item, i) => (
               <motion.div
@@ -606,6 +611,121 @@ export default function App() {
           maxWidth: "900px",
         }}
       />
+      
+      {/* Questionnaire / FAQ Section */}
+      <section className="py-32 px-8" style={{ backgroundColor: "#FFFFFF" }}>
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h2
+              style={{
+                fontSize: "clamp(32px, 4vw, 44px)",
+                lineHeight: "1.25",
+                fontWeight: "500",
+                color: "#1A1A1A",
+                letterSpacing: "-1.5px",
+              }}
+            >
+              Frequently asked questions
+            </h2>
+          </motion.div>
+          
+          <div className="space-y-4">
+            {[
+              {
+                q: "What is NaviLink and how does it work?",
+                a: "NaviLink is our community forum designed for neighbors to connect, seek advice, share local experiences, and discuss community matters such as wellness, careers, and local sports. Simply create an account, jump into an existing category, or start your own discussion to begin connecting.",
+              },
+              {
+                q: "How do I add my organization or a resource to NaviHub?",
+                a: "You can submit an application right through the 'Discover Resources' portal by clicking on 'Add Resource'. Our administrative team reviews every submission for accuracy and legitimacy before making it public to ensure safety for everyone.",
+              },
+              {
+                q: "Is NaviHub completely free to use?",
+                a: "Yes, NaviHub is entirely free for all community members seeking help or wanting to engage on NaviLink. We believe that access to essential services and community voices should never be limited by a paywall.",
+              },
+              {
+                q: "What types of resources are available on NaviHub?",
+                a: "We offer a diverse and continuously expanding directory of verified resources including Housing & Utilities, Food & Basic Needs, Employment & Career Support, Education, Legal Services, Health & Wellness, and Nonprofit Charitable Organizations across all boroughs of NYC.",
+              },
+              {
+                q: "How often are the resources updated?",
+                a: "We work continuously to keep the platform updated. Community members can leave feedback and ratings, organizations update their listings directly, and our moderation team does routine checks to ensure contact info and programs remain accurate.",
+              },
+              {
+                q: "Which areas of New York does NaviHub cover?",
+                a: "NaviHub currently covers all five boroughs of New York City: Manhattan, Brooklyn, Queens, the Bronx, and Staten Island. You can use our interactive map and location filters to find resources and support closest to your neighborhood.",
+              },
+              {
+                q: "Do I need an account to use the platform?",
+                a: "You can browse the resource directory and read public information without an account. However, creating a free account allows you to post in NaviLink discussions, leave reviews, and submit new community resources to the directory.",
+              },
+            ].map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="border rounded-2xl overflow-hidden"
+                style={{ borderColor: "rgba(204, 190, 177, 0.3)" }}
+              >
+                <button
+                  onClick={() => setActiveQuestion(activeQuestion === index ? null : index)}
+                  className="w-full flex items-center justify-between p-6 text-left"
+                  style={{ backgroundColor: activeQuestion === index ? "rgba(204, 190, 177, 0.05)" : "#FFFFFF" }}
+                >
+                  <span
+                    className="font-medium"
+                    style={{ fontSize: "17px", color: "#1A1A1A" }}
+                  >
+                    {faq.q}
+                  </span>
+                  <motion.div
+                    animate={{ rotate: activeQuestion === index ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 9L12 15L18 9" stroke="#997E67" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </motion.div>
+                </button>
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: activeQuestion === index ? "auto" : 0,
+                    opacity: activeQuestion === index ? 1 : 0
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden bg-white"
+                >
+                  <div className="p-6 pt-0 text-gray-600" style={{ color: "#664930", lineHeight: "1.75" }}>
+                    {faq.a}
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <motion.div
+        className="mx-auto"
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2 }}
+        style={{
+          height: "1px",
+          background: "linear-gradient(90deg, transparent 0%, #CCBEB1 50%, transparent 100%)",
+          maxWidth: "900px",
+        }}
+      />
       <section
         className="py-32 px-8"
         style={{ backgroundColor: "#FAF8F5" }}
@@ -640,7 +760,7 @@ export default function App() {
               color: "#664930",
             }}
           >
-            Whether you're seeking support or offering services, NaviHub is here to
+            Whether you&apos;re seeking support or offering services, NaviHub is here to
             help you connect with what matters.
           </motion.p>
 
