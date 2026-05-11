@@ -477,16 +477,20 @@ function NewsletterPageInner() {
           </div>
           <div className="mt-24 flex flex-col items-center text-[#7a6655]! text-[10px] uppercase tracking-widest">
             <span>Scroll down</span>
-            <ChevronDown size={18} className="mt-1" style={{ animation: "nh-bounce 10s ease-in-out infinite" }} />
+            <ChevronDown size={18} className="mt-1 nh-scroll-bounce" />
           </div>
           <style jsx global>{`
-            @keyframes nh-bounce {
+            @keyframes nh-bounce-slow {
               0%, 100% {
                 transform: translateY(0);
               }
               50% {
                 transform: translateY(8px);
               }
+            }
+
+            .nh-scroll-bounce {
+              animation: nh-bounce-slow 16s ease-in-out infinite !important;
             }
           `}</style>
         </div>

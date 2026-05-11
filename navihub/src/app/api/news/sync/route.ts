@@ -76,12 +76,25 @@ interface GNewsResponse {
 let lastSyncAt = 0;
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 min cooldown
 
-// ── POST /api/news/sync ─────────────────────────────────────
-export async function POST(request: Request) {
-  // Basic auth check via secret header (for cron or admin calls)
-  const authHeader = request.headers.get("x-sync-secret");
+const TARGET_DAILY_INSERTS = Math.max(
+  1,
+  Number(process.env.NEWS_SYNC_TARGET ?? "5")
+);
+
+function isAuthorized(request: Request): boolean {
+  const cronHeader = request.headers.get("x-vercel-cron");
+  if (cronHeader === "1") return true;
+
   const syncSecret = process.env.NEWS_SYNC_SECRET;
-  if (syncSecret && authHeader !== syncSecret) {
+  if (!syncSecret) return true;
+
+  const authHeader = request.headers.get("x-sync-secret");
+  const querySecret = new URL(request.url).searchParams.get("secret");
+  return authHeader === syncSecret || querySecret === syncSecret;
+}
+
+async function runNewsSync(request: Request) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -126,6 +139,7 @@ export async function POST(request: Request) {
   const ALL_QUERIES = [...LOCAL_QUERIES, ...NATIONAL_QUERIES, ...INTERNATIONAL_QUERIES];
 
   for (const query of ALL_QUERIES) {
+    if (totalInserted >= TARGET_DAILY_INSERTS) break;
     try {
       // Determine news type based on query origin early on
       let currentNewsType = "local";
@@ -139,7 +153,9 @@ export async function POST(request: Request) {
       if (currentNewsType !== "international") {
         url.searchParams.set("country", "us");
       }
-      url.searchParams.set("max", "10");
+      const remaining = Math.max(TARGET_DAILY_INSERTS - totalInserted, 1);
+      const perQueryLimit = Math.min(10, remaining);
+      url.searchParams.set("max", String(perQueryLimit));
       url.searchParams.set("from", fromISO);
       url.searchParams.set("apikey", apiKey);
 
@@ -198,15 +214,18 @@ export async function POST(request: Request) {
     fetched: totalFetched,
     inserted: totalInserted,
     skipped: totalSkipped,
+    target: TARGET_DAILY_INSERTS,
     errors: errors.length ? errors : undefined,
     syncedAt: new Date().toISOString(),
   });
 }
 
-// ── GET → redirect to POST info ─────────────────────────────
-export async function GET() {
-  return NextResponse.json({
-    message: "Send a POST request to sync news from GNews.",
-    usage: "POST /api/news/sync with optional header x-sync-secret",
-  });
+// ── POST /api/news/sync ─────────────────────────────────────
+export async function POST(request: Request) {
+  return runNewsSync(request);
+}
+
+// ── GET /api/news/sync (cron-friendly) ──────────────────────
+export async function GET(request: Request) {
+  return runNewsSync(request);
 }
