@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Instagram, Youtube, Bot, Sparkles, Mail } from "lucide-react";
+import { Bot, Sparkles, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -15,6 +15,7 @@ export default function Footer() {
           <p className="!text-[15px] text-gray-400 leading-relaxed max-w-sm">
             Empowering the community to connect, learn, and grow together. Discover resources, local events, and real-time news tailored for you.
           </p>
+          {/*
           <div className="flex flex-col gap-2 mt-2">
             <p className="text-xs text-gray-400">Check out our community</p>
             <div className="flex items-center gap-4">
@@ -47,9 +48,10 @@ export default function Footer() {
               </a>
             </div>
           </div>
+          {/* Quick Links */}
         </div>
 
-        {/* Quick Links */}
+
         <div className="flex flex-col gap-3">
           <h4 className="text-white font-semibold text-base mb-1">Explore Hub</h4>
           <Link href="/" className="text-xs text-gray-400 hover:text-[#CCBEB1] transition-colors w-fit">Home</Link>
