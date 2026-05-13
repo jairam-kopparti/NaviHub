@@ -67,13 +67,14 @@ const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-const StopSelect = ({
+const StopComboBox = ({
   label,
   value,
   onSelect,
   placeholder,
   options,
   disabled,
+  loading,
 }: {
   label: string;
   value: StopOption | null;
@@ -81,26 +82,65 @@ const StopSelect = ({
   placeholder: string;
   options: StopOption[];
   disabled?: boolean;
+  loading?: boolean;
 }) => {
+  const selectedLabel = value ? `${value.stop_name} (${value.stop_id})` : '';
+  const [query, setQuery] = useState(selectedLabel);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setQuery(selectedLabel);
+  }, [selectedLabel]);
+
+  const filtered = useMemo(() => {
+    const trimmed = query.trim().toLowerCase();
+    if (!trimmed) return options.slice(0, 60);
+    return options
+      .filter((stop) =>
+        stop.stop_name.toLowerCase().includes(trimmed) ||
+        stop.stop_id.toLowerCase().includes(trimmed)
+      )
+      .slice(0, 80);
+  }, [options, query]);
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 relative">
       <label className="!text-xs !font-semibold !text-gray-700">{label}</label>
-      <select
-        value={value?.stop_id || ''}
-        onChange={(event) => {
-          const selected = options.find((stop) => stop.stop_id === event.target.value) || null;
-          onSelect(selected);
-        }}
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        onFocus={() => setIsOpen(true)}
+        onClick={() => setIsOpen(true)}
+        onBlur={() => setTimeout(() => setIsOpen(false), 120)}
+        placeholder={placeholder}
         disabled={disabled}
         className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 !text-xs !text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669] disabled:opacity-60"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((stop) => (
-          <option key={stop.stop_id} value={stop.stop_id}>
-            {stop.stop_name} ({stop.stop_id})
-          </option>
-        ))}
-      </select>
+      />
+
+      {isOpen && !disabled && (
+        <div className="absolute left-0 right-0 z-20 mt-2 max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
+          {loading && (
+            <div className="px-3 py-2 text-xs !text-gray-500">Loading stations...</div>
+          )}
+          {!loading && filtered.length === 0 && (
+            <div className="px-3 py-2 text-xs !text-gray-500">No matching stations.</div>
+          )}
+          {!loading && filtered.map((stop) => (
+            <button
+              key={stop.stop_id}
+              type="button"
+              onMouseDown={() => {
+                onSelect(stop);
+                setQuery(`${stop.stop_name} (${stop.stop_id})`);
+              }}
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left !text-xs !text-gray-700 hover:!bg-gray-50"
+            >
+              <span className="font-semibold !text-gray-900">{stop.stop_name}</span>
+              <span className="text-[10px] !text-gray-500">{stop.stop_id}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -280,30 +320,25 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <StopSelect
+                <StopComboBox
                   label="Start station"
                   value={startStop}
                   onSelect={setStartStop}
                   placeholder={stopsLoading ? "Loading stations..." : "Select a start station"}
                   options={sortedStops}
                   disabled={stopsLoading || sortedStops.length === 0}
+                  loading={stopsLoading}
                 />
-                <StopSelect
+                <StopComboBox
                   label="End station"
                   value={endStop}
                   onSelect={setEndStop}
                   placeholder={stopsLoading ? "Loading stations..." : "Select a destination (optional)"}
                   options={sortedStops}
                   disabled={stopsLoading || sortedStops.length === 0}
+                  loading={stopsLoading}
                 />
               </div>
-
-              {stopsLoading && (
-                <div className="flex items-center gap-2 !text-xs !text-gray-600">
-                  <Loader2 className="h-4 w-4 !animate-[spin_1.6s_linear_infinite]" />
-                  Loading station list...
-                </div>
-              )}
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-2">
