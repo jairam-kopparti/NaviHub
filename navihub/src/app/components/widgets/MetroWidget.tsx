@@ -170,7 +170,7 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
 
     let closest: StopOption | null = null;
     let closestDistance = Number.POSITIVE_INFINITY;
-    stops.forEach((stop) => {
+    stops.forEach((stop: StopOption) => {
       const distance = haversineDistance(
         resource.latitude as number,
         resource.longitude as number,
