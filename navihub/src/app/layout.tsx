@@ -3,12 +3,13 @@ import "./globals.css";
 import NavbarWrapper from "./components/NavbarWrapper";
 import FooterWrapper from "./components/FooterWrapper";
 import Chatbot from "./components/Chatbot"
+import FloatingTools from "./components/FloatingTools";
 import ScrollProgressBar from "./components/ScrollProgressBar";
 import NewsletterSubscriptionModal from "./components/newsletter/NewsletterSubscriptionModal";
 
 export const metadata: Metadata = {
   title: "NaviHub",
-  description: "Team #2285-1",
+  description: "Team #2295-1",
 };
 
 export default function RootLayout({
@@ -26,6 +27,7 @@ export default function RootLayout({
         <main id="main-content" className="flex-1">
           {children}
         </main>
+        <FloatingTools />
         <Chatbot />
         <FooterWrapper />
       </body>

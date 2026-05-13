@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from "../lib/supabaseClient";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   BotMessageSquare,
   Newspaper,
@@ -15,6 +17,8 @@ import {
   BookOpen,
   Users,
   Navigation,
+  ExternalLink,
+  Clipboard,
 } from 'lucide-react';
 import type { NewsArticle } from "../lib/types";
 
@@ -25,9 +29,62 @@ enum From {
 
 interface Message {
   id: string;
-  content: string;
+  content: MessageContent;
   from: From;
 }
+
+type NaviBotAction = {
+  label: string;
+  url?: string;
+  command?: string;
+};
+
+type NaviBotCodeBlock = {
+  language: string;
+  code: string;
+};
+
+type NaviHubResponse = {
+  format_version: "1.0";
+  title: string;
+  summary: string;
+  body_markdown: string;
+  actions?: NaviBotAction[];
+  code_blocks?: NaviBotCodeBlock[];
+  metadata?: Record<string, unknown>;
+};
+
+type MessageContent = string | NaviHubResponse;
+
+const isNaviHubResponse = (value: unknown): value is NaviHubResponse => {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  return (
+    record.format_version === "1.0" &&
+    typeof record.title === "string" &&
+    typeof record.summary === "string" &&
+    typeof record.body_markdown === "string"
+  );
+};
+
+const parseNaviBotResponse = (payload: unknown): MessageContent => {
+  if (typeof payload === "string") {
+    const trimmed = payload.trim();
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (isNaviHubResponse(parsed)) return parsed;
+      } catch {
+        // Fall back to plain text.
+      }
+    }
+    return payload;
+  }
+
+  if (isNaviHubResponse(payload)) return payload;
+  if (payload && typeof payload === "object") return JSON.stringify(payload, null, 2);
+  return String(payload ?? "");
+};
 
 interface ChatbotOptionProps {
   icon: React.ElementType<LucideProps>;
@@ -52,6 +109,7 @@ function ChatbotOption({ icon: Icon, content, action, setHoverText }: ChatbotOpt
 
 export default function Chatbot() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -79,10 +137,10 @@ export default function Chatbot() {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  const addMessage = (content: string, from: From) => {
+  const addMessage = (content: MessageContent, from: From) => {
     setMessages(prev => [...prev, {
       id: `${Date.now()}-${Math.random()}`,
-      content: typeof content === "string" ? content : "There was an error. Please try again.",
+      content: content || "There was an error. Please try again.",
       from
     }]);
   };
@@ -164,7 +222,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         body: JSON.stringify(toSend)
       });
       const chatData = await chatRes.json();
-      addMessage(chatData, From.Chat);
+      addMessage(parseNaviBotResponse(chatData), From.Chat);
     } catch (error) {
       console.error(error);
       addMessage("Sorry, I encountered an error fulfilling your request.", From.Chat);
@@ -174,7 +232,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
   }, [isLoading, fetchArticles, fetchResources, fetchEvents]);
 
   const handleSummarizeNews = async () => {
-    setIsLoading(true);
     try {
       const data = await fetchArticles();
       let weeklyNews = "";
@@ -234,7 +291,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
   // ── Page-specific handlers ──
 
   const handleTopResources = useCallback(async () => {
-    setIsLoading(true);
     try {
       const resources = await fetchResources();
       if (!resources || resources.length === 0) {
@@ -262,7 +318,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
   };
 
   const handleUpcomingEvents = useCallback(async () => {
-    setIsLoading(true);
     try {
       const events = await fetchEvents();
       const now = new Date();
@@ -288,7 +343,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
 
   const handleEventsNearMe = useCallback(async () => {
     addMessage("Finding events near you...", From.You);
-    setIsLoading(true);
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
         if (!navigator.geolocation) {
@@ -389,6 +443,93 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
     return [];
   })();
 
+  const handleAction = (action: NaviBotAction) => {
+    if (action.url) {
+      if (action.url.startsWith("/")) {
+        router.push(action.url);
+      } else {
+        window.open(action.url, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
+
+    if (action.command && navigator?.clipboard) {
+      navigator.clipboard.writeText(action.command).catch(() => undefined);
+    }
+  };
+
+  const renderStructuredResponse = (response: NaviHubResponse) => {
+    const widgetMeta = (response.metadata as Record<string, unknown> | undefined)?.widget as
+      | Record<string, unknown>
+      | undefined;
+
+    return (
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <div className="!text-sm !font-semibold !text-gray-900">{response.title}</div>
+          <div className="!text-xs !text-gray-600">{response.summary}</div>
+        </div>
+        <div className="!text-sm !text-gray-800">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h3: ({ children }) => (
+                <h3 className="!text-sm !font-semibold !text-gray-900 mb-2">{children}</h3>
+              ),
+              p: ({ children }) => (
+                <p className="!text-sm !text-gray-800 leading-6 mb-2 last:mb-0">{children}</p>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc pl-5 space-y-1 !text-sm !text-gray-800">{children}</ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="list-decimal pl-5 space-y-1 !text-sm !text-gray-800">{children}</ol>
+              ),
+              li: ({ children }) => <li className="!text-sm !text-gray-800">{children}</li>,
+              a: ({ href, children }) => (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="!text-[#404E3B] underline underline-offset-4"
+                >
+                  {children}
+                </a>
+              ),
+              strong: ({ children }) => <strong className="font-semibold !text-gray-900">{children}</strong>,
+              em: ({ children }) => <em className="italic !text-gray-700">{children}</em>,
+            }}
+          >
+            {response.body_markdown}
+          </ReactMarkdown>
+        </div>
+
+        {response.actions && response.actions.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {response.actions.map((action, index) => (
+              <button
+                key={`${action.label}-${index}`}
+                onClick={() => handleAction(action)}
+                className="inline-flex items-center gap-2 rounded-full !bg-[#404E3B] px-4 py-2 text-xs font-semibold !text-white shadow-md hover:!bg-[#7B9669] transition"
+              >
+                <span>{action.label}</span>
+                {action.url ? <ExternalLink className="h-3.5 w-3.5" /> : null}
+                {action.command ? <Clipboard className="h-3.5 w-3.5" /> : null}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {widgetMeta && (
+          <div className="rounded-xl border border-dashed border-gray-300 bg-white/80 px-3 py-2 !text-xs !text-gray-600">
+            Interactive widget requested. The current chat UI does not run widget code yet.
+          </div>
+        )}
+
+      </div>
+    );
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -447,7 +588,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
               {messages.length === 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
                   <BotMessageSquare size={48} className="opacity-20" />
-                  <p className="text-sm font-medium text-gray-600!">{hoverText}</p>
+                  <p className="!text-sm !font-medium !text-gray-600">{hoverText}</p>
                 </div>
               )}
               {messages.map((msg) => (
@@ -458,19 +599,23 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
                   key={msg.id}
                   className={`flex ${msg.from === From.You ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-                    msg.from === From.You 
-                      ? 'bg-[#404E3B] text-white rounded-br-none' 
-                      : 'bg-[#E2E8F0] text-gray-800 rounded-bl-none'
-                  } whitespace-pre-line`}>
-                    {msg.content}
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
+                      msg.from === From.You
+                        ? 'bg-[#404E3B] text-white rounded-br-none'
+                        : 'bg-[#E2E8F0] text-gray-800 rounded-bl-none'
+                    } ${typeof msg.content === "string" ? "whitespace-pre-line" : ""}`}
+                  >
+                    {typeof msg.content === "string"
+                      ? msg.content
+                      : renderStructuredResponse(msg.content)}
                   </div>
                 </motion.div>
               ))}
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-[#E2E8F0] rounded-2xl rounded-bl-none px-4 py-2">
-                    <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+                    <Loader2 className="w-5 h-5 !text-gray-500 !animate-[spin_1.6s_linear_infinite]" />
                   </div>
                 </div>
               )}
@@ -512,7 +657,11 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
                   aria-label="Send message"
                   className="p-3 bg-[#404E3B] text-white rounded-full hover:bg-[#7B9669] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#404E3B]"
                 >
-                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendHorizontal className="w-5 h-5" />}
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 !text-white !animate-[spin_1.6s_linear_infinite]" />
+                  ) : (
+                    <SendHorizontal className="w-5 h-5" />
+                  )}
                 </button>
               </form>
             </div>
