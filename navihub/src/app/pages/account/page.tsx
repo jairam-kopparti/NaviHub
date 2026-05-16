@@ -274,9 +274,10 @@ export default function AccountPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#6b5a4e]!">Full Name</label>
-                <input 
-                  type="text" 
+                <label htmlFor="fullName" className="text-sm font-bold text-[#6b5a4e]!">Full Name</label>
+                <input
+                  id="fullName"
+                  type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
@@ -289,9 +290,10 @@ export default function AccountPage() {
                 <h3 className="text-lg font-bold text-[#4a3b32]! mb-6">Security & Password</h3>
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-[#6b5a4e]!">New Password</label>
-                    <input 
-                      type="password" 
+                    <label htmlFor="newPassword" className="text-sm font-bold text-[#6b5a4e]!">New Password</label>
+                    <input
+                      id="newPassword"
+                      type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Leave blank to keep current"
@@ -299,9 +301,10 @@ export default function AccountPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-[#6b5a4e]!">Confirm New Password</label>
-                    <input 
-                      type="password" 
+                    <label htmlFor="confirmPassword" className="text-sm font-bold text-[#6b5a4e]!">Confirm New Password</label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Must match new password"
@@ -363,8 +366,8 @@ export default function AccountPage() {
                 </div>
                 <p className="text-xl font-bold text-[#4a3b32]! mb-2 relative z-10">No Posts Yet</p>
                 <p className="text-[#a3958a]! mb-8 max-w-sm text-base leading-relaxed relative z-10">You haven&apos;t created any events or resources to share with the community yet.</p>
-                <button onClick={() => router.push('/pages/NaviLink')} className="text-sm text-[#997e67]! font-bold hover:text-[#866d58]! transition-colors inline-flex items-center group/btn relative z-10 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-[#eae0d5] hover:shadow cursor-pointer">
-                  Create one now <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover/btn:translate-x-1 transition-transform" />
+                <button aria-label="Create a post on NaviLink" onClick={() => router.push('/pages/NaviLink')} className="text-sm text-[#997e67]! font-bold hover:text-[#866d58]! transition-colors inline-flex items-center group/btn relative z-10 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-[#eae0d5] hover:shadow cursor-pointer">
+                  Create one now <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover/btn:translate-x-1 transition-transform" aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -393,8 +396,8 @@ export default function AccountPage() {
                         <span>{event.location_name || "NYC"}</span>
                         {event.is_virtual && <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md border border-blue-100 mt-1">Virtual</span>}
                       </div>
-                      <button onClick={() => router.push(`/pages/events`)} className="p-2 bg-[#fdfaf7] text-[#997e67] rounded-xl hover:bg-[#997e67] hover:text-white transition-colors border border-[#eae0d5] hover:border-transparent">
-                        <ArrowRight className="w-4 h-4" />
+                      <button aria-label="View event details" onClick={() => router.push(`/pages/events`)} className="p-2 bg-[#fdfaf7] text-[#997e67] rounded-xl hover:bg-[#997e67] hover:text-white transition-colors border border-[#eae0d5] hover:border-transparent">
+                        <ArrowRight className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -408,8 +411,8 @@ export default function AccountPage() {
                 </div>
                 <p className="text-xl font-bold text-[#4a3b32]! mb-2 relative z-10">No Registered Events</p>
                 <p className="text-[#a3958a]! mb-8 max-w-sm text-base leading-relaxed relative z-10">You haven&apos;t signed up for any upcoming events. Keep an eye out for what&apos;s new!</p>
-                <button onClick={() => router.push('/pages/events')} className="text-sm text-[#997e67]! font-bold hover:text-[#866d58]! transition-colors inline-flex items-center group/btn relative z-10 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-[#eae0d5] hover:shadow cursor-pointer">
-                  Explore Events <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover/btn:translate-x-1 transition-transform" />
+                <button aria-label="Explore events" onClick={() => router.push('/pages/events')} className="text-sm text-[#997e67]! font-bold hover:text-[#866d58]! transition-colors inline-flex items-center group/btn relative z-10 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-[#eae0d5] hover:shadow cursor-pointer">
+                  Explore Events <ArrowRight className="w-4 h-4 ml-1.5 transform group-hover/btn:translate-x-1 transition-transform" aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -665,7 +668,7 @@ export default function AccountPage() {
                     `}
                   >
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {React.cloneElement(tab.icon as React.ReactElement<any>, { className: "w-4 h-4" })}
+                    {React.cloneElement(tab.icon as React.ReactElement<any>, { className: "w-4 h-4", "aria-hidden": "true" })}
                     {tab.label}
                   </button>
                 )

@@ -171,8 +171,8 @@ export default function Navbar() {
                 {open && (
                   <div className="nav-dropdown" role="menu">
                     <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-xs text-white/50 uppercase tracking-widest">Account</p>
-                      <p className="text-sm text-white/90 mt-1 truncate">
+                      <p className="text-[10px] text-white/45 font-semibold uppercase tracking-wide">Account</p>
+                      <p className="text-sm font-semibold text-white mt-0.5 truncate">
                         {user.user_metadata?.full_name || user.email}
                       </p>
                     </div>

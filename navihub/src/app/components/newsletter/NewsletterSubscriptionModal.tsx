@@ -115,6 +115,13 @@ export default function NewsletterSubscriptionModal() {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen]);
+
   const handleClose = () => {
     setIsOpen(false);
     if (!success) {
@@ -169,7 +176,7 @@ export default function NewsletterSubscriptionModal() {
         onClick={handleClose}
       />
 
-      <div className="relative w-full max-w-5xl overflow-hidden rounded-4xl border border-[#e6ddd5] bg-[#fffdfa] shadow-[0_28px_120px_rgba(0,0,0,0.35)]">
+      <div role="dialog" aria-modal="true" aria-labelledby="newsletter-sub-title" className="relative w-full max-w-5xl overflow-hidden rounded-4xl border border-[#e6ddd5] bg-[#fffdfa] shadow-[0_28px_120px_rgba(0,0,0,0.35)]">
         <button
           aria-label="Close"
           className="absolute right-4 top-4 z-20 rounded-full border border-[#ece0d4] bg-white p-2 text-[#6b5a4e] transition hover:bg-[#f7f1ea] cursor-pointer"
@@ -209,7 +216,7 @@ export default function NewsletterSubscriptionModal() {
 
           <section className="p-6 sm:p-8 md:p-9">
             {success ? (
-              <div className="flex h-full min-h-90 flex-col items-center justify-center text-center">
+              <div aria-live="polite" className="flex h-full min-h-90 flex-col items-center justify-center text-center">
                 <div className="mb-4 rounded-full bg-[#edf7ee] p-3 !text-[#2f7a42]">
                   <CheckCircle2 size={28} />
                 </div>
@@ -221,7 +228,7 @@ export default function NewsletterSubscriptionModal() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="mb-4">
-                  <h2 className="mb-1 font-(--font-heading) text-2xl !text-[#1f1f1f]">
+                  <h2 id="newsletter-sub-title" className="mb-1 font-(--font-heading) text-2xl !text-[#1f1f1f]">
                     {isExistingUser ? "Manage Preferences" : "Weekly Digest"}
                   </h2>
                   <p className="text-sm !text-[#6b5a4e]">
@@ -270,7 +277,7 @@ export default function NewsletterSubscriptionModal() {
                   </label>
                 </div>
 
-                {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm !text-red-700">{error}</p>}
+                {error && <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm !text-red-700">{error}</p>}
 
                 <div className="flex flex-col gap-3">
                   <button

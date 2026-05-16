@@ -13,8 +13,6 @@ import {
 	FileText,
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
-import NavbarWrapper from "../../components/NavbarWrapper";
-import FooterWrapper from "../../components/FooterWrapper";
 
 type AdminTab = "resources" | "events";
 
@@ -236,8 +234,6 @@ export default function AdminPage() {
 	};
 
 	return (
-		<>
-			<NavbarWrapper />
 		<div className="admin-page min-h-screen bg-[#fcfbf9] pt-4 pb-20 selection:bg-[#997e67]/20 flex flex-col">
 			<div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
 				<div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#997e67]/5 blur-[120px] rounded-full mix-blend-multiply" />
@@ -268,8 +264,10 @@ export default function AdminPage() {
 					className="flex-1 w-full bg-white border border-[#eae0d5] rounded-3xl min-h-125 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative p-6 sm:p-8"
 				>
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-						<div className="inline-flex p-1.5 rounded-2xl bg-[#fdfaf7] border border-[#eae0d5] w-fit">
+						<div role="tablist" className="inline-flex p-1.5 rounded-2xl bg-[#fdfaf7] border border-[#eae0d5] w-fit">
 							<button
+								role="tab"
+								aria-selected={activeTab === "resources"}
 								onClick={() => setActiveTab("resources")}
 								className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
 									activeTab === "resources"
@@ -280,6 +278,8 @@ export default function AdminPage() {
 								Pending Resources ({pendingResources.length})
 							</button>
 							<button
+								role="tab"
+								aria-selected={activeTab === "events"}
 								onClick={() => setActiveTab("events")}
 								className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
 									activeTab === "events"
@@ -306,7 +306,7 @@ export default function AdminPage() {
 					)}
 
 					<div className="mb-4 text-xs font-bold uppercase tracking-wider text-[#a3958a]! inline-flex items-center gap-2">
-						<ShieldCheck className="w-4 h-4" />
+						<ShieldCheck className="w-4 h-4" aria-hidden="true" />
 						{activeCount} pending item{activeCount === 1 ? "" : "s"}
 					</div>
 
@@ -323,9 +323,7 @@ export default function AdminPage() {
 					)}
 				</motion.main>
 			</div>
-		</div>
-			<FooterWrapper />
-			<style jsx global>{`
+		<style jsx global>{`
 				.admin-page button,
 				.admin-page a,
 				.admin-page [role="button"] {
@@ -336,6 +334,6 @@ export default function AdminPage() {
 					cursor: not-allowed;
 				}
 			`}</style>
-		</>
+		</div>
 	);
 }

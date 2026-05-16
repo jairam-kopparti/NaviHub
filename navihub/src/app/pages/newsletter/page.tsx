@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useMemo } from "react";
+import { useCallback, useEffect, useState, Suspense, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, CalendarDays, Star, CalendarClock, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
@@ -357,6 +357,14 @@ function NewsletterPageInner() {
     return buildIssueEditorial(selectedIssue);
   }, [selectedIssue]);
 
+  const handleCloseIssue = useCallback(() => setSelectedIssue(null), []);
+
+  useEffect(() => {
+    if (!selectedIssue) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleCloseIssue(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [selectedIssue, handleCloseIssue]);
 
   const triggerModal = () => {
     window.dispatchEvent(new Event("open-newsletter-modal"));
@@ -510,7 +518,7 @@ function NewsletterPageInner() {
         )}
 
         {!loading && error && (
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-700">{error}</div>
+          <div role="alert" className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-700">{error}</div>
         )}
 
         {!loading && !error && !latestIssue && (
@@ -841,23 +849,26 @@ function NewsletterPageInner() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-              onClick={() => setSelectedIssue(null)}
+              onClick={handleCloseIssue}
             />
-            
+
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="newsletter-archive-title"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative flex max-h-full w-full max-w-3xl flex-col rounded-3xl border border-[#e6ddd5] bg-[#fffdfa] shadow-2xl overflow-hidden"
             >
               <div className="flex shrink-0 items-center justify-between border-b border-[#eadfd3] bg-[#fdfaf7] px-6 py-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#8a7868]!">
+                <p id="newsletter-archive-title" className="text-xs font-semibold uppercase tracking-widest text-[#8a7868]!">
                   Issue Archive: {new Date(selectedIssue.issue_date).toLocaleDateString()}
                 </p>
                 <button
-                  aria-label="Close"
+                  aria-label="Close issue archive"
                   className="rounded-full bg-white p-2 text-[#6b5a4e]! shadow-sm ring-1 ring-black/5 transition hover:bg-[#f7f1ea] cursor-pointer"
-                  onClick={() => setSelectedIssue(null)}
+                  onClick={handleCloseIssue}
                 >
                   <X size={16} />
                 </button>
