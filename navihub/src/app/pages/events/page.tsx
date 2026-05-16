@@ -149,6 +149,12 @@ const EventModal = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   const spotsAvailable = event.capacity ? event.capacity - event.spots_taken : null;
   const isFull = spotsAvailable !== null && spotsAvailable <= 0;
 
@@ -330,7 +336,7 @@ const EventModal = ({
             )}
           </div>
 
-          {error && <p className="!text-black text-sm mb-4">{error}</p>}
+          {error && <p role="alert" className="!text-black text-sm mb-4">{error}</p>}
 
           {event.signup_required && (
             <motion.button
@@ -1264,6 +1270,7 @@ function CommunityEventsInner() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => { setActiveCategory("all"); setPage(0); }}
+                    aria-current={activeCategory === "all" ? "true" : undefined}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                       activeCategory === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                     }`}
@@ -1274,6 +1281,7 @@ function CommunityEventsInner() {
                     <button
                       key={cat}
                       onClick={() => { setActiveCategory(cat); setPage(0); }}
+                      aria-current={activeCategory === cat ? "true" : undefined}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                         activeCategory === cat ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                       }`}
@@ -1289,6 +1297,7 @@ function CommunityEventsInner() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => { setActiveBorough("all"); setPage(0); }}
+                    aria-current={activeBorough === "all" ? "true" : undefined}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                       activeBorough === "all" ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                     }`}
@@ -1299,6 +1308,7 @@ function CommunityEventsInner() {
                     <button
                       key={b}
                       onClick={() => { setActiveBorough(b); setPage(0); }}
+                      aria-current={activeBorough === b ? "true" : undefined}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                         activeBorough === b ? "bg-[#997e67] text-white" : "bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10"
                       }`}

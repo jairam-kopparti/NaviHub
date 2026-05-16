@@ -305,7 +305,7 @@
 
 .auth-feature-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.875rem;
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.8);
