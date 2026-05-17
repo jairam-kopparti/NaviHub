@@ -42,6 +42,16 @@ type MetroRouteResponse = {
   message?: string | null;
 };
 
+type MetroRecommendation = {
+  line: string;
+  startStop: StopOption | null;
+  endStop: StopOption | null;
+  resourceId: string | null;
+  resourceTitle: string | null;
+  departAt: string;
+  direction: 'N' | 'S' | '';
+};
+
 const LINE_OPTIONS = [
   'A', 'C', 'E',
   'B', 'D', 'F', 'M',
@@ -76,6 +86,15 @@ const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+};
+
+const formatLocalDatetimeValue = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  const hours = `${date.getHours()}`.padStart(2, '0');
+  const minutes = `${date.getMinutes()}`.padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 const inferLineFromStopId = (stopId: string) => {
@@ -157,7 +176,7 @@ const StopComboBox = ({
 
   return (
     <div className="space-y-2 relative">
-      <label className="text-xs font-semibold text-gray-700">{label}</label>
+      <label className="text-xs font-semibold text-gray-700!">{label}</label>
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -386,47 +405,26 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
             </div>
 
             <div className="flex flex-col gap-4 px-5 py-4 bg-gray-50 overflow-y-auto">
-              <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-semibold text-gray-900">Recommended lines</div>
-                    <div className="text-[10px] text-gray-500">Updated when the widget opens</div>
-                  </div>
-                  <div className="text-[10px] text-gray-500">
-                    {recommendedLines.length > 0 ? `${recommendedLines.length} picks` : 'Loading suggestions'}
-                  </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] uppercase tracking-wide text-gray-500!">Other quick lines</div>
+                  <div className="text-[10px] text-gray-500!">Tap to change line only</div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(recommendedLines.length > 0 ? recommendedLines : LINE_OPTIONS.slice(0, 5)).map((option) => (
+                  {LINE_OPTIONS.map((option) => (
                     <button
                       key={option}
                       onClick={() => setLine(option)}
                       className={`rounded-full px-3 py-1 text-xs font-semibold transition border ${
                         line === option
                           ? 'bg-[#404E3B] text-white border-transparent'
-                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
                       }`}
                     >
                       {option}
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {LINE_OPTIONS.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => setLine(option)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition border ${
-                      line === option
-                        ? 'bg-[#404E3B] text-white border-transparent'
-                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -452,7 +450,7 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-700">Direction</label>
+                  <label className="text-xs font-semibold text-gray-700!">Direction</label>
                   <div className="flex gap-2">
                     {['', 'N', 'S'].map((dir) => (
                       <button
@@ -471,7 +469,7 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
                 </div>
 
                 <div className="space-y-2 sm:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700">Depart at</label>
+                  <label className="text-xs font-semibold text-gray-700!">Depart at</label>
                   <div className="relative">
                     <Timer className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                     <input
@@ -485,7 +483,7 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
               </div>
 
               <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700!">
                   <MapPin className="h-4 w-4 text-[#7B9669]" />
                   Use a community resource to set the nearest start station
                 </div>
@@ -568,37 +566,37 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
                             {arrival.routeId || line}
                           </span>
                           <div>
-                            <div className="text-xs font-semibold text-gray-900">Next train</div>
-                            <div className="text-[11px] text-gray-500">Trip {arrival.tripId}</div>
+                            <div className="text-xs font-semibold text-gray-900!">Next train</div>
+                            <div className="text-[11px] text-gray-500!">Trip {arrival.tripId}</div>
                           </div>
                         </div>
-                        <div className="text-xs font-semibold text-gray-900">
+                        <div className="text-xs font-semibold text-gray-900!">
                           {arrival.minutesAway !== null ? `${arrival.minutesAway} min` : 'N/A'}
                         </div>
                       </div>
 
-                      <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-gray-700">
+                      <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-gray-700!">
                         <div>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-500">Depart</div>
-                          <div className="font-semibold text-gray-900">{formatTime(arrival.startTime)}</div>
+                          <div className="text-[10px] uppercase tracking-wide text-gray-500!">Depart</div>
+                          <div className="font-semibold text-gray-900!">{formatTime(arrival.startTime)}</div>
                         </div>
                         <div>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-500">Arrive</div>
-                          <div className="font-semibold text-gray-900">{formatTime(arrival.endTime)}</div>
+                          <div className="text-[10px] uppercase tracking-wide text-gray-500!">Arrive</div>
+                          <div className="font-semibold text-gray-900!">{formatTime(arrival.endTime)}</div>
                         </div>
                         <div>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-500">Duration</div>
-                          <div className="font-semibold text-gray-900">
+                          <div className="text-[10px] uppercase tracking-wide text-gray-500!">Duration</div>
+                          <div className="font-semibold text-gray-900!">
                             {arrival.durationMinutes !== null ? `${arrival.durationMinutes} min` : 'N/A'}
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[11px] text-gray-500">
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[11px] text-gray-500!">
                         <div className="flex items-center gap-2">
-                          <span>{startStop?.stop_name || startStop?.stop_id || 'Start'}</span>
+                          <span className="text-gray-600!">{startStop?.stop_name || startStop?.stop_id || 'Start'}</span>
                           <ArrowRight className="h-3 w-3" />
-                          <span>{endStop?.stop_name || endStop?.stop_id || 'Destination'}</span>
+                          <span className="text-gray-600!">{endStop?.stop_name || endStop?.stop_id || 'Destination'}</span>
                         </div>
 
                         {mapsUrl && (

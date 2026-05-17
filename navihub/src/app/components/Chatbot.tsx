@@ -99,7 +99,7 @@ function ChatbotOption({ icon: Icon, content, action, setHoverText }: ChatbotOpt
       onMouseEnter={() => setHoverText(content)}
       onMouseLeave={() => setHoverText("Questions? I can help!")}
       onClick={action}
-      className='flex items-center gap-2 text-sm bg-white/20 hover:bg-white/40 text-white transition-colors duration-200 px-4 py-2 rounded-full shadow-sm'
+      className='flex items-center gap-2 text-sm bg-white/20 hover:bg-white/40 text-white transition-colors duration-200 px-4 py-2 rounded-full shadow-sm cursor-pointer'
     >
       <Icon className='w-4 h-4' />
       <span>{content}</span>
@@ -132,7 +132,12 @@ export default function Chatbot() {
   }, []);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        window.dispatchEvent(new Event("close-chatbot"));
+      }
+    };
     if (isOpen) document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen]);
@@ -459,10 +464,6 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
   };
 
   const renderStructuredResponse = (response: NaviHubResponse) => {
-    const widgetMeta = (response.metadata as Record<string, unknown> | undefined)?.widget as
-      | Record<string, unknown>
-      | undefined;
-
     return (
       <div className="space-y-3">
         <div className="space-y-1">
@@ -498,6 +499,11 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
               ),
               strong: ({ children }) => <strong className="font-semibold !text-gray-900">{children}</strong>,
               em: ({ children }) => <em className="italic !text-gray-700">{children}</em>,
+                  code: (props: any) => {
+                    const { inline, children } = props;
+                    if (inline) return <code className="px-1 bg-gray-100 rounded text-xs">{children}</code>;
+                    return null;
+                  },
             }}
           >
             {response.body_markdown}
@@ -510,19 +516,13 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
               <button
                 key={`${action.label}-${index}`}
                 onClick={() => handleAction(action)}
-                className="inline-flex items-center gap-2 rounded-full !bg-[#404E3B] px-4 py-2 text-xs font-semibold !text-white shadow-md hover:!bg-[#7B9669] transition"
+                className="inline-flex items-center gap-2 rounded-full !bg-[#404E3B] px-4 py-2 text-xs font-semibold !text-white shadow-md hover:!bg-[#7B9669] transition cursor-pointer"
               >
                 <span>{action.label}</span>
                 {action.url ? <ExternalLink className="h-3.5 w-3.5" /> : null}
                 {action.command ? <Clipboard className="h-3.5 w-3.5" /> : null}
               </button>
             ))}
-          </div>
-        )}
-
-        {widgetMeta && (
-          <div className="rounded-xl border border-dashed border-gray-300 bg-white/80 px-3 py-2 !text-xs !text-gray-600">
-            Interactive widget requested. The current chat UI does not run widget code yet.
           </div>
         )}
 
@@ -578,7 +578,14 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
                 <BotMessageSquare size={24} />
                 <h2 id="chatbot-title" className="text-xl font-semibold">NaviBot</h2>
               </div>
-              <button onClick={() => setIsOpen(false)} aria-label="Close chatbot" className="text-white/80 hover:text-white transition-colors">
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  window.dispatchEvent(new Event("close-chatbot"));
+                }}
+                aria-label="Close chatbot"
+                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -655,7 +662,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
                   type="submit"
                   disabled={isLoading || !inputValue.trim()}
                   aria-label="Send message"
-                  className="p-3 bg-[#404E3B] text-white rounded-full hover:bg-[#7B9669] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#404E3B]"
+                  className="p-3 bg-[#404E3B] text-white rounded-full hover:bg-[#7B9669] disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#404E3B] cursor-pointer"
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 !text-white !animate-[spin_1.6s_linear_infinite]" />

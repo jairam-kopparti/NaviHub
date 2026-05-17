@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CloudRain, Loader2, RefreshCcw, ThermometerSun, Wind } from 'lucide-react';
+import { CloudRain, Loader2, RefreshCcw, ThermometerSun } from 'lucide-react';
 import { BOROUGH_CENTERS, BoroughName } from '@/src/app/lib/nycBoroughs';
 
 type WeatherDay = {
@@ -11,7 +11,6 @@ type WeatherDay = {
   condition: string | null;
   precipitationMm: number | null;
   precipitationChance: number | null;
-  pollenLevel: string | null;
 };
 
 type WeatherResponse = {
@@ -168,12 +167,11 @@ export default function WeatherWidget({ isOpen, onClose }: WeatherWidgetProps) {
                       variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
                       className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="!text-xs !font-semibold !text-gray-700">{formatDay(day.date)}</span>
-                        <span className="!text-xs !text-gray-500">{day.condition || 'N/A'}</span>
-                      </div>
-                      <div className="mt-3 grid grid-cols-2 gap-3">
-                        <div className="flex items-center gap-2">
+                      <div className="space-y-3">
+                        <div className="!text-xs !font-semibold !text-gray-700">{formatDay(day.date)}</div>
+                        <div className="!text-xs !text-gray-500">{day.condition || 'N/A'}</div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex items-center gap-2">
                           <ThermometerSun className="h-4 w-4 !text-[#7B9669]" />
                           <div>
                             <div className="text-sm font-semibold !text-gray-900">
@@ -182,28 +180,16 @@ export default function WeatherWidget({ isOpen, onClose }: WeatherWidgetProps) {
                             <div className="text-[10px] !text-gray-500">High / Low</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
                           <CloudRain className="h-4 w-4 !text-[#7B9669]" />
                           <div>
                             <div className="text-sm font-semibold !text-gray-900">
                               {day.precipitationMm ?? 0} mm
                             </div>
-                            <div className="text-[10px] !text-gray-500">
-                              Rain chance {day.precipitationChance !== null
-                                ? `${Math.round(day.precipitationChance * 100)}%`
-                                : 'N/A'}
-                            </div>
+                            <div className="text-[10px] !text-gray-500">Rain</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 col-span-2">
-                          <Wind className="h-4 w-4 !text-[#7B9669]" />
-                          <div>
-                            <div className="text-sm font-semibold !text-gray-900">
-                              Pollen: {day.pollenLevel || 'N/A'}
-                            </div>
-                            <div className="text-[10px] !text-gray-500">If available from sources</div>
-                          </div>
-                        </div>
+                      </div>
                       </div>
                     </motion.div>
                   ))}

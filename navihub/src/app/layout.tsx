@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import NavbarWrapper from "./components/NavbarWrapper";
 import FooterWrapper from "./components/FooterWrapper";
-import Chatbot from "./components/Chatbot"
+import ChatbotLoader from "./components/ChatbotLoader"
 import FloatingTools from "./components/FloatingTools";
 import ScrollProgressBar from "./components/ScrollProgressBar";
 import NewsletterSubscriptionModal from "./components/newsletter/NewsletterSubscriptionModal";
@@ -28,7 +28,7 @@ export default function RootLayout({
           {children}
         </main>
         <FloatingTools />
-        <Chatbot />
+        <ChatbotLoader />
         <FooterWrapper />
       </body>
     </html>

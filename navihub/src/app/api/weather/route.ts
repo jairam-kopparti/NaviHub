@@ -14,7 +14,6 @@ type WeatherDay = {
   condition: string | null;
   precipitationMm: number | null;
   precipitationChance: number | null;
-  pollenLevel: string | null;
 };
 
 type WeatherResponse = {
@@ -47,11 +46,7 @@ const getCoordinates = (boroughParam: string | null, latParam: string | null, lo
   return { borough, lat, lon };
 };
 
-const mergeForecasts = (
-  primaryDays: WeatherDay[],
-  secondaryByDate: Map<string, WeatherDay>,
-  meteoPollenByDate: Map<string, string | null>
-) => {
+const mergeForecasts = (primaryDays: WeatherDay[], secondaryByDate: Map<string, WeatherDay>) => {
   return primaryDays.map((day) => {
     const secondary = secondaryByDate.get(day.date);
     return {
@@ -61,7 +56,6 @@ const mergeForecasts = (
       condition: day.condition ?? secondary?.condition ?? null,
       precipitationMm: day.precipitationMm ?? secondary?.precipitationMm ?? null,
       precipitationChance: day.precipitationChance ?? secondary?.precipitationChance ?? null,
-      pollenLevel: meteoPollenByDate.get(day.date) ?? day.pollenLevel ?? secondary?.pollenLevel ?? null,
     };
   });
 };
@@ -79,7 +73,6 @@ const createFallbackDays = () => {
       condition: index === 0 ? "Forecast unavailable" : "No forecast data",
       precipitationMm: null,
       precipitationChance: null,
-      pollenLevel: null,
     } satisfies WeatherDay;
   });
 };
@@ -120,7 +113,7 @@ const pickNestedNumber = (entry: Record<string, unknown>, paths: string[]) => {
 
 const fetchMeteoSource = async (lat: number, lon: number) => {
   if (!METEOSOURCE_API_KEY) {
-    return { days: createFallbackDays(), pollenByDate: new Map<string, string | null>() };
+    return { days: createFallbackDays() };
   }
 
   const url = new URL(METEOSOURCE_API_BASE_URL);
@@ -136,8 +129,6 @@ const fetchMeteoSource = async (lat: number, lon: number) => {
     const res = await fetch(url.toString(), { next: { revalidate: 900 } });
     if (!res.ok) throw new Error("MeteoSource request failed");
     const data = await res.json();
-
-    const pollenByDate = new Map<string, string | null>();
 
     const dailyData = Array.isArray(data?.daily?.data) ? data.daily.data : [];
     const days = dailyData.slice(0, 7).map((entry: Record<string, unknown>) => {
@@ -194,14 +185,13 @@ const fetchMeteoSource = async (lat: number, lon: number) => {
         condition,
         precipitationMm: precipitationMm !== null ? Number(precipitationMm) : null,
         precipitationChance,
-        pollenLevel: pollenByDate.get(date) ?? null,
       } as WeatherDay;
     });
 
-    return { days: days.length > 0 ? days : createFallbackDays(), pollenByDate };
+    return { days: days.length > 0 ? days : createFallbackDays() };
   } catch (error) {
     console.error("MeteoSource error:", error);
-    return { days: createFallbackDays(), pollenByDate: new Map<string, string | null>() };
+    return { days: createFallbackDays() };
   }
 };
 
@@ -222,14 +212,13 @@ export async function GET(request: NextRequest) {
   try {
     const meteoSource = await fetchMeteoSource(coords.lat, coords.lon);
     const secondaryDays = meteoSource.days;
-    const pollenMap = meteoSource.pollenByDate;
 
     const secondaryByDate = new Map<string, WeatherDay>();
     secondaryDays.forEach((day: WeatherDay) => {
       if (day.date) secondaryByDate.set(day.date, day);
     });
 
-    const mergedDays = mergeForecasts(secondaryDays, secondaryByDate, pollenMap);
+    const mergedDays = mergeForecasts(secondaryDays, secondaryByDate);
 
     const response: WeatherResponse = {
       borough: coords.borough,
@@ -239,7 +228,7 @@ export async function GET(request: NextRequest) {
       days: mergedDays,
       sources: {
         openWeather: false,
-        meteoSource: secondaryDays.length > 0 || pollenMap.size > 0,
+        meteoSource: secondaryDays.length > 0,
       },
     };
 
