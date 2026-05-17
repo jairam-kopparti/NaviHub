@@ -724,8 +724,8 @@ function NewsletterPageInner() {
                     <h4 className="text-lg leading-snug font-bold text-[#1f1f1f]! group-hover:text-[#997e67]! transition-colors line-clamp-2">
                       {issue.title}
                     </h4>
-                    <p className="mt-3 text-sm text-[#5e5045]! line-clamp-4 leading-relaxed">
-                      {issue.summary}
+                    <p className="mt-3 text-sm text-[#5e5045]! line-clamp-3 leading-relaxed">
+                      {issue.summary && issue.summary.length > 110 ? `${issue.summary.slice(0, 110).trim()}…` : issue.summary}
                     </p>
                   </div>
                   <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-[#997e67]! group-hover:text-[#846854]!">

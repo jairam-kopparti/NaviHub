@@ -47,6 +47,14 @@ export default function ReferencePage() {
               <Link href="/pages/about" className="references-link">About Us</Link>
             </li>
             <li>
+              <strong>News:</strong>{" "}
+              <Link href="/pages/news" className="references-link">News</Link>
+            </li>
+            <li>
+              <strong>Newsletter:</strong>{" "}
+              <Link href="/pages/newsletter" className="references-link">Newsletter</Link>
+            </li>
+            <li>
               <strong>Sign In:</strong>{" "}
               <Link href="/pages/signin" className="references-link">Sign In</Link>
             </li>
@@ -83,7 +91,7 @@ export default function ReferencePage() {
                   <a href="https://nextjs.org/" target="_blank" rel="noopener noreferrer" className="references-link">
                     Next.js
                   </a>{" "}
-                  - React framework for production (v16.1.6)
+                  - React framework for production (v16.2.6)
                 </li>
                 <li>
                   <a href="https://react.dev/" target="_blank" rel="noopener noreferrer" className="references-link">
@@ -108,7 +116,7 @@ export default function ReferencePage() {
                   <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer" className="references-link">
                     Tailwind CSS
                   </a>{" "}
-                  - Utility-first CSS framework (v4.1.18)
+                  - Utility-first CSS framework (v4.3.0)
                 </li>
                 <li>
                   <a href="https://postcss.org/" target="_blank" rel="noopener noreferrer" className="references-link">
@@ -127,32 +135,62 @@ export default function ReferencePage() {
                   <a href="https://www.framer.com/motion/" target="_blank" rel="noopener noreferrer" className="references-link">
                     Framer Motion
                   </a>{" "}
-                  - Production-ready motion library for React (v12.29.0)
+                  - Production-ready motion library for React (v12.38.0)
                 </li>
                 <li>
                   <a href="https://gsap.com/" target="_blank" rel="noopener noreferrer" className="references-link">
                     GSAP
                   </a>{" "}
-                  - Professional-grade animation library (v3.14.2)
+                  - Professional-grade animation library (v3.15.0)
                 </li>
               </ul>
             </div>
 
-            {/* Backend & Database */}
+            {/* APIs & Data Sources */}
             <div className="references-card">
-              <h3>Backend & Database</h3>
+              <h3>APIs & Data Sources</h3>
               <ul className="references-list">
                 <li>
-                  <a href="https://supabase.com/" target="_blank" rel="noopener noreferrer" className="references-link">
-                    Supabase
+                  <a href="https://developers.resend.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Resend API
                   </a>{" "}
-                  - Open source Firebase alternative for database and authentication (v2.89.0)
+                  - Email delivery API used for transactional messages
                 </li>
                 <li>
-                  <a href="https://resend.com/" target="_blank" rel="noopener noreferrer" className="references-link">
-                    Resend
+                  <a href="https://docs.mapbox.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Mapbox Services
                   </a>{" "}
-                  - Email API for developers (v6.9.2)
+                  - Geocoding and map tiles for location features
+                </li>
+                <li>
+                  <a href="https://gnews.io/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    GNews
+                  </a>{" "}
+                  - News search API used for aggregated headlines
+                </li>
+                <li>
+                  <a href="https://developers.generativeai.google/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Google Generative AI (Gemini)
+                  </a>{" "}
+                  - Large multimodal model used by the NaviBot assistant
+                </li>
+                <li>
+                  <a href="https://openweathermap.org/api" target="_blank" rel="noopener noreferrer" className="references-link">
+                    OpenWeather
+                  </a>{" "}
+                  - Global weather data API
+                </li>
+                <li>
+                  <a href="https://meteosource.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    MeteoSource
+                  </a>{" "}
+                  - Additional weather and forecast data provider
+                </li>
+                <li>
+                  <a href="https://new.mta.info/developers" target="_blank" rel="noopener noreferrer" className="references-link">
+                    MTA / GTFS
+                  </a>{" "}
+                  - Transit realtime feeds and GTFS data used for arrivals and planning
                 </li>
               </ul>
             </div>
@@ -171,10 +209,16 @@ export default function ReferencePage() {
                   - SDK for interacting with Gemini AI models (v0.24.1)
                 </li>
                 <li>
+                  <a href="https://www.npmjs.com/package/@google/genai" target="_blank" rel="noopener noreferrer" className="references-link">
+                    @google/genai
+                  </a>{" "}
+                  - Additional Google GenAI bindings (v2.0.1)
+                </li>
+                <li>
                   <a href="https://www.npmjs.com/package/dotenv" target="_blank" rel="noopener noreferrer" className="references-link">
                     Dotenv
                   </a>{" "}
-                  - Zero-dependency module that loads environment variables (used for secure AI key management) (v17.3.1)
+                  - Zero-dependency module that loads environment variables (v17.4.2)
                 </li>
               </ul>
             </div>
@@ -187,13 +231,37 @@ export default function ReferencePage() {
                   <a href="https://docs.mapbox.com/mapbox-gl-js/api/" target="_blank" rel="noopener noreferrer" className="references-link">
                     Mapbox GL JS
                   </a>{" "}
-                  - Interactive, customizable vector maps (v3.18.1)
+                  - Interactive, customizable vector maps (v3.23.1)
                 </li>
                 <li>
                   <a href="https://lucide.dev/" target="_blank" rel="noopener noreferrer" className="references-link">
                     Lucide React
                   </a>{" "}
-                  - Beautiful & consistent icon toolkit (v0.562.0)
+                  - Beautiful & consistent icon toolkit (v1.14.0)
+                </li>
+                <li>
+                  <a href="https://www.npmjs.com/package/react-markdown" target="_blank" rel="noopener noreferrer" className="references-link">
+                    react-markdown
+                  </a>{" "}
+                  - Markdown renderer for React (v9.0.3)
+                </li>
+                <li>
+                  <a href="https://www.npmjs.com/package/remark-gfm" target="_blank" rel="noopener noreferrer" className="references-link">
+                    remark-gfm
+                  </a>{" "}
+                  - GitHub-flavored markdown plugin (v4.0.1)
+                </li>
+                <li>
+                  <a href="https://www.npmjs.com/package/gtfs-realtime-bindings" target="_blank" rel="noopener noreferrer" className="references-link">
+                    gtfs-realtime-bindings
+                  </a>{" "}
+                  - MTA GTFS realtime protobuf bindings (v1.1.1)
+                </li>
+                <li>
+                  <a href="https://www.npmjs.com/package/sharp" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Sharp
+                  </a>{" "}
+                  - High performance Node.js image processing (v0.34.5)
                 </li>
                 <li>
                   <a href="https://www.npmjs.com/package/react-intersection-observer" target="_blank" rel="noopener noreferrer" className="references-link">
@@ -201,12 +269,7 @@ export default function ReferencePage() {
                   </a>{" "}
                   - React implementation of Intersection Observer API (v10.0.0)
                 </li>
-                <li>
-                  <a href="https://sharp.pixelplumbing.com/" target="_blank" rel="noopener noreferrer" className="references-link">
-                    Sharp
-                  </a>{" "}
-                  - High performance Node.js image processing
-                </li>
+                
               </ul>
             </div>
 
@@ -225,6 +288,25 @@ export default function ReferencePage() {
                     ESLint
                   </a>{" "}
                   - Code linting and quality tool (v9)
+                </li>
+              </ul>
+            </div>
+
+            {/* Backend & Database */}
+            <div className="references-card">
+              <h3>Backend & Database</h3>
+              <ul className="references-list">
+                <li>
+                  <a href="https://supabase.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Supabase
+                  </a>{" "}
+                  - Open source Firebase alternative for database and authentication (v2.105.4)
+                </li>
+                <li>
+                  <a href="https://resend.com/" target="_blank" rel="noopener noreferrer" className="references-link">
+                    Resend
+                  </a>{" "}
+                  - Email API for developers (v6.12.3)
                 </li>
               </ul>
             </div>

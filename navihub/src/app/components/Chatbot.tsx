@@ -3,10 +3,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from "../lib/supabaseClient";
+import { useUser } from '../lib/useUser'
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   BotMessageSquare,
+  CloudSun,
+  Train,
   Newspaper,
   CircleQuestionMark,
   LucideProps,
@@ -55,6 +58,506 @@ type NaviHubResponse = {
 };
 
 type MessageContent = string | NaviHubResponse;
+
+type ChatbotIntent = "weather" | "metro" | "event_weather" | "event_metro" | null;
+
+type WeatherApiResponse = {
+  borough: string;
+  latitude: number;
+  longitude: number;
+  updatedAt: string;
+  days: Array<{
+    date: string;
+    tempMaxF: number | null;
+    tempMinF: number | null;
+    condition: string | null;
+    precipitationMm: number | null;
+    precipitationChance: number | null;
+  }>;
+};
+
+type MetroStop = {
+  stop_id: string;
+  stop_name: string;
+  stop_lat: number;
+  stop_lon: number;
+};
+
+type MetroArrival = {
+  tripId: string;
+  routeId: string | null;
+  startStopId: string;
+  endStopId: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  minutesAway: number | null;
+  durationMinutes: number | null;
+  status: string;
+};
+
+type MetroApiResponse = {
+  line: string;
+  startStopId: string;
+  endStopId: string | null;
+  direction: string | null;
+  arrivals: MetroArrival[];
+  updatedAt: string;
+  message?: string | null;
+};
+
+type EventRecord = {
+  id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  start_time: string;
+  end_time: string;
+  location_name: string | null;
+  address: string | null;
+  is_virtual: boolean;
+  category?: string | null;
+};
+
+type GeocodeResult = {
+  latitude: number;
+  longitude: number;
+  placeName: string;
+};
+
+type SpecializedContext = {
+  intent: ChatbotIntent;
+  prompt: string;
+  actionHints: NaviBotAction[];
+};
+
+const MTA_LINE_OPTIONS = [
+  'A', 'C', 'E',
+  'B', 'D', 'F', 'M',
+  'G',
+  'J', 'Z',
+  'L',
+  'N', 'Q', 'R', 'W',
+  '1', '2', '3',
+  '4', '5', '6',
+  '7',
+  'S',
+  'SI',
+];
+
+const inferLineFromStopId = (stopId: string) => {
+  const normalized = stopId.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (normalized.startsWith('SI')) return 'SI';
+  for (const option of MTA_LINE_OPTIONS) {
+    if (normalized.startsWith(option)) return option;
+  }
+  if (/^[1234567]/.test(normalized)) return normalized[0];
+  return null;
+};
+
+const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const splitKeywords = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length >= 3);
+
+const geocodePlace = async (query: string): Promise<GeocodeResult | null> => {
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const trimmed = query.trim();
+  if (!token || !trimmed) return null;
+
+  const res = await fetch(
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(trimmed)}.json?access_token=${token}&limit=1`
+  );
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const feature = data?.features?.[0];
+  if (!feature?.center || feature.center.length < 2) return null;
+
+  return {
+    longitude: Number(feature.center[0]),
+    latitude: Number(feature.center[1]),
+    placeName: feature.place_name || trimmed,
+  };
+};
+
+const fetchUpcomingEventsForChatbot = async () => {
+  const { data } = await supabase
+    .from("events")
+    .select("id, title, description, event_date, start_time, end_time, location_name, address, is_virtual, category")
+    .eq("status", "approved")
+    .order("event_date", { ascending: true });
+
+  return (data || []) as EventRecord[];
+};
+
+const findRelevantEvent = (question: string, events: EventRecord[]) => {
+  const today = new Date();
+  const upcoming = events.filter((event) => !event.is_virtual && new Date(event.event_date) >= today);
+  if (upcoming.length === 0) return null;
+
+  const questionTokens = splitKeywords(question);
+
+  const scored = upcoming
+    .map((event) => {
+      const haystack = [event.title, event.description, event.location_name, event.address]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      let score = 0;
+
+      questionTokens.forEach((token) => {
+        if (haystack.includes(token)) score += 1;
+      });
+
+      if (question.toLowerCase().includes(event.title.toLowerCase())) score += 5;
+      if (question.toLowerCase().includes("this event")) score += 1;
+      if (question.toLowerCase().includes("that event")) score += 1;
+
+      return { event, score };
+    })
+    .sort((left, right) => right.score - left.score);
+
+  return scored[0]?.event || upcoming[0];
+};
+
+const buildWeatherContext = async (question: string): Promise<SpecializedContext> => {
+  try {
+    const location = await getCurrentPosition();
+    const params = new URLSearchParams({ lat: String(location.latitude), lon: String(location.longitude) });
+    const res = await fetch(`/api/weather?${params.toString()}`);
+    if (!res.ok) throw new Error("Weather request failed");
+    const data = (await res.json()) as WeatherApiResponse;
+
+    return {
+      intent: "weather",
+      prompt: JSON.stringify({
+        kind: "weather",
+        question,
+        instructions: "Answer the weather question using the supplied forecast data. If relevant, mention that the user can open the weather widget. Do not add resource or events page links.",
+        allowed_actions: [{ label: "Open Weather Widget", command: "open-weather-widget" }],
+        location,
+        forecast: {
+          borough: data.borough,
+          updatedAt: data.updatedAt,
+          days: Array.isArray(data.days)
+            ? data.days.slice(0, 5).map((day) => ({
+                date: day.date,
+                condition: day.condition,
+                tempMaxF: day.tempMaxF,
+                tempMinF: day.tempMinF,
+                precipitationMm: day.precipitationMm,
+              }))
+            : [],
+        },
+      }),
+      actionHints: [{ label: "Open Weather Widget", command: "open-weather-widget" }],
+    };
+  } catch {
+    const res = await fetch('/api/weather?borough=Manhattan');
+    if (!res.ok) throw new Error('Weather request failed');
+    const data = (await res.json()) as WeatherApiResponse;
+
+    return {
+      intent: "weather",
+      prompt: JSON.stringify({
+        kind: "weather",
+        question,
+        instructions: "Answer the weather question using the supplied forecast data. If relevant, mention that the user can open the weather widget. Do not add resource or events page links.",
+        allowed_actions: [{ label: "Open Weather Widget", command: "open-weather-widget" }],
+        location: { borough: 'Manhattan' },
+        forecast: {
+          borough: data.borough,
+          updatedAt: data.updatedAt,
+          days: Array.isArray(data.days)
+            ? data.days.slice(0, 5).map((day) => ({
+                date: day.date,
+                condition: day.condition,
+                tempMaxF: day.tempMaxF,
+                tempMinF: day.tempMinF,
+                precipitationMm: day.precipitationMm,
+              }))
+            : [],
+        },
+      }),
+      actionHints: [{ label: "Open Weather Widget", command: "open-weather-widget" }],
+    };
+  }
+};
+
+const buildMetroContext = async (question: string): Promise<SpecializedContext> => {
+  const location = await getCurrentPosition();
+  const stopsRes = await fetch('/api/metro/stops?all=1');
+  if (!stopsRes.ok) throw new Error('Stops request failed');
+
+  const stopsData = await stopsRes.json();
+  const stops = (Array.isArray(stopsData.stops) ? stopsData.stops : []) as MetroStop[];
+  if (stops.length === 0) {
+    return {
+      intent: "metro",
+      prompt: JSON.stringify({ kind: 'metro', question, location, recommendedStops: [], arrivals: [] }),
+      actionHints: [{ label: "Open Metro Planner", command: "open-metro-widget" }],
+    };
+  }
+
+  const nearestStops = [...stops]
+    .map((stop) => ({
+      ...stop,
+      distanceKm: haversineDistance(location.latitude, location.longitude, stop.stop_lat, stop.stop_lon),
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, 3);
+
+  const bestStop = nearestStops[0];
+  let arrivals: MetroApiResponse['arrivals'] = [];
+  let routeSummary: MetroApiResponse | null = null;
+
+  if (bestStop) {
+    const inferredLine = inferLineFromStopId(bestStop.stop_id);
+    if (inferredLine) {
+      const params = new URLSearchParams({ line: inferredLine, startStopId: bestStop.stop_id });
+      const metroRes = await fetch(`/api/metro?${params.toString()}`);
+      if (metroRes.ok) {
+        routeSummary = (await metroRes.json()) as MetroApiResponse;
+        arrivals = Array.isArray(routeSummary.arrivals) ? routeSummary.arrivals.slice(0, 4) : [];
+      }
+    }
+  }
+
+  return {
+    intent: "metro",
+    prompt: JSON.stringify({
+      kind: 'metro',
+      question,
+        instructions: "Answer the metro question using the supplied station and arrival data. If relevant, mention that the user can open the metro planner. Do not add resource or events page links.",
+        allowed_actions: [{ label: "Open Metro Planner", command: "open-metro-widget" }],
+      location,
+      recommendedStops: nearestStops.map(({ distanceKm, ...stop }) => ({
+        ...stop,
+        distanceMiles: Number((distanceKm * 0.621371).toFixed(2)),
+        inferredLine: inferLineFromStopId(stop.stop_id),
+      })),
+      routeSummary: routeSummary
+        ? {
+            line: routeSummary.line,
+            startStopId: routeSummary.startStopId,
+            updatedAt: routeSummary.updatedAt,
+            message: routeSummary.message || null,
+          }
+        : null,
+      arrivals: arrivals.map((arrival) => ({
+        routeId: arrival.routeId,
+        startStopId: arrival.startStopId,
+        minutesAway: arrival.minutesAway,
+        startTime: arrival.startTime,
+        status: arrival.status,
+      })),
+    }),
+    actionHints: [{ label: "Open Metro Planner", command: "open-metro-widget" }],
+  };
+};
+
+const buildEventWeatherContext = async (question: string): Promise<SpecializedContext> => {
+  const events = await fetchUpcomingEventsForChatbot();
+  const event = findRelevantEvent(question, events);
+
+  if (!event) {
+    return buildWeatherContext(question);
+  }
+
+  const locationQuery = event.address || event.location_name || event.title;
+  const geocoded = await geocodePlace(locationQuery);
+  const forecast = geocoded
+    ? await fetch(`/api/weather?lat=${geocoded.latitude}&lon=${geocoded.longitude}`).then(async (res) => {
+        if (!res.ok) return null;
+        return (await res.json()) as WeatherApiResponse;
+      })
+    : null;
+
+  return {
+    intent: "event_weather",
+    prompt: JSON.stringify({
+      kind: 'event_weather',
+      question,
+    instructions: "Answer about weather for the selected in-person event using the event and forecast data. If relevant, mention the weather widget. Do not add resource or events page links.",
+    allowed_actions: [{ label: "Open Weather Widget", command: "open-weather-widget" }],
+      event: {
+        id: event.id,
+        title: event.title,
+        event_date: event.event_date,
+        start_time: event.start_time,
+        location_name: event.location_name,
+        address: event.address,
+        is_virtual: event.is_virtual,
+      },
+      venue: geocoded,
+      forecast: forecast
+        ? {
+            borough: forecast.borough,
+            updatedAt: forecast.updatedAt,
+            days: forecast.days.slice(0, 5).map((day) => ({
+              date: day.date,
+              condition: day.condition,
+              tempMaxF: day.tempMaxF,
+              tempMinF: day.tempMinF,
+              precipitationMm: day.precipitationMm,
+            })),
+          }
+        : null,
+    }),
+    actionHints: [{ label: "Open Weather Widget", command: "open-weather-widget" }],
+  };
+};
+
+const buildEventMetroContext = async (question: string): Promise<SpecializedContext> => {
+  const events = await fetchUpcomingEventsForChatbot();
+  const event = findRelevantEvent(question, events);
+
+  if (!event) {
+    return buildMetroContext(question);
+  }
+
+  const locationQuery = event.address || event.location_name || event.title;
+  const geocoded = await geocodePlace(locationQuery);
+  const stopsRes = await fetch('/api/metro/stops?all=1');
+  if (!stopsRes.ok) throw new Error('Stops request failed');
+
+  const stopsData = await stopsRes.json();
+  const stops = (Array.isArray(stopsData.stops) ? stopsData.stops : []) as MetroStop[];
+  const userLocation = await getCurrentPosition().catch(() => null);
+
+  const eventNearestStops = geocoded
+    ? [...stops]
+        .map((stop) => ({
+          ...stop,
+          distanceKm: haversineDistance(geocoded.latitude, geocoded.longitude, stop.stop_lat, stop.stop_lon),
+        }))
+        .sort((a, b) => a.distanceKm - b.distanceKm)
+        .slice(0, 3)
+    : [];
+
+  const userNearestStops = userLocation
+    ? [...stops]
+        .map((stop) => ({
+          ...stop,
+          distanceKm: haversineDistance(userLocation.latitude, userLocation.longitude, stop.stop_lat, stop.stop_lon),
+        }))
+        .sort((a, b) => a.distanceKm - b.distanceKm)
+        .slice(0, 1)
+    : [];
+
+  let routeSummary: MetroApiResponse | null = null;
+  if (userNearestStops[0] && eventNearestStops[0]) {
+    const startStop = userNearestStops[0];
+    const endStop = eventNearestStops[0];
+    const inferredLine = inferLineFromStopId(startStop.stop_id);
+
+    if (inferredLine) {
+      const params = new URLSearchParams({
+        line: inferredLine,
+        startStopId: startStop.stop_id,
+        endStopId: endStop.stop_id,
+      });
+      const metroRes = await fetch(`/api/metro?${params.toString()}`);
+      if (metroRes.ok) {
+        routeSummary = (await metroRes.json()) as MetroApiResponse;
+      }
+    }
+  }
+
+  return {
+    intent: "event_metro",
+    prompt: JSON.stringify({
+      kind: 'event_metro',
+      question,
+    instructions: "Answer about metro transit for the selected in-person event using the event and station data. If relevant, mention the metro planner. Do not add resource or events page links.",
+    allowed_actions: [{ label: "Open Metro Planner", command: "open-metro-widget" }],
+      event: {
+        id: event.id,
+        title: event.title,
+        event_date: event.event_date,
+        start_time: event.start_time,
+        location_name: event.location_name,
+        address: event.address,
+        is_virtual: event.is_virtual,
+      },
+      venue: geocoded,
+      userLocation,
+      recommendedStops: eventNearestStops.map(({ distanceKm, ...stop }) => ({
+        ...stop,
+        distanceMiles: Number((distanceKm * 0.621371).toFixed(2)),
+        inferredLine: inferLineFromStopId(stop.stop_id),
+      })),
+      routeSummary: routeSummary
+        ? {
+            line: routeSummary.line,
+            startStopId: routeSummary.startStopId,
+            endStopId: routeSummary.endStopId,
+            updatedAt: routeSummary.updatedAt,
+            message: routeSummary.message || null,
+          }
+        : null,
+    }),
+    actionHints: [{ label: "Open Metro Planner", command: "open-metro-widget" }],
+  };
+};
+
+const getCurrentPosition = () =>
+  new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation not supported'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+      reject,
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  });
+
+const buildSpecializedContext = async (question: string): Promise<SpecializedContext | null> => {
+  const normalized = question.toLowerCase();
+  const weatherKeywords = ['weather', 'forecast', 'temperature', 'rain', 'umbrella', 'hot', 'cold'];
+  const metroKeywords = ['metro', 'subway', 'train', 'station', 'stop', 'arrivals', 'commute', 'transit', 'route'];
+  const eventKeywords = ['event', 'events', 'venue', 'location', 'where', 'there', 'this event', 'that event', 'concert', 'festival', 'workshop', 'rsvp'];
+
+  const isEventRelated = eventKeywords.some((keyword) => normalized.includes(keyword));
+
+  if (weatherKeywords.some((keyword) => normalized.includes(keyword)) && isEventRelated) {
+    return buildEventWeatherContext(question);
+  }
+
+  if (metroKeywords.some((keyword) => normalized.includes(keyword)) && isEventRelated) {
+    return buildEventMetroContext(question);
+  }
+
+  if (weatherKeywords.some((keyword) => normalized.includes(keyword))) {
+    return buildWeatherContext(question);
+  }
+
+  if (metroKeywords.some((keyword) => normalized.includes(keyword))) {
+    return buildMetroContext(question);
+  }
+
+  return null;
+};
 
 const isNaviHubResponse = (value: unknown): value is NaviHubResponse => {
   if (!value || typeof value !== "object") return false;
@@ -116,6 +619,7 @@ export default function Chatbot() {
   const [inputValue, setInputValue] = useState("");
   const [hoverText, setHoverText] = useState("Questions? I can help!");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -169,6 +673,31 @@ export default function Chatbot() {
     }
   }, []);
 
+  const fetchUserContext = useCallback(async (userId: string) => {
+    try {
+      // Get the current session access token from the client-side supabase instance
+      const sessionRes = await supabase.auth.getSession();
+      // @ts-ignore
+      const token = sessionRes?.data?.session?.access_token;
+      if (!token) return { signedUpEvents: [], resourceSubmissions: [], posts: [] };
+
+      const res = await fetch('/api/user/context', {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      });
+
+      if (!res.ok) return { signedUpEvents: [], resourceSubmissions: [], posts: [] };
+      const payload = await res.json();
+      return {
+        signedUpEvents: payload.signedUpEvents ?? [],
+        resourceSubmissions: payload.resourceSubmissions ?? [],
+        posts: payload.posts ?? [],
+      };
+    } catch (err) {
+      return { signedUpEvents: [], resourceSubmissions: [], posts: [] };
+    }
+  }, []);
+
   const fetchEvents = useCallback(async () => {
     const { data } = await supabase
       .from("events")
@@ -200,25 +729,64 @@ export default function Chatbot() {
       }
 
       let toSend = hiddenPrompt || displayText;
+      let specializedKind: ChatbotIntent = null;
+      let specializedActionHints: NaviBotAction[] | null = null;
       if (openEnded) {
-        const [articles, resources, events] = await Promise.all([
-          fetchArticles(),
-          fetchResources(),
-          fetchEvents()
-        ]);
+        const specializedContext = await buildSpecializedContext(displayText);
+        if (specializedContext) {
+          specializedKind = specializedContext.intent;
+          toSend = specializedContext.prompt;
+          specializedActionHints = specializedContext.actionHints;
+        } else {
+          const [articles, resources, events] = await Promise.all([
+            fetchArticles(),
+            fetchResources(),
+            fetchEvents()
+          ]);
 
-        const safeStringify = (arr: unknown, limit: number) => {
-          if (!Array.isArray(arr)) return "None";
-          // Only take top items to save tokens & prevent timeouts
-          return JSON.stringify(arr.slice(0, limit)).substring(0, 2000);
-        };
+          const safeStringify = (arr: unknown, limit: number) => {
+            if (!Array.isArray(arr)) return "None";
+            // Only take top items to save tokens & prevent timeouts
+            return JSON.stringify(arr.slice(0, limit)).substring(0, 2000);
+          };
 
-        toSend = `You are a helpful community hub assistant for NYC. 
+          toSend = `You are a helpful community hub assistant for NYC. 
 Resources available: ${safeStringify(resources, 5)}. 
 Recent News: ${safeStringify(articles, 3)}. 
 Events: ${safeStringify(events, 3)}. 
 User's question: ${displayText}. 
 Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. Be extremely concise (max 2-3 sentences).`;
+        }
+      }
+
+      // If the user is signed in, attach a brief sanitized snapshot of their personal data
+      if (user && user.id) {
+        try {
+          const uctx = await fetchUserContext(user.id);
+          // If the outgoing payload is JSON text (specialized contexts), merge userContext into it.
+          try {
+            const parsed = JSON.parse(typeof toSend === 'string' ? toSend : String(toSend));
+            if (parsed && typeof parsed === 'object') {
+              parsed.userContext = {
+                signedUpEvents: uctx.signedUpEvents?.slice(0, 5) ?? [],
+                resourceSubmissions: uctx.resourceSubmissions?.slice(0, 10) ?? [],
+                posts: uctx.posts?.slice(0, 10) ?? [],
+              };
+              toSend = JSON.stringify(parsed);
+            } else {
+              toSend = `${toSend}\nUserContext: ${JSON.stringify(uctx)}`;
+            }
+          } catch (e) {
+            // Not JSON, append as short string
+            toSend = `${toSend}\nUserContext: ${JSON.stringify({
+              signedUpEvents: uctx.signedUpEvents?.slice(0, 5) ?? [],
+              resourceSubmissions: uctx.resourceSubmissions?.slice(0, 10) ?? [],
+              posts: uctx.posts?.slice(0, 10) ?? [],
+            })}`;
+          }
+        } catch (err) {
+          // silently continue without user context
+        }
       }
 
       const chatRes = await fetch(`/api/chatbot`, {
@@ -227,7 +795,43 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
         body: JSON.stringify(toSend)
       });
       const chatData = await chatRes.json();
-      addMessage(parseNaviBotResponse(chatData), From.Chat);
+      const parsed = parseNaviBotResponse(chatData);
+      const fallbackTitle =
+        specializedKind === "weather"
+          ? "Weather Update"
+          : specializedKind === "event_weather"
+            ? "Event Weather"
+            : specializedKind === "metro"
+              ? "Metro Update"
+              : specializedKind === "event_metro"
+                ? "Event Transit"
+                : "NaviBot";
+
+      if (parsed && typeof parsed === "object" && isNaviHubResponse(parsed)) {
+        const actions = parsed.actions && parsed.actions.length > 0
+          ? parsed.actions
+          : specializedActionHints && specializedActionHints.length > 0
+            ? specializedActionHints
+            : undefined;
+
+        addMessage(
+          actions ? { ...parsed, actions } : parsed,
+          From.Chat
+        );
+      } else if (specializedActionHints && specializedActionHints.length > 0) {
+        addMessage(
+          {
+            format_version: "1.0",
+            title: fallbackTitle,
+            summary: displayText,
+            body_markdown: typeof parsed === "string" ? parsed : JSON.stringify(parsed),
+            actions: specializedActionHints,
+          },
+          From.Chat
+        );
+      } else {
+        addMessage(parsed, From.Chat);
+      }
     } catch (error) {
       console.error(error);
       addMessage("Sorry, I encountered an error fulfilling your request.", From.Chat);
@@ -458,6 +1062,16 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
       return;
     }
 
+    if (action.command === "open-weather-widget") {
+      window.dispatchEvent(new Event("open-weather-widget"));
+      return;
+    }
+
+    if (action.command === "open-metro-widget") {
+      window.dispatchEvent(new Event("open-metro-widget"));
+      return;
+    }
+
     if (action.command && navigator?.clipboard) {
       navigator.clipboard.writeText(action.command).catch(() => undefined);
     }
@@ -520,7 +1134,9 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
               >
                 <span>{action.label}</span>
                 {action.url ? <ExternalLink className="h-3.5 w-3.5" /> : null}
-                {action.command ? <Clipboard className="h-3.5 w-3.5" /> : null}
+                {action.command === "open-weather-widget" ? <CloudSun className="h-3.5 w-3.5" /> : null}
+                {action.command === "open-metro-widget" ? <Train className="h-3.5 w-3.5" /> : null}
+                {action.command && action.command !== "open-weather-widget" && action.command !== "open-metro-widget" ? <Clipboard className="h-3.5 w-3.5" /> : null}
               </button>
             ))}
           </div>

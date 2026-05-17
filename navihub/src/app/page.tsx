@@ -767,7 +767,7 @@ export default function Home() {
         <div className="w-full overflow-hidden mb-12">
           <div 
             className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent"
-            style={{ animationDuration: "180s" }}
+            style={{ animationDuration: "70s" }}
           >
             {Array.from({ length: 20 }).map((_, i) => (
               <span key={i} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>

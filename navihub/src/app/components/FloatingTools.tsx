@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CloudSun, Train } from 'lucide-react';
 import WeatherWidget from './widgets/WeatherWidget';
@@ -9,6 +10,19 @@ type Panel = 'weather' | 'metro' | null;
 
 export default function FloatingTools() {
   const [openPanel, setOpenPanel] = useState<Panel>(null);
+
+  useEffect(() => {
+    const openWeather = () => setOpenPanel('weather');
+    const openMetro = () => setOpenPanel('metro');
+
+    window.addEventListener('open-weather-widget', openWeather);
+    window.addEventListener('open-metro-widget', openMetro);
+
+    return () => {
+      window.removeEventListener('open-weather-widget', openWeather);
+      window.removeEventListener('open-metro-widget', openMetro);
+    };
+  }, []);
 
   const togglePanel = (panel: Panel) => {
     setOpenPanel((current) => (current === panel ? null : panel));
