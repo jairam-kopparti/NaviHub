@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BOROUGH_CENTERS, BoroughName } from "@/src/app/lib/nycBoroughs";
 
-const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || "";
 const METEOSOURCE_API_KEY = process.env.METEOSOURCE_API_KEY || "";
 const METEOSOURCE_API_BASE_URL =
   process.env.METEOSOURCE_API_BASE_URL || "https://www.meteosource.com/api/v1/free/point";
@@ -48,68 +47,162 @@ const getCoordinates = (boroughParam: string | null, latParam: string | null, lo
   return { borough, lat, lon };
 };
 
-const mergeForecasts = (openWeatherDays: WeatherDay[], meteoPollenByDate: Map<string, string | null>) => {
-  return openWeatherDays.map((day) => ({
-    ...day,
-    pollenLevel: meteoPollenByDate.get(day.date) ?? day.pollenLevel ?? null,
-  }));
+const mergeForecasts = (
+  primaryDays: WeatherDay[],
+  secondaryByDate: Map<string, WeatherDay>,
+  meteoPollenByDate: Map<string, string | null>
+) => {
+  return primaryDays.map((day) => {
+    const secondary = secondaryByDate.get(day.date);
+    return {
+      ...day,
+      tempMaxF: day.tempMaxF ?? secondary?.tempMaxF ?? null,
+      tempMinF: day.tempMinF ?? secondary?.tempMinF ?? null,
+      condition: day.condition ?? secondary?.condition ?? null,
+      precipitationMm: day.precipitationMm ?? secondary?.precipitationMm ?? null,
+      precipitationChance: day.precipitationChance ?? secondary?.precipitationChance ?? null,
+      pollenLevel: meteoPollenByDate.get(day.date) ?? day.pollenLevel ?? secondary?.pollenLevel ?? null,
+    };
+  });
 };
 
-const fetchOpenWeather = async (lat: number, lon: number) => {
-  if (!OPENWEATHER_API_KEY) return [] as WeatherDay[];
+const createFallbackDays = () => {
+  const today = new Date();
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + index);
 
-  const url = new URL("https://api.openweathermap.org/data/3.0/onecall");
-  url.searchParams.set("lat", lat.toString());
-  url.searchParams.set("lon", lon.toString());
-  url.searchParams.set("units", "imperial");
-  url.searchParams.set("exclude", "minutely,hourly,alerts");
-  url.searchParams.set("appid", OPENWEATHER_API_KEY);
-
-  const res = await fetch(url.toString(), { next: { revalidate: 600 } });
-  if (!res.ok) throw new Error("OpenWeather request failed");
-  const data = await res.json();
-
-  const daily = Array.isArray(data?.daily) ? data.daily : [];
-  return daily.slice(0, 7).map((day: any) => ({
-    date: day?.dt ? new Date(day.dt * 1000).toISOString().slice(0, 10) : "",
-    tempMaxF: Number.isFinite(day?.temp?.max) ? Math.round(day.temp.max) : null,
-    tempMinF: Number.isFinite(day?.temp?.min) ? Math.round(day.temp.min) : null,
-    condition: day?.weather?.[0]?.description || day?.weather?.[0]?.main || null,
-    precipitationMm: Number.isFinite(day?.rain)
-      ? Number(day.rain)
-      : Number.isFinite(day?.snow)
-      ? Number(day.snow)
-      : 0,
-    precipitationChance: Number.isFinite(day?.pop) ? Number(day.pop) : null,
-    pollenLevel: null,
-  }));
+    return {
+      date: date.toISOString().slice(0, 10),
+      tempMaxF: null,
+      tempMinF: null,
+      condition: index === 0 ? "Forecast unavailable" : "No forecast data",
+      precipitationMm: null,
+      precipitationChance: null,
+      pollenLevel: null,
+    } satisfies WeatherDay;
+  });
 };
 
-const fetchMeteoSourcePollen = async (lat: number, lon: number) => {
-  if (!METEOSOURCE_API_KEY) return new Map<string, string | null>();
+const toNumber = (value: unknown) => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue : null;
+};
+
+const pickNumber = (entry: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const numericValue = toNumber(entry[key]);
+    if (numericValue !== null) return numericValue;
+  }
+  return null;
+};
+
+const normalizeProbability = (value: number | null) => {
+  if (value === null) return null;
+  if (value > 1) return Math.min(value / 100, 1);
+  return value;
+};
+
+const getPathValue = (entry: Record<string, unknown>, path: string) => {
+  return path.split(".").reduce<unknown>((value, key) => {
+    if (!value || typeof value !== "object") return undefined;
+    return (value as Record<string, unknown>)[key];
+  }, entry);
+};
+
+const pickNestedNumber = (entry: Record<string, unknown>, paths: string[]) => {
+  for (const path of paths) {
+    const numericValue = toNumber(getPathValue(entry, path));
+    if (numericValue !== null) return numericValue;
+  }
+  return null;
+};
+
+const fetchMeteoSource = async (lat: number, lon: number) => {
+  if (!METEOSOURCE_API_KEY) {
+    return { days: createFallbackDays(), pollenByDate: new Map<string, string | null>() };
+  }
 
   const url = new URL(METEOSOURCE_API_BASE_URL);
   url.searchParams.set("lat", lat.toString());
   url.searchParams.set("lon", lon.toString());
-  url.searchParams.set("sections", "daily,pollen");
-  url.searchParams.set("timezone", "America/New_York");
+  url.searchParams.set("sections", "daily");
+  url.searchParams.set("timezone", "auto");
   url.searchParams.set("language", "en");
   url.searchParams.set("units", "us");
   url.searchParams.set("key", METEOSOURCE_API_KEY);
 
-  const res = await fetch(url.toString(), { next: { revalidate: 900 } });
-  if (!res.ok) throw new Error("MeteoSource request failed");
-  const data = await res.json();
+  try {
+    const res = await fetch(url.toString(), { next: { revalidate: 900 } });
+    if (!res.ok) throw new Error("MeteoSource request failed");
+    const data = await res.json();
 
-  const pollenData = Array.isArray(data?.pollen?.data) ? data.pollen.data : [];
-  const pollenByDate = new Map<string, string | null>();
-  pollenData.forEach((entry: any) => {
-    if (!entry?.date) return;
-    const level = entry?.level || entry?.category || entry?.description || null;
-    pollenByDate.set(entry.date, level);
-  });
+    const pollenByDate = new Map<string, string | null>();
 
-  return pollenByDate;
+    const dailyData = Array.isArray(data?.daily?.data) ? data.daily.data : [];
+    const days = dailyData.slice(0, 7).map((entry: Record<string, unknown>) => {
+      const date =
+        (entry.day as string) ||
+        (entry.date as string) ||
+        (typeof entry.time === "string" ? entry.time.slice(0, 10) : "");
+
+      const allDay = (entry.all_day as Record<string, unknown> | undefined) || {};
+      const tempMaxF =
+        pickNestedNumber(entry, [
+          "all_day.temperature_max",
+          "all_day.temperature",
+          "temperature_max",
+          "temperature",
+          "temp.max",
+        ]) ?? pickNestedNumber(allDay, ["temperature_max", "temperature", "temp.max"]);
+      const tempMinF =
+        pickNestedNumber(entry, ["all_day.temperature_min", "temperature_min", "temp.min"]) ??
+        pickNestedNumber(allDay, ["temperature_min", "temp.min"]);
+      const precipitationMm =
+        pickNestedNumber(entry, [
+          "all_day.precipitation.total",
+          "precipitation.total",
+          "precipitation",
+          "rain",
+          "snow",
+        ]) ?? pickNestedNumber(allDay, ["precipitation.total", "precipitation", "rain", "snow"]);
+      const precipitationChance = normalizeProbability(
+        pickNestedNumber(entry, [
+          "all_day.precipitation.probability",
+          "precipitation_probability",
+          "precip_probability",
+          "precipitation_chance",
+          "rain_probability",
+          "pop",
+        ]) ?? pickNestedNumber(allDay, ["precipitation.probability", "pop"])
+      );
+      const condition =
+        (entry.summary as string) ||
+        (allDay.summary as string) ||
+        (entry.weather as string) ||
+        (allDay.weather as string) ||
+        (entry.condition as string) ||
+        (allDay.condition as string) ||
+        (entry.icon as string) ||
+        (allDay.icon as string) ||
+        null;
+
+      return {
+        date,
+        tempMaxF: tempMaxF !== null ? Math.round(tempMaxF) : null,
+        tempMinF: tempMinF !== null ? Math.round(tempMinF) : null,
+        condition,
+        precipitationMm: precipitationMm !== null ? Number(precipitationMm) : null,
+        precipitationChance,
+        pollenLevel: pollenByDate.get(date) ?? null,
+      } as WeatherDay;
+    });
+
+    return { days: days.length > 0 ? days : createFallbackDays(), pollenByDate };
+  } catch (error) {
+    console.error("MeteoSource error:", error);
+    return { days: createFallbackDays(), pollenByDate: new Map<string, string | null>() };
+  }
 };
 
 export async function GET(request: NextRequest) {
@@ -126,17 +219,17 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!OPENWEATHER_API_KEY) {
-    return buildError("Missing OpenWeather API key.", 500);
-  }
-
   try {
-    const [openWeatherDays, pollenByDate] = await Promise.all([
-      fetchOpenWeather(coords.lat, coords.lon),
-      fetchMeteoSourcePollen(coords.lat, coords.lon),
-    ]);
+    const meteoSource = await fetchMeteoSource(coords.lat, coords.lon);
+    const secondaryDays = meteoSource.days;
+    const pollenMap = meteoSource.pollenByDate;
 
-    const mergedDays = mergeForecasts(openWeatherDays, pollenByDate);
+    const secondaryByDate = new Map<string, WeatherDay>();
+    secondaryDays.forEach((day: WeatherDay) => {
+      if (day.date) secondaryByDate.set(day.date, day);
+    });
+
+    const mergedDays = mergeForecasts(secondaryDays, secondaryByDate, pollenMap);
 
     const response: WeatherResponse = {
       borough: coords.borough,
@@ -145,8 +238,8 @@ export async function GET(request: NextRequest) {
       updatedAt: new Date().toISOString(),
       days: mergedDays,
       sources: {
-        openWeather: openWeatherDays.length > 0,
-        meteoSource: pollenByDate.size > 0,
+        openWeather: false,
+        meteoSource: secondaryDays.length > 0 || pollenMap.size > 0,
       },
     };
 

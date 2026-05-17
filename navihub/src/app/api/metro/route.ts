@@ -130,12 +130,19 @@ export async function GET(request: NextRequest) {
       return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
     });
 
+    const responseArrivals = arrivals.slice(0, 12);
+    const message =
+      responseArrivals.length === 0
+        ? 'No trains matched the selected line, station, direction, or departure time.'
+        : null;
+
     return NextResponse.json({
       line: lineParam,
       startStopId,
       endStopId,
       direction: direction || null,
-      arrivals: arrivals.slice(0, 12),
+      arrivals: responseArrivals,
+      message,
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
