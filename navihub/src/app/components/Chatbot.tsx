@@ -1186,7 +1186,7 @@ Instructions: Do not hallucinate. Steer conversation to the hub if irrelevant. B
             role="dialog"
             aria-modal="true"
             aria-labelledby="chatbot-title"
-            className="fixed bottom-6 right-6 w-[90vw] sm:w-100 h-150 max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
+            className="fixed bottom-6 right-6 w-[90vw] sm:w-[400px] sm:max-w-[95vw] h-150 max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-[#404E3B] text-white">

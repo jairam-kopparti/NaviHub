@@ -98,7 +98,7 @@ export default function WeatherWidget({ isOpen, onClose }: WeatherWidgetProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:left-6 sm:w-[420px] sm:max-h-[80vh] z-50 flex flex-col !bg-white border border-gray-200 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:left-6 sm:w-[420px] sm:max-w-[95vw] sm:max-h-[80vh] z-50 flex flex-col !bg-white border border-gray-200 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden"
             role="dialog"
             aria-modal="true"
           >
