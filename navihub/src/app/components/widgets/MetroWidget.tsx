@@ -8,7 +8,6 @@ import {
   Train,
   RefreshCcw,
   ArrowRight,
-  ExternalLink,
 } from 'lucide-react';
 import { supabase } from '@/src/app/lib/supabaseClient';
 import type { Resource } from '@/src/app/lib/types';
@@ -30,26 +29,6 @@ type MetroArrival = {
   minutesAway: number | null;
   durationMinutes: number | null;
   status: string;
-};
-
-type MetroRouteResponse = {
-  line: string;
-  startStopId: string;
-  endStopId: string | null;
-  direction: string | null;
-  arrivals: MetroArrival[];
-  updatedAt: string;
-  message?: string | null;
-};
-
-type MetroRecommendation = {
-  line: string;
-  startStop: StopOption | null;
-  endStop: StopOption | null;
-  resourceId: string | null;
-  resourceTitle: string | null;
-  departAt: string;
-  direction: 'N' | 'S' | '';
 };
 
 const LINE_OPTIONS = [
@@ -86,56 +65,6 @@ const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
-};
-
-const formatLocalDatetimeValue = (date: Date) => {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
-  const hours = `${date.getHours()}`.padStart(2, '0');
-  const minutes = `${date.getMinutes()}`.padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-const inferLineFromStopId = (stopId: string) => {
-  const normalized = stopId.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (normalized.startsWith('SI')) return 'SI';
-  if (normalized.startsWith('1234567')) return normalized[0];
-
-  for (const option of LINE_OPTIONS) {
-    if (normalized.startsWith(option)) return option;
-  }
-
-  if (/^[1234567]/.test(normalized)) {
-    return normalized[0];
-  }
-
-  return null;
-};
-
-const buildGoogleMapsRouteUrl = (startStop: StopOption, endStop: StopOption) => {
-  return `https://www.google.com/maps/dir/?api=1&origin=${startStop.stop_lat},${startStop.stop_lon}&destination=${endStop.stop_lat},${endStop.stop_lon}&travelmode=transit`;
-};
-
-const buildRecommendedLines = (stops: StopOption[], activeLine: string) => {
-  const counts = new Map<string, number>();
-
-  stops.forEach((stop) => {
-    const inferredLine = inferLineFromStopId(stop.stop_id);
-    if (!inferredLine) return;
-    counts.set(inferredLine, (counts.get(inferredLine) || 0) + 1);
-  });
-
-  const sortedFromData = [...counts.entries()]
-    .sort((a, b) => {
-      if (b[1] !== a[1]) return b[1] - a[1];
-      return LINE_OPTIONS.indexOf(a[0]) - LINE_OPTIONS.indexOf(b[0]);
-    })
-    .map(([metroLine]) => metroLine)
-    .filter((metroLine) => LINE_OPTIONS.includes(metroLine));
-
-  const fallback = LINE_OPTIONS.filter((option) => option !== activeLine).slice(0, 4);
-  return [...new Set([activeLine, ...sortedFromData, ...fallback])].slice(0, 6);
 };
 
 const StopComboBox = ({
@@ -176,7 +105,7 @@ const StopComboBox = ({
 
   return (
     <div className="space-y-2 relative">
-      <label className="text-xs font-semibold text-gray-700!">{label}</label>
+      <label className="!text-xs !font-semibold !text-gray-700">{label}</label>
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -185,16 +114,16 @@ const StopComboBox = ({
         onBlur={() => setTimeout(() => setIsOpen(false), 120)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669] disabled:opacity-60"
+        className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 !text-xs !text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669] disabled:opacity-60"
       />
 
       {isOpen && !disabled && (
         <div className="absolute left-0 right-0 z-20 mt-2 max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
           {loading && (
-            <div className="px-3 py-2 text-xs text-gray-500">Loading stations...</div>
+            <div className="px-3 py-2 text-xs !text-gray-500">Loading stations...</div>
           )}
           {!loading && filtered.length === 0 && (
-            <div className="px-3 py-2 text-xs text-gray-500">No matching stations.</div>
+            <div className="px-3 py-2 text-xs !text-gray-500">No matching stations.</div>
           )}
           {!loading && filtered.map((stop) => (
             <button
@@ -204,10 +133,10 @@ const StopComboBox = ({
                 onSelect(stop);
                 setQuery(`${stop.stop_name} (${stop.stop_id})`);
               }}
-              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left !text-xs !text-gray-700 hover:!bg-gray-50"
             >
-              <span className="font-semibold text-gray-900">{stop.stop_name}</span>
-              <span className="text-[10px] text-gray-500">{stop.stop_id}</span>
+              <span className="font-semibold !text-gray-900">{stop.stop_name}</span>
+              <span className="text-[10px] !text-gray-500">{stop.stop_id}</span>
             </button>
           ))}
         </div>
@@ -225,13 +154,9 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
   const [arrivals, setArrivals] = useState<MetroArrival[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [routeMessage, setRouteMessage] = useState<string | null>(null);
-  const [searchAttempted, setSearchAttempted] = useState(false);
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedResource, setSelectedResource] = useState<string>('');
   const [allStops, setAllStops] = useState<StopOption[]>([]);
-  const [recommendedLines, setRecommendedLines] = useState<string[]>([]);
-  const [openSnapshotLine, setOpenSnapshotLine] = useState(line);
   const [stopsLoading, setStopsLoading] = useState(false);
 
   const loadResources = useCallback(async () => {
@@ -266,20 +191,6 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
     if (!isOpen) return;
     loadAllStops();
   }, [isOpen, loadAllStops]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    setOpenSnapshotLine(line);
-    setArrivals([]);
-    setRouteMessage(null);
-    setErrorMessage(null);
-    setSearchAttempted(false);
-  }, [isOpen, line]);
-
-  useEffect(() => {
-    if (!isOpen || allStops.length === 0) return;
-    setRecommendedLines(buildRecommendedLines(allStops, openSnapshotLine));
-  }, [isOpen, allStops, openSnapshotLine]);
 
   const resourceOptions = useMemo(() => {
     return resources.filter((resource) => resource.latitude && resource.longitude);
@@ -321,20 +232,14 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
   }, [selectedResource, applyResourceStop]);
 
   const fetchArrivals = useCallback(async () => {
-    setSearchAttempted(true);
-
     if (!startStop) {
       setStatus('error');
-      setArrivals([]);
-      setRouteMessage(null);
       setErrorMessage('Pick a start station to continue.');
       return;
     }
 
     setStatus('loading');
     setErrorMessage(null);
-    setRouteMessage(null);
-    setArrivals([]);
 
     try {
       const params = new URLSearchParams({
@@ -353,19 +258,12 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
 
       const res = await fetch(`/api/metro?${params.toString()}`);
       if (!res.ok) throw new Error('Metro request failed');
-      const data = (await res.json()) as MetroRouteResponse;
-      const routeArrivals = Array.isArray(data.arrivals) ? data.arrivals : [];
-      setArrivals(routeArrivals);
-      setRouteMessage(
-        data.message ||
-          (routeArrivals.length === 0 ? 'No trains matched the selected preferences. Try another line or station.' : null)
-      );
+      const data = await res.json();
+      setArrivals(Array.isArray(data.arrivals) ? data.arrivals : []);
       setStatus('idle');
     } catch (error) {
       console.error(error);
       setStatus('error');
-      setArrivals([]);
-      setRouteMessage(null);
       setErrorMessage('Unable to load metro updates right now.');
     }
   }, [line, startStop, endStop, direction, departAt]);
@@ -387,44 +285,38 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:left-6 z-50 flex flex-col bg-white border border-gray-200 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden" style={{ width: '460px', maxHeight: '82vh' }}
+            className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:left-6 sm:w-[460px] sm:max-w-[95vw] sm:max-h-[82vh] z-50 flex flex-col !bg-white border border-gray-200 rounded-none sm:rounded-2xl shadow-2xl overflow-hidden"
             role="dialog"
             aria-modal="true"
           >
-            <div className="flex items-center justify-between px-5 py-4 bg-[#404E3B] text-white">
+            <div className="flex items-center justify-between px-5 py-4 !bg-[#404E3B] !text-white">
               <div>
-                <h2 className="text-lg font-semibold text-white">NYC Metro Planner</h2>
-                <p className="text-xs text-white/80">Next arrivals + travel time</p>
+                <h2 className="!text-lg !font-semibold !text-white">NYC Metro Planner</h2>
+                <p className="!text-xs !text-white/80">Next arrivals + travel time</p>
               </div>
               <button
                 onClick={onClose}
-                className="rounded-full border border-white/30 px-3 py-1 text-xs font-semibold hover:bg-white/15"
+                className="rounded-full border border-white/30 px-3 py-1 !text-xs !font-semibold hover:!bg-white/15"
               >
                 Close
               </button>
             </div>
 
             <div className="flex flex-col gap-4 px-5 py-4 bg-gray-50 overflow-y-auto">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-[10px] uppercase tracking-wide text-gray-500!">Other quick lines</div>
-                  <div className="text-[10px] text-gray-500!">Tap to change line only</div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {LINE_OPTIONS.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => setLine(option)}
-                      className={`rounded-full px-3 py-1 text-xs font-semibold transition border ${
-                        line === option
-                          ? 'bg-[#404E3B] text-white border-transparent'
-                          : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {LINE_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setLine(option)}
+                    className={`rounded-full px-3 py-1 !text-xs !font-semibold transition border ${
+                      line === option
+                        ? '!bg-[#404E3B] !text-white border-transparent'
+                        : 'bg-white !text-gray-700 border-gray-200 hover:!bg-gray-100'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -450,16 +342,16 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-700!">Direction</label>
+                  <label className="!text-xs !font-semibold !text-gray-700">Direction</label>
                   <div className="flex gap-2">
                     {['', 'N', 'S'].map((dir) => (
                       <button
                         key={dir || 'any'}
                         onClick={() => setDirection(dir as 'N' | 'S' | '')}
-                        className={`rounded-full px-3 py-1 text-xs font-semibold border transition ${
+                        className={`rounded-full px-3 py-1 !text-xs !font-semibold border transition ${
                           direction === dir
-                            ? 'bg-[#404E3B] text-white border-transparent'
-                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                            ? '!bg-[#404E3B] !text-white border-transparent'
+                            : 'bg-white !text-gray-700 border-gray-200 hover:!bg-gray-100'
                         }`}
                       >
                         {dir || 'Any'}
@@ -469,28 +361,28 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
                 </div>
 
                 <div className="space-y-2 sm:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700!">Depart at</label>
+                  <label className="!text-xs !font-semibold !text-gray-700">Depart at</label>
                   <div className="relative">
-                    <Timer className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    <Timer className="absolute left-3 top-2.5 h-4 w-4 !text-gray-400" />
                     <input
                       type="datetime-local"
                       value={departAt}
                       onChange={(event) => setDepartAt(event.target.value)}
-                      className="w-full rounded-full border border-gray-200 bg-white px-9 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669]"
+                      className="w-full rounded-full border border-gray-200 bg-white px-9 py-2 !text-xs !text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669]"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700!">
-                  <MapPin className="h-4 w-4 text-[#7B9669]" />
+                <div className="flex items-center gap-2 !text-xs !font-semibold !text-gray-700">
+                  <MapPin className="h-4 w-4 !text-[#7B9669]" />
                   Use a community resource to set the nearest start station
                 </div>
                 <select
                   value={selectedResource}
                   onChange={(event) => setSelectedResource(event.target.value)}
-                  className="w-full rounded-full border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669]"
+                  className="w-full rounded-full border border-gray-200 bg-white px-3 py-2 !text-xs !text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#7B9669]"
                 >
                   <option value="">Select a resource (optional)</option>
                   {resourceOptions.map((resource) => (
@@ -504,116 +396,86 @@ export default function MetroWidget({ isOpen, onClose }: MetroWidgetProps) {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={fetchArrivals}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#404E3B] px-4 py-2 text-xs font-semibold text-white shadow-md hover:bg-[#7B9669]"
+                  className="inline-flex items-center gap-2 rounded-full !bg-[#404E3B] px-4 py-2 !text-xs !font-semibold !text-white shadow-md hover:!bg-[#7B9669]"
                 >
                   <Train className="h-4 w-4" />
                   Find trains
                 </button>
                 <button
                   onClick={fetchArrivals}
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 !text-xs !font-semibold !text-gray-700 hover:!bg-gray-50"
                 >
                   <RefreshCcw className="h-4 w-4" />
                   Refresh
                 </button>
                 {status === 'loading' && (
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    <Loader2 className="h-4 w-4 animate-spin" style={{ animationDuration: '1.6s' }} />
+                  <div className="flex items-center gap-2 !text-xs !text-gray-600">
+                    <Loader2 className="h-4 w-4 !animate-[spin_1.6s_linear_infinite]" />
                     Loading live arrivals...
                   </div>
                 )}
               </div>
 
               {status === 'error' && errorMessage && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 !text-xs !text-red-700">
                   {errorMessage}
                 </div>
               )}
 
-              {status !== 'loading' && searchAttempted && routeMessage && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                  {routeMessage}
-                </div>
-              )}
-
-              {status !== 'loading' && !searchAttempted && arrivals.length === 0 && (
-                <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600">
-                  Choose a line and start station to see live train arrivals.
-                </div>
-              )}
-
-              {status !== 'loading' && searchAttempted && arrivals.length === 0 && !routeMessage && (
-                <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600">
-                  No train results yet. Try a different line, direction, or departure time.
-                </div>
-              )}
-
               <div className="space-y-3">
-                {arrivals.map((arrival) => {
-                  const mapsUrl = startStop && endStop ? buildGoogleMapsRouteUrl(startStop, endStop) : null;
+                {arrivals.length === 0 && status !== 'loading' && (
+                  <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 !text-xs !text-gray-600">
+                    Choose a line and start station to see live train arrivals.
+                  </div>
+                )}
 
-                  return (
-                    <motion.div
-                      key={`${arrival.tripId}-${arrival.startTime}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#404E3B] text-xs font-semibold text-white">
-                            {arrival.routeId || line}
-                          </span>
-                          <div>
-                            <div className="text-xs font-semibold text-gray-900!">Next train</div>
-                            <div className="text-[11px] text-gray-500!">Trip {arrival.tripId}</div>
-                          </div>
-                        </div>
-                        <div className="text-xs font-semibold text-gray-900!">
-                          {arrival.minutesAway !== null ? `${arrival.minutesAway} min` : 'N/A'}
+                {arrivals.map((arrival) => (
+                  <motion.div
+                    key={`${arrival.tripId}-${arrival.startTime}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full !bg-[#404E3B] text-xs font-semibold !text-white">
+                          {arrival.routeId || line}
+                        </span>
+                        <div>
+                          <div className="text-xs font-semibold !text-gray-900">Next train</div>
+                          <div className="text-[11px] !text-gray-500">Trip {arrival.tripId}</div>
                         </div>
                       </div>
+                      <div className="text-xs font-semibold !text-gray-900">
+                        {arrival.minutesAway !== null ? `${arrival.minutesAway} min` : 'N/A'}
+                      </div>
+                    </div>
 
-                      <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-gray-700!">
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-500!">Depart</div>
-                          <div className="font-semibold text-gray-900!">{formatTime(arrival.startTime)}</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-500!">Arrive</div>
-                          <div className="font-semibold text-gray-900!">{formatTime(arrival.endTime)}</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-500!">Duration</div>
-                          <div className="font-semibold text-gray-900!">
-                            {arrival.durationMinutes !== null ? `${arrival.durationMinutes} min` : 'N/A'}
-                          </div>
+                    <div className="mt-3 grid grid-cols-3 gap-3 text-xs !text-gray-700">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide !text-gray-500">Depart</div>
+                        <div className="font-semibold !text-gray-900">{formatTime(arrival.startTime)}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide !text-gray-500">Arrive</div>
+                        <div className="font-semibold !text-gray-900">{formatTime(arrival.endTime)}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-wide !text-gray-500">Duration</div>
+                        <div className="font-semibold !text-gray-900">
+                          {arrival.durationMinutes !== null ? `${arrival.durationMinutes} min` : 'N/A'}
                         </div>
                       </div>
+                    </div>
 
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[11px] text-gray-500!">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-600!">{startStop?.stop_name || startStop?.stop_id || 'Start'}</span>
-                          <ArrowRight className="h-3 w-3" />
-                          <span className="text-gray-600!">{endStop?.stop_name || endStop?.stop_id || 'Destination'}</span>
-                        </div>
-
-                        {mapsUrl && (
-                          <a
-                            href={mapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-gray-700 hover:bg-gray-50"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Open in Google Maps
-                          </a>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                    <div className="mt-3 flex items-center gap-2 text-[11px] !text-gray-500">
+                      <span>{startStop?.stop_name || startStop?.stop_id || 'Start'}</span>
+                      <ArrowRight className="h-3 w-3" />
+                      <span>{endStop?.stop_name || endStop?.stop_id || 'Destination'}</span>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </motion.div>
