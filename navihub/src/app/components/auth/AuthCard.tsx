@@ -104,7 +104,7 @@ export default function AuthCard({ type }: AuthCardProps) {
       <div className="auth-brand-panel">
         <div className="auth-brand-inner">
           <div
-            className="shadow-sm inline-block mb-6"
+            className="inline-block mb-6"
             style={{
               width: "160px",
               height: "116px",
@@ -145,7 +145,7 @@ export default function AuthCard({ type }: AuthCardProps) {
           {/* Mobile logo */}
           <div className="auth-mobile-logo">
             <div
-              className="shadow-sm inline-block"
+              className="inline-block"
               style={{
                 width: "100px",
                 height: "70px",

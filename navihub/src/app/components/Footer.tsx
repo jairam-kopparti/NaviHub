@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="flex flex-col gap-6">
           <Link href="/" className="inline-block">
             <div
-              className="shadow-sm inline-block hover:opacity-100 opacity-90 transition"
+              className="inline-block hover:opacity-100 opacity-90 transition"
               style={{
                 width: "160px",
                 height: "116px",

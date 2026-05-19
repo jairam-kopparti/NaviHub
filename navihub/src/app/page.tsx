@@ -829,7 +829,7 @@ export default function Home() {
           <div 
             className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent"
           >
-            {Array.from({ length: 20 }).map((_, i) => (
+            {Array.from({ length: 40 }).map((_, i) => (
               <span key={i} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>
                 HIGHLIGHTS
               </span>

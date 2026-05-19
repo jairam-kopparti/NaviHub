@@ -113,7 +113,7 @@ export default function Navbar() {
         {/* Centered Logo */}
         <Link href="/" className="nav-logo-center mx-4 xl:mx-10 2xl:mx-20 flex-shrink-0">
           <div
-            className="shadow-sm flex items-center justify-center hover:scale-105 transition-transform duration-300"
+            className="flex items-center justify-center hover:scale-105 transition-transform duration-300"
             style={{
               width: "120px",
               height: "88px",
