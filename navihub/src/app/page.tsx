@@ -825,15 +825,22 @@ export default function Home() {
       {/* ═══════════ HIGHLIGHTS — dark bg, white text ═══════════ */}
       <section className="w-full bg-[#1F1F1F] py-24 overflow-hidden relative">
         <div className="absolute inset-0 mix-blend-overlay opacity-5 pointer-events-none bg-[url('/noise.png')]" />
-        <div className="w-full overflow-hidden mb-12">
-          <div 
-            className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent"
-          >
-            {Array.from({ length: 40 }).map((_, i) => (
-              <span key={i} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>
-                HIGHLIGHTS
-              </span>
-            ))}
+        <div className="marquee w-full mb-12">
+          <div className="marquee-track flex text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent">
+            <div className="marquee-group flex gap-12 shrink-0">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span key={`g1-${i}`} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>
+                  HIGHLIGHTS
+                </span>
+              ))}
+            </div>
+            <div className="marquee-group flex gap-12 shrink-0" aria-hidden>
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span key={`g2-${i}`} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>
+                  HIGHLIGHTS
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         <div className="flex justify-center relative z-10">

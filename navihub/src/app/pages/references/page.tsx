@@ -79,7 +79,7 @@ export default function ReferencePage() {
           </p>
 
           <p className="references-intro" style={{ marginTop: '1rem' }}>
-            Find the plan of work log and the copyright checklist <a href="https://drive.google.com/file/d/1NFx058WITAtxvRC7LKYffE6gvEXb4yWn/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
+            Find the plan of work log and the copyright checklist <a href="https://drive.google.com/file/d/1eza66fi7r1mQXPMJ0JhnBCqEkjCHgX6e/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="references-link">here</a>.
           </p>
 
           <div className="references-grid">
@@ -343,7 +343,7 @@ export default function ReferencePage() {
                For the full list of image attributions and sources, please visit the link below:
             </p>
             <a 
-              href="https://docs.google.com/document/d/1Ntv8zLt3jxJyMwhDjgEDjv20RzNaDfbZfp18XKQquKQ/copy"
+              href="https://drive.google.com/file/d/1meo0Fd7TfLHszF8TZuJDdwwNXH99xucD/view?usp=sharing"
               target="_blank" 
               rel="noopener noreferrer" 
               className="references-link text-lg font-semibold"
