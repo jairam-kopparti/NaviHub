@@ -106,17 +106,17 @@ export default function AuthCard({ type }: AuthCardProps) {
           <div
             className="inline-flex mb-6 bg-[#FFDBBB]/45 backdrop-blur-xl shadow-[0_8px_30px_rgba(255,219,187,0.28)] items-center justify-center"
             style={{
-              width: "180px",
-              height: "130px",
+              width: "144px",
+              height: "104px",
               borderRadius: "14px",
             }}
           >
             <Image
               src="/main_logo.png"
               alt="NaviHub"
-              width={160}
-              height={116}
-              style={{ width: "160px", height: "116px", objectFit: "contain", display: "block" }}
+              width={128}
+              height={93}
+              style={{ width: "128px", height: "93px", objectFit: "contain", display: "block" }}
             />
           </div>
           <h2 className="auth-brand-title">
@@ -146,12 +146,12 @@ export default function AuthCard({ type }: AuthCardProps) {
             <div
               className="inline-flex bg-[#FFDBBB]/45 backdrop-blur-xl shadow-[0_8px_20px_rgba(255,219,187,0.24)] items-center justify-center"
               style={{
-                width: "116px",
-                height: "82px",
+                width: "93px",
+                height: "66px",
                 borderRadius: "14px",
               }}
             >
-              <Image src="/main_logo.png" alt="NaviHub" width={100} height={70} style={{ width: "100px", height: "70px", objectFit: "contain", display: "block" }} />
+              <Image src="/main_logo.png" alt="NaviHub" width={80} height={56} style={{ width: "80px", height: "56px", objectFit: "contain", display: "block" }} />
             </div>
           </div>
 

@@ -18,29 +18,21 @@
    MARQUEE
 ═══════════════════════════════════════ */
 
-.marquee {
-  overflow: hidden;
-}
-
-.marquee-track {
-  width: max-content;
-  animation: scroll-left 18s linear infinite;
-  will-change: transform;
-}
+.marquee { animation: scroll-left 7s linear infinite !important; }
 
 @keyframes scroll-left {
   0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-100%); }
 }
 
 .filled { color: #997E67; }
 .outlined { color: transparent; -webkit-text-stroke: 1px #997E67; }
 
 @media (max-width: 768px) {
-  .marquee-track { animation-duration: 14s; }
+  .marquee { font-size: 36px; gap: 8px; animation-duration: 6s !important; }
 }
 @media (max-width: 480px) {
-  .marquee-track { animation-duration: 12s; }
+  .marquee { font-size: 28px; gap: 6px; animation-duration: 5s !important; }
 }
 
 /* ═══════════════════════════════════════

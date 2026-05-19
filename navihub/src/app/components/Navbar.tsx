@@ -115,17 +115,17 @@ export default function Navbar() {
           <div
             className="flex items-center justify-center hover:scale-105 transition-transform duration-300 bg-[#FFDBBB]/45 backdrop-blur-xl border border-[#FFFFFA]/55 shadow-[0_8px_30px_rgba(255,219,187,0.28)]"
             style={{
-              width: "140px",
-              height: "104px",
+              width: "112px",
+              height: "83px",
               borderRadius: "14px",
             }}
           >
             <Image
               src="/main_logo.png"
               alt="NaviHub logo"
-              width={120}
-              height={88}
-              style={{ width: "120px", height: "88px", objectFit: "contain", display: "block" }}
+              width={96}
+              height={70}
+              style={{ width: "96px", height: "70px", objectFit: "contain", display: "block" }}
               priority
             />
           </div>
