@@ -5,20 +5,34 @@ import { usePathname } from "next/navigation";
 import { Mail, X, Sparkles, CheckCircle2 } from "lucide-react";
 import { useUser } from "@/src/app/lib/useUser";
 
-const AUTO_TARGET_PAGES = ["/pages/news", "/pages/resources", "/pages/events"];
+const AUTO_TARGET_PATH = "/";
+const AUTO_OPEN_DELAY_MS = 6000;
+const AUTO_CLOSE_MS = 5000;
+const AUTO_OPEN_MAX_PER_SESSION = 3;
+const SESSION_AUTO_COUNT = "navihub_newsletter_auto_count";
+const SESSION_DISMISS_UNTIL = "navihub_newsletter_dismiss_until";
+const SESSION_DISMISS_COOLDOWN_MS = 10 * 60 * 1000;
 
 const STORAGE_SUBSCRIBED = "navihub_newsletter_subscribed";
-const STORAGE_DISMISS_UNTIL = "navihub_newsletter_dismiss_until";
 
-function includesTargetPage(pathname: string): boolean {
-  return AUTO_TARGET_PAGES.some((page) => pathname.startsWith(page));
+function isHomePage(pathname: string): boolean {
+  return pathname === AUTO_TARGET_PATH || pathname === "";
+}
+
+function getSessionNumber(key: string): number {
+  if (typeof window === "undefined") return 0;
+  const raw = window.sessionStorage.getItem(key);
+  const parsed = raw ? Number(raw) : 0;
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function setSessionNumber(key: string, value: number) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(key, String(value));
 }
 
 function getDismissedUntil(): number {
-  if (typeof window === "undefined") return 0;
-  const raw = window.localStorage.getItem(STORAGE_DISMISS_UNTIL);
-  const parsed = raw ? Number(raw) : 0;
-  return Number.isFinite(parsed) ? parsed : 0;
+  return getSessionNumber(SESSION_DISMISS_UNTIL);
 }
 
 export default function NewsletterSubscriptionModal() {
@@ -27,6 +41,8 @@ export default function NewsletterSubscriptionModal() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [openSource, setOpenSource] = useState<"auto" | "manual">("manual");
+  const [autoProgress, setAutoProgress] = useState(0);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<"unknown" | "subscribed" | "unsubscribed">("unknown");
 
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -39,7 +55,11 @@ export default function NewsletterSubscriptionModal() {
   const [isExistingUser, setIsExistingUser] = useState(false);
   const [loadingPreferences, setLoadingPreferences] = useState(false);
 
-  const canAutoOpen = useMemo(() => includesTargetPage(pathname), [pathname]);
+  const isAutoTarget = useMemo(() => isHomePage(pathname), [pathname]);
+  const canAutoOpen = useMemo(
+    () => isAutoTarget && !!user && subscriptionStatus === "unsubscribed",
+    [isAutoTarget, user, subscriptionStatus]
+  );
 
   useEffect(() => {
     if (user?.email) {
@@ -49,6 +69,53 @@ export default function NewsletterSubscriptionModal() {
       setDisplayName(String(user.user_metadata.full_name));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!user?.email) {
+      setSubscriptionStatus("unknown");
+      return;
+    }
+
+    let isActive = true;
+    const localSubscribed =
+      typeof window !== "undefined" && window.localStorage.getItem(STORAGE_SUBSCRIBED) === "1";
+
+    if (localSubscribed) {
+      setSubscriptionStatus("subscribed");
+    }
+
+    const checkSubscription = async () => {
+      try {
+        const res = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(user.email)}`);
+        if (!res.ok) {
+          if (isActive) {
+            setSubscriptionStatus(localSubscribed ? "subscribed" : "unsubscribed");
+          }
+          return;
+        }
+
+        const data = await res.json();
+        if (!isActive) return;
+
+        if (data.subscribed) {
+          window.localStorage.setItem(STORAGE_SUBSCRIBED, "1");
+          setSubscriptionStatus("subscribed");
+        } else {
+          setSubscriptionStatus("unsubscribed");
+        }
+      } catch (err) {
+        if (isActive) {
+          setSubscriptionStatus(localSubscribed ? "subscribed" : "unsubscribed");
+        }
+      }
+    };
+
+    checkSubscription();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user?.email]);
 
   // Fetch existing preferences if email is typed or authed
   useEffect(() => {
@@ -92,21 +159,22 @@ export default function NewsletterSubscriptionModal() {
   }, []);
 
   useEffect(() => {
-    if (!canAutoOpen) return;
-
-    const alreadySubscribed = window.localStorage.getItem(STORAGE_SUBSCRIBED) === "1";
-    if (alreadySubscribed) return;
+    if (!canAutoOpen || isOpen) return;
 
     const dismissedUntil = getDismissedUntil();
     if (dismissedUntil > Date.now()) return;
 
+    const autoCount = getSessionNumber(SESSION_AUTO_COUNT);
+    if (autoCount >= AUTO_OPEN_MAX_PER_SESSION) return;
+
     const timer = window.setTimeout(() => {
       setOpenSource("auto");
       setIsOpen(true);
-    }, 6000);
+      setSessionNumber(SESSION_AUTO_COUNT, autoCount + 1);
+    }, AUTO_OPEN_DELAY_MS);
 
     return () => window.clearTimeout(timer);
-  }, [canAutoOpen, pathname]);
+  }, [canAutoOpen, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -116,17 +184,43 @@ export default function NewsletterSubscriptionModal() {
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen || openSource !== "auto") {
+      setAutoProgress(0);
+      return;
+    }
+
+    const startedAt = Date.now();
+    const interval = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      const progress = Math.min(100, (elapsed / AUTO_CLOSE_MS) * 100);
+      setAutoProgress(progress);
+
+      if (elapsed >= AUTO_CLOSE_MS) {
+        window.clearInterval(interval);
+        handleClose("auto");
+      }
+    }, 100);
+
+    return () => window.clearInterval(interval);
+  }, [isOpen, openSource]);
+
+  useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen]);
 
-  const handleClose = () => {
+  const handleClose = (reason: "manual" | "auto" = "manual") => {
     setIsOpen(false);
+    setAutoProgress(0);
+
     if (!success) {
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      window.localStorage.setItem(STORAGE_DISMISS_UNTIL, String(Date.now() + sevenDays));
+      const cooldownMs = reason === "manual"
+        ? SESSION_DISMISS_COOLDOWN_MS
+        : Math.max(2 * 60 * 1000, Math.floor(SESSION_DISMISS_COOLDOWN_MS / 2));
+      const dismissUntil = Date.now() + cooldownMs;
+      setSessionNumber(SESSION_DISMISS_UNTIL, dismissUntil);
     }
   };
 
@@ -155,6 +249,7 @@ export default function NewsletterSubscriptionModal() {
 
       setSuccess(true);
       window.localStorage.setItem(STORAGE_SUBSCRIBED, "1");
+      setSubscriptionStatus("subscribed");
 
       window.setTimeout(() => {
         setIsOpen(false);
@@ -172,11 +267,19 @@ export default function NewsletterSubscriptionModal() {
     <div className="fixed inset-0 z-120 flex items-center justify-center p-4 sm:p-6">
       <button
         aria-label="Close newsletter signup"
-        className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/55 backdrop-blur-[2px] z-0"
         onClick={handleClose}
       />
 
-      <div role="dialog" aria-modal="true" aria-labelledby="newsletter-sub-title" className="relative w-full max-w-5xl overflow-hidden rounded-4xl border border-[#e6ddd5] bg-[#fffdfa] shadow-[0_28px_120px_rgba(0,0,0,0.35)]">
+      <div role="dialog" aria-modal="true" aria-labelledby="newsletter-sub-title" className="relative z-10 w-full max-w-5xl overflow-hidden rounded-4xl border border-[#e6ddd5] bg-[#fffdfa] shadow-[0_28px_120px_rgba(0,0,0,0.35)]">
+        {openSource === "auto" && (
+          <div className="absolute left-0 top-0 h-1 w-full bg-[#efe7de]">
+            <div
+              className="h-full bg-[#997e67] transition-[width] duration-100"
+              style={{ width: `${autoProgress}%` }}
+            />
+          </div>
+        )}
         <button
           aria-label="Close"
           className="absolute right-4 top-4 z-20 rounded-full border border-[#ece0d4] bg-white p-2 text-[#6b5a4e] transition hover:bg-[#f7f1ea] cursor-pointer"

@@ -13,6 +13,7 @@ import {
   Zap,
   Shield
 } from "lucide-react";
+import "../../styles/aboutus.css";
 export default function App() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [activeQuestion, setActiveQuestion] = useState<number | null>(null);
@@ -98,10 +99,9 @@ export default function App() {
               letterSpacing: "0.2px",
             }}
           >
-            NaviHub started with a simple observation: finding community support
-            shouldn&apos;t be this hard. We&apos;re creating a central hub where New Yorkers
-            can discover local organizations, programs, and services—all verified,
-            organized, and accessible in one place.
+            NaviHub began with a simple belief: community support should be easy to find.
+            We connect New Yorkers to verified local organizations, programs, and services
+            in one clear hub.
           </motion.p>
         </motion.div>
       </section>
@@ -209,7 +209,7 @@ export default function App() {
               className="relative"
             >
               <motion.div
-                className="aspect-[4/3] rounded-2xl relative overflow-hidden"
+                className="aspect-[4/3] rounded-2xl relative overflow-hidden about-image-card"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
                 style={{
@@ -254,7 +254,7 @@ export default function App() {
               className="relative order-2 lg:order-1"
             >
               <motion.div
-                className="aspect-[4/3] rounded-2xl relative overflow-hidden"
+                className="aspect-[4/3] rounded-2xl relative overflow-hidden about-image-card"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
                 style={{
@@ -457,7 +457,7 @@ export default function App() {
               className="relative"
             >
               <motion.div
-                className="aspect-[4/3] rounded-2xl relative overflow-hidden"
+                className="aspect-[4/3] rounded-2xl relative overflow-hidden about-image-card"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
                 style={{

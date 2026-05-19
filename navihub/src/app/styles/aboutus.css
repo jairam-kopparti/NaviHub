@@ -9,6 +9,25 @@
   will-change: transform;
 }
 
+/* Subtle gloss + muted saturation for about image cards */
+.about-image-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.about-image-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 45%, rgba(31, 31, 31, 0.08) 100%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.about-image-card img {
+  filter: saturate(0.85) contrast(0.96);
+}
+
 .hero-section .absolute {
   position: absolute;
 }

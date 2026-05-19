@@ -5,11 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CloudSun, Train } from 'lucide-react';
 import WeatherWidget from './widgets/WeatherWidget';
 import MetroWidget from './widgets/MetroWidget';
+import { usePathname } from 'next/navigation';
 
 type Panel = 'weather' | 'metro' | null;
 
 export default function FloatingTools() {
   const [openPanel, setOpenPanel] = useState<Panel>(null);
+  const pathname = usePathname() ?? '';
+  const hideWidgets = pathname.startsWith('/pages/signin') || pathname.startsWith('/pages/signup');
 
   useEffect(() => {
     const openWeather = () => setOpenPanel('weather');
@@ -27,6 +30,8 @@ export default function FloatingTools() {
   const togglePanel = (panel: Panel) => {
     setOpenPanel((current) => (current === panel ? null : panel));
   };
+
+  if (hideWidgets) return null;
 
   return (
     <>

@@ -394,17 +394,8 @@ function HomeArchSection() {
     const ctx = gsap.context(() => {
       const outer = outerRef.current;
       if (!outer) return;
-
-      ScrollTrigger.create({
-        trigger: outer,
-        start: "top top",
-        end: "bottom bottom",
-        pin: stageRef.current,
-        pinSpacing: false,
-      });
-
-      // Arch text line reveals
-      if (archTextRef.current) {
+      const revealText = () => {
+        if (!archTextRef.current) return;
         const lines = archTextRef.current.querySelectorAll(".arch-line-inner");
         gsap.fromTo(lines, 
           { yPercent: 120, rotate: 2, opacity: 0 },
@@ -423,67 +414,114 @@ function HomeArchSection() {
             },
           }
         );
-      }
+      };
 
-      // Photo LEFT — enters from bottom
-      gsap.fromTo(
-        photoLeftRef.current,
-        { y: "65vh", opacity: 0, rotate: -8, scale: 0.95 },
-        {
-          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
+      const mm = gsap.matchMedia();
 
-      // Photo RIGHT TOP — enters from upper-right
-      gsap.fromTo(
-        photoRightTopRef.current,
-        { y: "-40vh", x: "12vw", opacity: 0, rotate: 10, scale: 0.95 },
-        {
-          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Photo LEFT BOTTOM
-      gsap.fromTo(
-        photoLeftBotRef.current,
-        { y: "55vh", opacity: 0, rotate: 6, scale: 0.95 },
-        {
-          y: "0vh", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Photo RIGHT BOTTOM
-      gsap.fromTo(
-        photoRightBotRef.current,
-        { y: "60vh", x: "8vw", opacity: 0, rotate: -8, scale: 0.95 },
-        {
-          y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
-          scrollTrigger: { trigger: outer, start: "5% top", end: "40% top", scrub: 1.8 },
-        }
-      );
-
-      // Central Arch Pill — Expand horizontally on scroll
-      if (archPillRef.current) {
-        gsap.to(archPillRef.current, {
-          width: "clamp(380px, 42vw, 550px)", // noticeable but controlled expansion that shouldn't touch images
-          ease: "none",
-          scrollTrigger: { trigger: outer, start: "top top", end: "75% top", scrub: true },
+      mm.add("(min-width: 1024px)", () => {
+        ScrollTrigger.create({
+          trigger: outer,
+          start: "top top",
+          end: "bottom bottom",
+          pin: stageRef.current,
+          pinSpacing: false,
         });
-      }
+
+        revealText();
+
+        // Photo LEFT TOP — enters from lower-left
+        gsap.fromTo(
+          photoLeftBotRef.current,
+          { y: "28vh", x: "-4vw", opacity: 0, rotate: -4, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "8% top", end: "42% top", scrub: 1.4 },
+          }
+        );
+
+        // Photo LEFT BOTTOM — rises gently
+        gsap.fromTo(
+          photoLeftRef.current,
+          { y: "30vh", x: "-2vw", opacity: 0, rotate: 3, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "10% top", end: "45% top", scrub: 1.4 },
+          }
+        );
+
+        // Photo RIGHT TOP — slides in from upper-right
+        gsap.fromTo(
+          photoRightTopRef.current,
+          { y: "-22vh", x: "6vw", opacity: 0, rotate: 4, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "8% top", end: "42% top", scrub: 1.4 },
+          }
+        );
+
+        // Photo RIGHT BOTTOM — rises from below
+        gsap.fromTo(
+          photoRightBotRef.current,
+          { y: "26vh", x: "4vw", opacity: 0, rotate: -4, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "10% top", end: "45% top", scrub: 1.4 },
+          }
+        );
+
+        // Central Arch Pill — subtle expansion only
+        if (archPillRef.current) {
+          gsap.fromTo(
+            archPillRef.current,
+            { scaleX: 1, scaleY: 1 },
+            {
+              scaleX: 1.03,
+              scaleY: 1.01,
+              ease: "none",
+              scrollTrigger: { trigger: outer, start: "top top", end: "70% top", scrub: true },
+            }
+          );
+        }
+      });
+
+      mm.add("(max-width: 1023px)", () => {
+        revealText();
+
+        const items = [
+          archPillRef.current,
+          photoLeftBotRef.current,
+          photoLeftRef.current,
+          photoRightTopRef.current,
+          photoRightBotRef.current,
+        ].filter(Boolean) as HTMLElement[];
+
+        items.forEach((item, index) => {
+          gsap.fromTo(
+            item,
+            { y: 16, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              ease: "power3.out",
+              delay: index * 0.08,
+              scrollTrigger: { trigger: outer, start: "top 80%", toggleActions: "play none none none" },
+            }
+          );
+        });
+      });
+
+      return () => mm.revert();
     }, outerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={outerRef} style={{ height: "280vh", backgroundColor: "#FFFFFA" }}>
+    <section ref={outerRef} className="arch-section">
       <div
         ref={stageRef}
-        className="relative overflow-hidden"
-        style={{ height: "100vh", backgroundColor: "#FFFFFA" }}
+        className="arch-stage relative overflow-hidden"
       >
         {/* Noise texture */}
         <div
@@ -497,16 +535,7 @@ function HomeArchSection() {
         {/* ── Central arch pill — filled with peach (#FFDBBB) ── */}
         <div
           ref={archPillRef}
-          className="absolute left-1/2 top-1/2 border border-[#1F1F1F]/8 shadow-sm"
-          style={{
-            transform: "translate(-50%, -48%)",
-            width: "clamp(240px, 21vw, 300px)",
-            height: "clamp(460px, 86vh, 740px)",
-            borderRadius: "9999px",
-            backgroundColor: "#FFDBBB",
-            zIndex: 2,
-            overflow: "hidden",
-          }}
+          className="arch-pill border border-[#1F1F1F]/8 shadow-sm"
         >
           <ArchDots />
           <div
@@ -534,60 +563,46 @@ function HomeArchSection() {
           </div>
         </div>
 
-        {/* Photo: Left center */}
-        <div
-          ref={photoLeftRef}
-          className="arch-photo photo-bottom-left"
-          style={{ left: "clamp(12px, 6vw, 100px)", bottom: "clamp(70px, 14vh, 150px)", width: "clamp(160px, 15vw, 220px)", zIndex: 3 }}
-        >
-          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
-            <div className="relative w-full h-full">
-              <Image src="/page-images/home-arch-about.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
+        <div className="arch-photo-grid">
+          {/* Photo: Left bottom */}
+          <div ref={photoLeftRef} className="arch-photo arch-photo--left-bottom">
+            <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
+              <div className="relative w-full h-full">
+                <Image src="/page-images/home-arch-about.jpg" alt="NaviHub community" fill className="object-cover" sizes="220px" />
+              </div>
+            </div>
+            <p className="arch-photo-caption !text-[#1F1F1F]/40">
+              NaviHub exists not to reinvent, but to respect.
+            </p>
+          </div>
+
+          {/* Photo: Right top */}
+          <div ref={photoRightTopRef} className="arch-photo arch-photo--right-top">
+            <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
+              <div className="relative w-full h-full">
+                <Image src="/page-images/home-arch-resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
+              </div>
+            </div>
+            <p className="arch-photo-caption !text-[#1F1F1F]/40">
+              Connections are not forced. They are made.
+            </p>
+          </div>
+
+          {/* Photo: Left top */}
+          <div ref={photoLeftBotRef} className="arch-photo arch-photo--left-top">
+            <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
+              <div className="relative w-full h-full">
+                <Image src="/page-images/home-arch-events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
+              </div>
             </div>
           </div>
-          <p className="arch-photo-caption !text-[#1F1F1F]/40">
-            NaviHub exists not to reinvent, but to respect.
-          </p>
-        </div>
 
-        {/* Photo: Right top */}
-        <div
-          ref={photoRightTopRef}
-          className="arch-photo"
-          style={{ right: "clamp(12px, 6vw, 100px)", top: "clamp(30px, 6vh, 70px)", width: "clamp(150px, 14vw, 210px)", zIndex: 3 }}
-        >
-          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "3/4" }}>
-            <div className="relative w-full h-full">
-              <Image src="/page-images/home-arch-resources.jpg" alt="Community resources" fill className="object-cover" sizes="210px" />
-            </div>
-          </div>
-          <p className="arch-photo-caption !text-[#1F1F1F]/40">
-            Connections are not forced. They are made.
-          </p>
-        </div>
-
-        {/* Photo: Left top (second entrance) */}
-        <div
-          ref={photoLeftBotRef}
-          className="arch-photo"
-          style={{ left: "clamp(12px, 9vw, 140px)", top: "clamp(30px, 6vh, 60px)", width: "clamp(120px, 11vw, 170px)", zIndex: 3 }}
-        >
-          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
-            <div className="relative w-full h-full">
-              <Image src="/page-images/home-arch-events.jpg" alt="Community events" fill className="object-cover" sizes="170px" />
-            </div>
-          </div>
-        </div>
-
-        {/* Photo: Right bottom */}
-        <div
-          ref={photoRightBotRef}
-          className="arch-photo"
-          style={{ right: "clamp(12px, 9vw, 150px)", bottom: "clamp(20px, 4vh, 55px)", width: "clamp(140px, 13vw, 200px)", zIndex: 3 }}
-        >
-          <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
-            <div className="relative w-full h-full">
-              <Image src="/page-images/home-arch-navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
+          {/* Photo: Right bottom */}
+          <div ref={photoRightBotRef} className="arch-photo arch-photo--right-bottom">
+            <div className="arch-photo-inner overflow-hidden rounded-xl" style={{ aspectRatio: "4/5" }}>
+              <div className="relative w-full h-full">
+                <Image src="/page-images/home-arch-navilink.jpg" alt="NaviLink forum" fill className="object-cover" sizes="200px" />
+              </div>
             </div>
           </div>
         </div>
@@ -767,7 +782,6 @@ export default function Home() {
         <div className="w-full overflow-hidden mb-12">
           <div 
             className="marquee flex gap-12 text-[64px] md:text-[100px] font-bold uppercase whitespace-nowrap text-white/5 selection:bg-transparent"
-            style={{ animationDuration: "70s" }}
           >
             {Array.from({ length: 20 }).map((_, i) => (
               <span key={i} className={i % 2 === 0 ? "fill-white text-white/20" : "outlined text-transparent"}>

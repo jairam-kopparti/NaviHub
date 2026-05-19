@@ -9,15 +9,30 @@ const supabaseAdmin = createClient(
 
 // ── GNews search queries for NYC-related news ───────────────
 const LOCAL_QUERIES = [
-  "New York City"
+  "New York City",
+  "NYC community",
+  "NYC transit",
+  "NYC housing",
+  "NYC education",
+  "NYC public health",
 ];
 
 const NATIONAL_QUERIES = [
-  "US News"
+  "United States",
+  "US economy",
+  "US policy",
+  "US healthcare",
+  "US education",
+  "US infrastructure",
 ];
 
 const INTERNATIONAL_QUERIES = [
-  "World News"
+  "World news",
+  "global economy",
+  "international relations",
+  "climate summit",
+  "global health",
+  "humanitarian aid",
 ];
 
 // ── Borough detection helper ────────────────────────────────
@@ -76,9 +91,14 @@ interface GNewsResponse {
 let lastSyncAt = 0;
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 min cooldown
 
-const TARGET_DAILY_INSERTS = Math.max(
-  1,
-  Number(process.env.NEWS_SYNC_TARGET ?? "5")
+const TARGET_PER_TYPE = Math.max(
+  10,
+  Number(process.env.NEWS_SYNC_TARGET_PER_TYPE ?? "12")
+);
+
+const TARGET_TOTAL = Math.max(
+  30,
+  Number(process.env.NEWS_SYNC_TARGET ?? String(TARGET_PER_TYPE * 3))
 );
 
 function isAuthorized(request: Request): boolean {
@@ -136,76 +156,80 @@ async function runNewsSync(request: Request) {
   let totalSkipped = 0;
   const errors: string[] = [];
 
-  const ALL_QUERIES = [...LOCAL_QUERIES, ...NATIONAL_QUERIES, ...INTERNATIONAL_QUERIES];
+  const QUERY_GROUPS: Array<{ type: "local" | "national" | "international"; queries: string[] }> = [
+    { type: "local", queries: LOCAL_QUERIES },
+    { type: "national", queries: NATIONAL_QUERIES },
+    { type: "international", queries: INTERNATIONAL_QUERIES },
+  ];
 
-  for (const query of ALL_QUERIES) {
-    if (totalInserted >= TARGET_DAILY_INSERTS) break;
-    try {
-      // Determine news type based on query origin early on
-      let currentNewsType = "local";
-      if (NATIONAL_QUERIES.includes(query)) currentNewsType = "national";
-      if (INTERNATIONAL_QUERIES.includes(query)) currentNewsType = "international";
+  for (const group of QUERY_GROUPS) {
+    let insertedForType = 0;
 
-      const url = new URL("https://gnews.io/api/v4/search");
-      url.searchParams.set("q", query);
-      url.searchParams.set("lang", "en");
-      // Only restrict to US for local and national
-      if (currentNewsType !== "international") {
-        url.searchParams.set("country", "us");
+    for (const query of group.queries) {
+      if (insertedForType >= TARGET_PER_TYPE || totalInserted >= TARGET_TOTAL) break;
+
+      try {
+        const url = new URL("https://gnews.io/api/v4/search");
+        url.searchParams.set("q", query);
+        url.searchParams.set("lang", "en");
+        if (group.type !== "international") {
+          url.searchParams.set("country", "us");
+        }
+
+        const remainingForType = Math.max(TARGET_PER_TYPE - insertedForType, 1);
+        const remainingTotal = Math.max(TARGET_TOTAL - totalInserted, 1);
+        const perQueryLimit = Math.min(12, remainingForType, remainingTotal);
+
+        url.searchParams.set("max", String(perQueryLimit));
+        url.searchParams.set("from", fromISO);
+        url.searchParams.set("apikey", apiKey);
+
+        const res = await fetch(url.toString(), { cache: "no-store" });
+        if (!res.ok) {
+          errors.push(`GNews query "${query}" failed: ${res.status}`);
+          continue;
+        }
+
+        const data: GNewsResponse = await res.json();
+        totalFetched += data.articles?.length ?? 0;
+
+        if (!data.articles?.length) continue;
+
+        const rows = data.articles.map((a) => {
+          const combined = `${a.title} ${a.description} ${a.content ?? ""}`;
+          return {
+            title: a.title,
+            description: a.description,
+            content: a.content || null,
+            url: a.url,
+            image_url: a.image || null,
+            source_name: a.source?.name || null,
+            published_at: a.publishedAt,
+            borough: detectBorough(combined),
+            category: detectCategory(combined),
+            news_type: group.type,
+          };
+        });
+
+        const { data: inserted, error: upsertErr } = await supabaseAdmin
+          .from("news")
+          .upsert(rows, { onConflict: "url", ignoreDuplicates: true })
+          .select("id");
+
+        if (upsertErr) {
+          errors.push(`Upsert error for "${query}": ${upsertErr.message}`);
+          continue;
+        }
+
+        const insertedCount = inserted?.length ?? 0;
+        totalInserted += insertedCount;
+        insertedForType += insertedCount;
+        totalSkipped += rows.length - insertedCount;
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } catch (err) {
+        errors.push(`Exception for "${query}": ${err instanceof Error ? err.message : String(err)}`);
       }
-      const remaining = Math.max(TARGET_DAILY_INSERTS - totalInserted, 1);
-      const perQueryLimit = Math.min(10, remaining);
-      url.searchParams.set("max", String(perQueryLimit));
-      url.searchParams.set("from", fromISO);
-      url.searchParams.set("apikey", apiKey);
-
-      const res = await fetch(url.toString(), { cache: "no-store" });
-      if (!res.ok) {
-        errors.push(`GNews query "${query}" failed: ${res.status}`);
-        continue;
-      }
-
-      const data: GNewsResponse = await res.json();
-      totalFetched += data.articles?.length ?? 0;
-
-      if (!data.articles?.length) continue;
-
-      // Normalize articles
-      const rows = data.articles.map((a) => {
-        const combined = `${a.title} ${a.description} ${a.content ?? ""}`;
-        return {
-          title: a.title,
-          description: a.description,
-          content: a.content || null,
-          url: a.url,
-          image_url: a.image || null,
-          source_name: a.source?.name || null,
-          published_at: a.publishedAt,
-          borough: detectBorough(combined),
-          category: detectCategory(combined),
-          news_type: currentNewsType, // Added news_type column for international, national, local
-        };
-      });
-
-      // Upsert – skip duplicates by unique url
-      const { data: inserted, error: upsertErr } = await supabaseAdmin
-        .from("news")
-        .upsert(rows, { onConflict: "url", ignoreDuplicates: true })
-        .select("id");
-
-      if (upsertErr) {
-        errors.push(`Upsert error for "${query}": ${upsertErr.message}`);
-        continue;
-      }
-
-      const insertedCount = inserted?.length ?? 0;
-      totalInserted += insertedCount;
-      totalSkipped += rows.length - insertedCount;
-
-      // Generous delay to prevent hitting 1-req/sec limit on free tiers
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    } catch (err) {
-      errors.push(`Exception for "${query}": ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -214,7 +238,8 @@ async function runNewsSync(request: Request) {
     fetched: totalFetched,
     inserted: totalInserted,
     skipped: totalSkipped,
-    target: TARGET_DAILY_INSERTS,
+    targetTotal: TARGET_TOTAL,
+    targetPerType: TARGET_PER_TYPE,
     errors: errors.length ? errors : undefined,
     syncedAt: new Date().toISOString(),
   });

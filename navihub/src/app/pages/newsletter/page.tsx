@@ -477,7 +477,7 @@ function NewsletterPageInner() {
               </p>
               <button
                 onClick={triggerModal}
-                className="mt-6 flex items-center gap-2 px-6 py-3 bg-[#4f4339] text-white! rounded-none border border-white hover:bg-white hover:text-[#4f4339] transition-colors uppercase tracking-widest text-xs font-bold"
+                className="mt-6 flex items-center gap-2 px-6 py-3 bg-[#4f4339] text-white! rounded-none border border-white hover:bg-white hover:text-[#4f4339] transition-all hover:-translate-y-0.5 hover:shadow-lg uppercase tracking-widest text-xs font-bold cursor-pointer"
               >
                 <Mail size={16} /> Subscribe
               </button>

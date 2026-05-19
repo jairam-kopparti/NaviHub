@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function ScrollProgressBar() {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
   useEffect(() => {
     let ticking = false;
@@ -25,14 +26,31 @@ export default function ScrollProgressBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const updateViewport = () => setViewportHeight(window.innerHeight);
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
+
+  const safeHeight = viewportHeight || 1;
+  const trackHeight = Math.min(160, Math.max(120, Math.round(safeHeight * 0.22)));
+  const thumbHeight = Math.max(20, Math.round(trackHeight * 0.25));
+  const maxTop = Math.max(trackHeight - thumbHeight, 0);
+  const thumbTop = Math.round(maxTop * scrollProgress);
+
   return (
-    <div 
-      className="fixed right-0 top-0 w-1.5 h-screen bg-gray-200 z-50 transition-opacity duration-300"
-      style={{ opacity: scrollProgress > 0.01 ? 1 : 0 }}
+    <div
+      className="fixed right-3 top-1/2 w-1.5 rounded-full bg-[rgba(153,126,103,0.18)] z-50 transition-opacity duration-300"
+      style={{
+        height: `${trackHeight}px`,
+        opacity: 1,
+        transform: "translateY(-50%)",
+      }}
     >
       <div
-        className="w-full bg-gradient-to-b from-[#997e67] to-[#c9a876] transition-all duration-300"
-        style={{ height: `${scrollProgress * 100}%` }}
+        className="absolute left-0 w-full rounded-full bg-[#997e67] shadow-[0_0_8px_rgba(153,126,103,0.35)] transition-transform duration-300"
+        style={{ height: `${thumbHeight}px`, transform: `translateY(${thumbTop}px)` }}
       />
     </div>
   );

@@ -332,7 +332,9 @@ export default function AddResourceModal({
 
         {showScrollIndicator && !success && (
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white via-white/80 to-transparent pointer-events-none flex items-end justify-center pb-3">
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded-full text-gray-500 text-xs font-medium animate-bounce">
+            <div 
+              className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded-full text-gray-500 text-xs font-medium"
+            >
               <span>Scroll for more</span>
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7" />

@@ -7,6 +7,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "../../lib/useUser";
 import EventChat from "../../components/events/EventChat";
 import "../../styles/events.css";
+import Link from "next/link";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const EVENT_WINDOW_START = `${CURRENT_YEAR}-05-01`;
@@ -493,6 +494,8 @@ function CommunityEventsInner() {
     return e.title.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q) || e.location_name?.toLowerCase().includes(q);
   });
   const activeFilterCount = (activeCategory !== "all" ? 1 : 0) + (activeBorough !== "all" ? 1 : 0);
+  const canEditSuggest = !!user && !userLoading;
+  const canHoverSubmit = canEditSuggest && !suggestSubmitting;
 
   const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE);
   const paginatedEvents = filteredEvents.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -1043,7 +1046,7 @@ function CommunityEventsInner() {
         </div>
       </section>
 
-      {user && !userLoading && (
+      {!userLoading && (
         <section className="px-4 sm:px-6 pb-14 sm:pb-20 bg-[var(--surface)]">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -1066,6 +1069,26 @@ function CommunityEventsInner() {
                   Share a local event idea with NaviHub. Submissions are reviewed by the admin team before publishing.
                 </p>
 
+                {!canEditSuggest && (
+                  <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      <MessageCircle className="w-5 h-5 mt-0.5 !text-amber-700" />
+                      <div>
+                        <p className="font-semibold !text-amber-700">Sign in to suggest an event</p>
+                        <p className="text-sm !text-amber-800">
+                          You need to be signed in to edit or submit this form.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/pages/signin"
+                      className="inline-flex items-center justify-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                )}
+
                 {suggestSuccess && (
                   <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 font-medium">
                     {suggestSuccess}
@@ -1079,154 +1102,156 @@ function CommunityEventsInner() {
                 )}
 
                 <form onSubmit={handleSuggestEventSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <label htmlFor="suggest-title" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Event Title *</label>
-                    <input
-                      id="suggest-title"
-                      type="text"
-                      value={suggestTitle}
-                      onChange={(e) => setSuggestTitle(e.target.value)}
-                      placeholder="Neighborhood Career Workshop"
-                      className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="suggest-description" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Description *</label>
-                    <textarea
-                      id="suggest-description"
-                      value={suggestDescription}
-                      onChange={(e) => setSuggestDescription(e.target.value)}
-                      placeholder="Share what this event is about, who should join, and what attendees can expect."
-                      rows={4}
-                      className="w-full p-4 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all resize-none !text-[#4a3b32] placeholder:text-[#4a3b32]/40"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <fieldset disabled={!canEditSuggest} className={`space-y-6 ${!canEditSuggest ? "opacity-60" : ""}`}>
                     <div className="space-y-2">
-                      <label htmlFor="suggest-category" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Category *</label>
-                      <select
-                        id="suggest-category"
-                        value={suggestCategory}
-                        onChange={(e) => setSuggestCategory(e.target.value as Category)}
-                        className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] appearance-none"
-                      >
-                        {CATEGORIES.map((category) => (
-                          <option key={category} value={category}>
-                            {CATEGORY_LABELS[category]}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label htmlFor="suggest-borough" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Borough *</label>
-                      <select
-                        id="suggest-borough"
-                        value={suggestBorough}
-                        onChange={(e) => setSuggestBorough(e.target.value as Borough)}
-                        disabled={suggestVirtual}
-                        className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] disabled:opacity-60"
-                      >
-                        {BOROUGHS.map((borough) => (
-                          <option key={borough} value={borough}>
-                            {borough}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <label htmlFor="suggest-date" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Date *</label>
+                      <label htmlFor="suggest-title" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Event Title *</label>
                       <input
-                        id="suggest-date"
-                        type="date"
-                        min={EVENT_WINDOW_START}
-                        max={EVENT_WINDOW_END}
-                        value={suggestDate}
-                        onChange={(e) => setSuggestDate(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32]"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label htmlFor="suggest-start-time" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Start *</label>
-                      <input
-                        id="suggest-start-time"
-                        type="time"
-                        value={suggestStartTime}
-                        onChange={(e) => setSuggestStartTime(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32]"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label htmlFor="suggest-end-time" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">End *</label>
-                      <input
-                        id="suggest-end-time"
-                        type="time"
-                        value={suggestEndTime}
-                        onChange={(e) => setSuggestEndTime(e.target.value)}
-                        className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32]"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="suggest-address" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Address</label>
-                    <input
-                      id="suggest-address"
-                      type="text"
-                      value={suggestAddress}
-                      onChange={(e) => setSuggestAddress(e.target.value)}
-                      placeholder={suggestVirtual ? "Virtual event selected" : "123 Community St, NY"}
-                      disabled={suggestVirtual}
-                      className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40 disabled:opacity-60"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <label className="flex items-center gap-2 rounded-2xl border border-[#eae0d5]/80 bg-[#fdfaf7] px-4 py-3.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={suggestVirtual}
-                        onChange={(e) => setSuggestVirtual(e.target.checked)}
-                        className="accent-[#997e67]"
-                      />
-                      <span className="!text-[#4a3b32] text-sm font-semibold">This is a virtual event</span>
-                    </label>
-
-                    <div className="space-y-2">
-                      <label htmlFor="suggest-capacity" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Capacity</label>
-                      <input
-                        id="suggest-capacity"
-                        type="number"
-                        min={1}
-                        value={suggestCapacity}
-                        onChange={(e) => setSuggestCapacity(e.target.value)}
-                        placeholder="50"
+                        id="suggest-title"
+                        type="text"
+                        value={suggestTitle}
+                        onChange={(e) => setSuggestTitle(e.target.value)}
+                        placeholder="Neighborhood Career Workshop"
                         className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40"
+                        required
                       />
                     </div>
-                  </div>
 
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    type="submit"
-                    disabled={suggestSubmitting}
-                    className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-[#997e67] hover:bg-[#8a6d5a] text-white rounded-2xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
-                  >
-                    {suggestSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Submit Event</>}
-                  </motion.button>
+                    <div className="space-y-2">
+                      <label htmlFor="suggest-description" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Description *</label>
+                      <textarea
+                        id="suggest-description"
+                        value={suggestDescription}
+                        onChange={(e) => setSuggestDescription(e.target.value)}
+                        placeholder="Share what this event is about, who should join, and what attendees can expect."
+                        rows={4}
+                        className="w-full p-4 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all resize-none !text-[#4a3b32] placeholder:text-[#4a3b32]/40"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label htmlFor="suggest-category" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Category *</label>
+                        <select
+                          id="suggest-category"
+                          value={suggestCategory}
+                          onChange={(e) => setSuggestCategory(e.target.value as Category)}
+                          className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] appearance-none"
+                        >
+                          {CATEGORIES.map((category) => (
+                            <option key={category} value={category}>
+                              {CATEGORY_LABELS[category]}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="suggest-borough" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Borough *</label>
+                        <select
+                          id="suggest-borough"
+                          value={suggestBorough}
+                          onChange={(e) => setSuggestBorough(e.target.value as Borough)}
+                          disabled={suggestVirtual}
+                          className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] disabled:opacity-60"
+                        >
+                          {BOROUGHS.map((borough) => (
+                            <option key={borough} value={borough}>
+                              {borough}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <label htmlFor="suggest-date" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Date *</label>
+                        <input
+                          id="suggest-date"
+                          type="date"
+                          min={EVENT_WINDOW_START}
+                          max={EVENT_WINDOW_END}
+                          value={suggestDate}
+                          onChange={(e) => setSuggestDate(e.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32]"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="suggest-start-time" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Start *</label>
+                        <input
+                          id="suggest-start-time"
+                          type="time"
+                          value={suggestStartTime}
+                          onChange={(e) => setSuggestStartTime(e.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32]"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="suggest-end-time" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">End *</label>
+                        <input
+                          id="suggest-end-time"
+                          type="time"
+                          value={suggestEndTime}
+                          onChange={(e) => setSuggestEndTime(e.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32]"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="suggest-address" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Address</label>
+                      <input
+                        id="suggest-address"
+                        type="text"
+                        value={suggestAddress}
+                        onChange={(e) => setSuggestAddress(e.target.value)}
+                        placeholder={suggestVirtual ? "Virtual event selected" : "123 Community St, NY"}
+                        disabled={suggestVirtual}
+                        className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40 disabled:opacity-60"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <label className="flex items-center gap-2 rounded-2xl border border-[#eae0d5]/80 bg-[#fdfaf7] px-4 py-3.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={suggestVirtual}
+                          onChange={(e) => setSuggestVirtual(e.target.checked)}
+                          className="accent-[#997e67]"
+                        />
+                        <span className="!text-[#4a3b32] text-sm font-semibold">This is a virtual event</span>
+                      </label>
+
+                      <div className="space-y-2">
+                        <label htmlFor="suggest-capacity" className="text-sm font-semibold !text-[#4a3b32] ml-1 block">Capacity</label>
+                        <input
+                          id="suggest-capacity"
+                          type="number"
+                          min={1}
+                          value={suggestCapacity}
+                          onChange={(e) => setSuggestCapacity(e.target.value)}
+                          placeholder="50"
+                          className="w-full px-4 py-3.5 bg-[#fdfaf7] border border-[#eae0d5]/80 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#997e67]/10 focus:border-[#997e67] transition-all !text-[#4a3b32] placeholder:text-[#4a3b32]/40"
+                        />
+                      </div>
+                    </div>
+
+                    <motion.button
+                      whileHover={canHoverSubmit ? { scale: 1.02 } : undefined}
+                      whileTap={canHoverSubmit ? { scale: 0.98 } : undefined}
+                      type="submit"
+                      disabled={suggestSubmitting || !canEditSuggest}
+                      className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-[#997e67] hover:bg-[#8a6d5a] text-white rounded-2xl font-bold transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none disabled:translate-y-0"
+                    >
+                      {suggestSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Submit Event</>}
+                    </motion.button>
+                  </fieldset>
                 </form>
               </div>
             </motion.div>

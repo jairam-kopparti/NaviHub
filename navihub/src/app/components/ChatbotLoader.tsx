@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Cpu, Sparkles } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const Chatbot = dynamic(() => import("./Chatbot"), { ssr: false, loading: () => null });
 
@@ -11,6 +12,8 @@ export default function ChatbotLoader() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldOpen, setShouldOpen] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
+  const pathname = usePathname() ?? "";
+  const hideChatbot = pathname.startsWith("/pages/signin") || pathname.startsWith("/pages/signup");
   const [showLauncher, setShowLauncher] = useState<boolean>(() => {
     try {
       // Default true; if a session flag exists we'll hide until a full page refresh
@@ -108,6 +111,8 @@ export default function ChatbotLoader() {
       // ignore
     }
   }, []);
+
+  if (hideChatbot) return null;
 
   return (
     <>

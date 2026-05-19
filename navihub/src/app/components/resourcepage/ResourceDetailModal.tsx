@@ -101,8 +101,8 @@ export default function ResourceDetailModal({
   useEffect(() => {
     if (!isOpen) {
       if (typeof window !== "undefined" && window.location.hash === "#resource") {
-        // cleanup hash if closed without back button somehow
-        // though we prefer utilizing back()
+        const cleanUrl = window.location.pathname + window.location.search;
+        window.history.replaceState(null, "", cleanUrl);
       }
       return;
     }
@@ -124,10 +124,10 @@ export default function ResourceDetailModal({
   }, [isOpen, onClose]);
 
   const handleModalClose = () => {
+    onClose();
     if (typeof window !== "undefined" && window.location.hash === "#resource") {
-      window.history.back(); // This triggers popstate and closes it via our effect!
-    } else {
-      onClose();
+      const cleanUrl = window.location.pathname + window.location.search;
+      window.history.replaceState(null, "", cleanUrl);
     }
   };
 
@@ -479,7 +479,7 @@ export default function ResourceDetailModal({
                   <div className="sticky top-0 left-0 right-0 flex justify-center py-2 bg-linear-to-b from-white to-transparent z-10">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full text-gray-500">
                       <span className="text-xs font-medium">Scroll for more</span>
-                      <ChevronDown className="w-3 h-3 animate-bounce" />
+                      <ChevronDown className="w-3 h-3" />
                     </div>
                   </div>
                 )}

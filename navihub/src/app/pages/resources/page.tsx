@@ -804,7 +804,7 @@ function ResourcesPageInner() {
                     </span>
                   )}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.categories ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 !transition-transform !duration-1000 ${expandedSections.categories ? 'rotate-180' : ''}`} />
               </button>
               {expandedSections.categories && (
                 <div className="px-3 pb-3 pt-2 space-y-1.5">
@@ -854,7 +854,7 @@ function ResourcesPageInner() {
                     </span>
                   )}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.locations ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 !transition-transform !duration-1000 ${expandedSections.locations ? 'rotate-180' : ''}`} />
               </button>
               {expandedSections.locations && (
                 <div className="px-3 pb-3 pt-2">
@@ -901,7 +901,7 @@ function ResourcesPageInner() {
                     </span>
                   )}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.rating ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 !transition-transform !duration-1000 ${expandedSections.rating ? 'rotate-180' : ''}`} />
               </button>
               {expandedSections.rating && (
                 <div className="px-3 pb-3 pt-2">
@@ -942,7 +942,7 @@ function ResourcesPageInner() {
                   <Eye className="w-4 h-4 text-[#997e67]" />
                   <span className="font-medium text-(--secondary-text) text-sm">Sort by Views</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 transition-transform duration-200 ${expandedSections.views ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-(--secondary-text)/60 !transition-transform !duration-1000 ${expandedSections.views ? 'rotate-180' : ''}`} />
               </button>
               {expandedSections.views && (
                 <div className="px-3 pb-3 pt-2">
@@ -1227,7 +1227,9 @@ function ResourcesPageInner() {
             {/* Scroll Indicator */}
             {showFilterScrollIndicator && (
               <div className="absolute bottom-14 left-0 right-0 flex justify-center pointer-events-none z-10 opacity-80">
-                <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-gray-200/50 animate-bounce">
+                <div 
+                  className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm border border-gray-200/50"
+                >
                   <ChevronDown className="w-4 h-4 text-[#997e67]" />
                 </div>
               </div>
