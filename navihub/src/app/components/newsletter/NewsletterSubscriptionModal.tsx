@@ -86,7 +86,10 @@ export default function NewsletterSubscriptionModal() {
 
     const checkSubscription = async () => {
       try {
-        const res = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(user.email)}`);
+        const email = user.email;
+        if (!email) return;
+
+        const res = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(email)}`);
         if (!res.ok) {
           if (isActive) {
             setSubscriptionStatus(localSubscribed ? "subscribed" : "unsubscribed");
@@ -268,7 +271,7 @@ export default function NewsletterSubscriptionModal() {
       <button
         aria-label="Close newsletter signup"
         className="absolute inset-0 bg-black/55 backdrop-blur-[2px] z-0"
-        onClick={handleClose}
+        onClick={() => handleClose()}
       />
 
       <div role="dialog" aria-modal="true" aria-labelledby="newsletter-sub-title" className="relative z-10 w-full max-w-5xl overflow-hidden rounded-4xl border border-[#e6ddd5] bg-[#fffdfa] shadow-[0_28px_120px_rgba(0,0,0,0.35)]">
@@ -283,7 +286,7 @@ export default function NewsletterSubscriptionModal() {
         <button
           aria-label="Close"
           className="absolute right-4 top-4 z-20 rounded-full border border-[#ece0d4] bg-white p-2 text-[#6b5a4e] transition hover:bg-[#f7f1ea] cursor-pointer"
-          onClick={handleClose}
+          onClick={() =>handleClose()}
         >
           <X size={18} />
         </button>
