@@ -32,7 +32,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading || !checkedAccess) {
     return (
       <div className="min-h-screen bg-[#fcfbf9] flex items-center justify-center">
-        <Loader2 className="w-9 h-9 text-[#997e67] animate-spin" />
+        <span role="status" aria-label="Loading admin panel...">
+          <Loader2 className="w-9 h-9 text-[#997e67] animate-spin" aria-hidden="true" />
+        </span>
       </div>
     );
   }

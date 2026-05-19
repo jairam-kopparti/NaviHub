@@ -564,7 +564,7 @@ function ResourcesPageInner() {
               className="sticky top-[80px] h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center cursor-pointer group hover:bg-[#fdfaf7] transition-colors"
             >
               <div className="flex flex-col items-center gap-6">
-                <MapIcon className="w-6 h-6 md:w-8 md:h-8 text-[#997e67] group-hover:scale-110 transition-transform drop-shadow-sm" />
+                <MapIcon className="w-6 h-6 md:w-8 md:h-8 text-[#997e67] group-hover:scale-110 transition-transform drop-shadow-sm" aria-hidden="true" />
                 <span 
                   className="text-[#997e67] font-bold tracking-[0.2em] uppercase text-xs md:text-sm group-hover:tracking-[0.25em] transition-all"
                   style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
@@ -707,7 +707,7 @@ function ResourcesPageInner() {
                   disabled={isSubmitting || !inlineTitle.trim() || !inlineCategory || wordCount < 15} 
                   className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-[#997e67] hover:bg-[#8a6d5a] text-white rounded-2xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
                 >
-                  {isSubmitting ? <Loader className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Submit Resource</>}
+                  {isSubmitting ? <Loader className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" aria-hidden="true" /> Submit Resource</>}
                 </motion.button>
               </form>
             </div>
@@ -762,6 +762,7 @@ function ResourcesPageInner() {
       <AnimatePresence>
         {mobileFiltersOpen && (
           <motion.div
+            aria-label="Resource filters"
             className="fixed top-0 left-0 h-full w-[85%] max-w-87.5 z-50 bg-(--surface) shadow-2xl lg:hidden"
             variants={slideInDrawer}
             initial="hidden"
@@ -818,6 +819,7 @@ function ResourcesPageInner() {
                             ? setSelectedCategories(selectedCategories.filter((c) => c !== category))
                             : setSelectedCategories([...selectedCategories, category])
                         }
+                        aria-current={isSelected ? "true" : undefined}
                         className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
                           isSelected
                             ? "bg-[#997e67] text-white shadow-md"
@@ -869,6 +871,7 @@ function ResourcesPageInner() {
                               ? setSelectedLocations(selectedLocations.filter((l) => l !== location))
                               : setSelectedLocations([...selectedLocations, location])
                           }
+                          aria-current={isSelected ? "true" : undefined}
                           className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                             isSelected
                               ? "bg-[#997e67] text-white shadow-md"
@@ -912,6 +915,7 @@ function ResourcesPageInner() {
                         <button
                           key={option.value}
                           onClick={() => setSelectedRating(option.value)}
+                          aria-current={isSelected ? "true" : undefined}
                           className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                             isSelected
                               ? "bg-[#997e67] text-white shadow-md"
@@ -953,6 +957,7 @@ function ResourcesPageInner() {
                         <button
                           key={option}
                           onClick={() => setSelectedView(option)}
+                          aria-pressed={isSelected}
                           className={`flex-1 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
                             isSelected
                               ? "bg-[#997e67] text-white shadow-md"
@@ -1074,6 +1079,7 @@ function ResourcesPageInner() {
                               ? setSelectedCategories(selectedCategories.filter((c) => c !== category))
                               : setSelectedCategories([...selectedCategories, category])
                           }
+                          aria-current={isSelected ? "true" : undefined}
                           className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group ${
                             isSelected
                               ? "bg-[#997e67] text-white shadow-md"
@@ -1081,8 +1087,8 @@ function ResourcesPageInner() {
                           }`}
                         >
                           <div className={`w-4 h-4 rounded flex items-center justify-center transition-all ${
-                            isSelected 
-                              ? "bg-white/20" 
+                            isSelected
+                              ? "bg-white/20"
                               : "border border-(--border) group-hover:border-[#997e67]/50"
                           }`}>
                             {isSelected && <Check className="w-3 h-3" />}
@@ -1126,6 +1132,7 @@ function ResourcesPageInner() {
                                 ? setSelectedLocations(selectedLocations.filter((l) => l !== location))
                                 : setSelectedLocations([...selectedLocations, location])
                             }
+                            aria-current={isSelected ? "true" : undefined}
                             className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                               isSelected
                                 ? "bg-[#997e67] text-white shadow-md"
@@ -1168,6 +1175,7 @@ function ResourcesPageInner() {
                           <button
                             key={option.value}
                             onClick={() => setSelectedRating(option.value)}
+                            aria-current={isSelected ? "true" : undefined}
                             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                               isSelected
                                 ? "bg-[#997e67] text-white shadow-md"
@@ -1208,6 +1216,7 @@ function ResourcesPageInner() {
                           <button
                             key={option}
                             onClick={() => setSelectedView(option)}
+                            aria-pressed={isSelected}
                             className={`flex-1 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
                               isSelected
                                 ? "bg-[#997e67] text-white shadow-md"
@@ -1283,7 +1292,7 @@ function ResourcesPageInner() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-5 h-5" aria-hidden="true" />
               Suggest Resource
             </motion.button>
           </motion.div>

@@ -249,6 +249,7 @@ export default function NewsPage() {
                 <input
                   type="text"
                   placeholder="Search articles..."
+                  aria-label="Search news articles"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-5 bg-white border border-[#eae0d5]/60 rounded-xl sm:rounded-2xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#CCBEB1] transition text-base sm:text-lg shadow-lg"
@@ -302,6 +303,7 @@ export default function NewsPage() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setBorough("")}
+                        aria-current={!borough ? "true" : undefined}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                           !borough
                             ? "bg-[#997e67] text-white"
@@ -314,6 +316,7 @@ export default function NewsPage() {
                         <button
                           key={b}
                           onClick={() => setBorough(borough === b ? "" : b)}
+                          aria-current={borough === b ? "true" : undefined}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                             borough === b
                               ? "bg-[#997e67] text-white"
@@ -335,6 +338,7 @@ export default function NewsPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setCategory("")}
+                      aria-current={!category ? "true" : undefined}
                       className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                         !category
                           ? "bg-[#997e67] text-white"
@@ -343,7 +347,7 @@ export default function NewsPage() {
                     >
                       All Categories
                     </button>
-                    {NEWS_CATEGORIES.filter((c) => 
+                    {NEWS_CATEGORIES.filter((c) =>
                       newsType === "local" || !["community", "housing", "transit"].includes(c.value)
                     ).map((c) => (
                       <button
@@ -351,6 +355,7 @@ export default function NewsPage() {
                         onClick={() =>
                           setCategory(category === c.value ? "" : c.value)
                         }
+                        aria-current={category === c.value ? "true" : undefined}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer ${
                           category === c.value
                             ? "bg-[#997e67] text-white"
@@ -390,10 +395,12 @@ export default function NewsPage() {
 
       {/* ══════════════ NEWS TYPE TABS ══════════════ */}
       <section className="bg-white border-b border-gray-100 flex items-center justify-center py-4 relative">
-        <div className="flex gap-2 sm:gap-4 p-1 bg-gray-100/50 rounded-xl">
+        <div role="tablist" className="flex gap-2 sm:gap-4 p-1 bg-gray-100/50 rounded-xl">
           {(["local", "national", "international"] as const).map((type) => (
             <button
               key={type}
+              role="tab"
+              aria-selected={newsType === type}
               onClick={() => {
                 setNewsType(type);
                 if (type !== "local") setBorough("");
@@ -541,26 +548,28 @@ export default function NewsPage() {
                 <div className="news-pagination">
                   <button
                     className="news-pagination__btn"
+                    aria-label="Previous page"
                     disabled={page === 0}
                     onClick={() => {
                       setPage((p) => Math.max(0, p - 1));
                       window.scrollTo({ top: 400, behavior: "smooth" });
                     }}
                   >
-                    <ChevronLeft size={18} /> Previous
+                    <ChevronLeft size={18} aria-hidden="true" /> Previous
                   </button>
                   <span className="news-pagination__info">
                     Page {page + 1} of {totalPages}
                   </span>
                   <button
                     className="news-pagination__btn"
+                    aria-label="Next page"
                     disabled={page >= totalPages - 1}
                     onClick={() => {
                       setPage((p) => p + 1);
                       window.scrollTo({ top: 400, behavior: "smooth" });
                     }}
                   >
-                    Next <ChevronRight size={18} />
+                    Next <ChevronRight size={18} aria-hidden="true" />
                   </button>
                 </div>
               )}

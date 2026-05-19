@@ -102,7 +102,7 @@ const CATEGORIES: Category[] = [
   {
     id: "sports",
     name: "Sports & Recreation",
-    icon: <Trophy size={22} />,
+    icon: <Trophy size={22} aria-hidden="true" />,
     description: "Discuss local sports events, teams, and activities",
     color: "#f59e0b",
   },
@@ -440,6 +440,7 @@ const CreatePostModal = ({
         <AnimatePresence>
           {moderationError && (
             <motion.div
+              role="alert"
               className="navilink-error-banner"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -500,7 +501,7 @@ const CreatePostModal = ({
               </>
             ) : (
               <>
-                <Send size={16} />
+                <Send size={16} aria-hidden="true" />
                 Post
               </>
             )}
@@ -578,6 +579,7 @@ const EditPostModalContent = ({
         <AnimatePresence>
           {moderationError && (
             <motion.div
+              role="alert"
               className="navilink-error-banner"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -863,7 +865,7 @@ const PostCard = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <MessageCircle size={18} />
+          <MessageCircle size={18} aria-hidden="true" />
           <span>
             {postReplies.length > 0
               ? `${postReplies.length} ${postReplies.length === 1 ? "Reply" : "Replies"}`
@@ -929,6 +931,7 @@ const PostCard = ({
                 <input
                   type="text"
                   placeholder="Write a reply..."
+                  aria-label="Write a reply"
                   value={replyContent}
                   onChange={(e) => {
                     setReplyContent(e.target.value);

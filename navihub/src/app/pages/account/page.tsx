@@ -584,7 +584,7 @@ export default function AccountPage() {
             onClick={() => router.push('/')}
             className="inline-flex items-center text-sm text-[#a3958a]! font-bold hover:text-[#4a3b32]! transition-colors group md:self-start mt-2 md:mt-0"
           >
-            <ArrowRight className="w-4 h-4 mr-2 rotate-180 transform group-hover:-translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 mr-2 rotate-180 transform group-hover:-translate-x-1 transition-transform" aria-hidden="true" />
             Back to Home
           </button>
         </div>
