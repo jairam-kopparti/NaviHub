@@ -113,12 +113,11 @@ export default function Navbar() {
         {/* Centered Logo */}
         <Link href="/" className="nav-logo-center mx-4 xl:mx-10 2xl:mx-20 flex-shrink-0">
           <div
-            className="flex items-center justify-center hover:scale-105 transition-transform duration-300"
+            className="flex items-center justify-center hover:scale-105 transition-transform duration-300 bg-[#FFDBBB]/45 backdrop-blur-xl border border-[#FFFFFA]/55 shadow-[0_8px_30px_rgba(255,219,187,0.28)]"
             style={{
-              width: "120px",
-              height: "88px",
-              borderRadius: "12px",
-              overflow: "hidden",
+              width: "140px",
+              height: "104px",
+              borderRadius: "14px",
             }}
           >
             <Image
@@ -126,7 +125,7 @@ export default function Navbar() {
               alt="NaviHub logo"
               width={120}
               height={88}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ width: "120px", height: "88px", objectFit: "contain", display: "block" }}
               priority
             />
           </div>

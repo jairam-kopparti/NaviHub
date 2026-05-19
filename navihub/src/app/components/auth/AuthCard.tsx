@@ -104,12 +104,11 @@ export default function AuthCard({ type }: AuthCardProps) {
       <div className="auth-brand-panel">
         <div className="auth-brand-inner">
           <div
-            className="inline-block mb-6"
+            className="inline-flex mb-6 bg-[#FFDBBB]/45 backdrop-blur-xl shadow-[0_8px_30px_rgba(255,219,187,0.28)] items-center justify-center"
             style={{
-              width: "160px",
-              height: "116px",
-              borderRadius: "12px",
-              overflow: "hidden",
+              width: "180px",
+              height: "130px",
+              borderRadius: "14px",
             }}
           >
             <Image
@@ -117,7 +116,7 @@ export default function AuthCard({ type }: AuthCardProps) {
               alt="NaviHub"
               width={160}
               height={116}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              style={{ width: "160px", height: "116px", objectFit: "contain", display: "block" }}
             />
           </div>
           <h2 className="auth-brand-title">
@@ -145,15 +144,14 @@ export default function AuthCard({ type }: AuthCardProps) {
           {/* Mobile logo */}
           <div className="auth-mobile-logo">
             <div
-              className="inline-block"
+              className="inline-flex bg-[#FFDBBB]/45 backdrop-blur-xl shadow-[0_8px_20px_rgba(255,219,187,0.24)] items-center justify-center"
               style={{
-                width: "100px",
-                height: "70px",
-                borderRadius: "12px",
-                overflow: "hidden",
+                width: "116px",
+                height: "82px",
+                borderRadius: "14px",
               }}
             >
-              <Image src="/main_logo.png" alt="NaviHub" width={100} height={70} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <Image src="/main_logo.png" alt="NaviHub" width={100} height={70} style={{ width: "100px", height: "70px", objectFit: "contain", display: "block" }} />
             </div>
           </div>
 
