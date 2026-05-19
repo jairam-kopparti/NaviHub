@@ -485,30 +485,76 @@ function HomeArchSection() {
       });
 
       mm.add("(max-width: 1023px)", () => {
+        ScrollTrigger.create({
+          trigger: outer,
+          start: "top top",
+          end: "bottom bottom",
+          pin: stageRef.current,
+          pinSpacing: false,
+        });
+
         revealText();
 
         const items = [
-          archPillRef.current,
           photoLeftBotRef.current,
           photoLeftRef.current,
           photoRightTopRef.current,
           photoRightBotRef.current,
         ].filter(Boolean) as HTMLElement[];
 
-        items.forEach((item, index) => {
+        // Central Arch Pill — subtle expansion only
+        if (archPillRef.current) {
           gsap.fromTo(
-            item,
-            { y: 16, opacity: 0 },
+            archPillRef.current,
+            { scaleX: 1, scaleY: 1 },
             {
-              y: 0,
-              opacity: 1,
-              duration: 0.8,
-              ease: "power3.out",
-              delay: index * 0.08,
-              scrollTrigger: { trigger: outer, start: "top 80%", toggleActions: "play none none none" },
+              scaleX: 1.03,
+              scaleY: 1.01,
+              ease: "none",
+              scrollTrigger: { trigger: outer, start: "top top", end: "70% top", scrub: true },
             }
           );
-        });
+        }
+
+        // Photo LEFT TOP
+        gsap.fromTo(
+          photoLeftBotRef.current,
+          { y: "28vh", x: "-4vw", opacity: 0, rotate: -4, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "8% top", end: "42% top", scrub: 1.4 },
+          }
+        );
+
+        // Photo LEFT BOTTOM
+        gsap.fromTo(
+          photoLeftRef.current,
+          { y: "30vh", x: "-2vw", opacity: 0, rotate: 3, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "10% top", end: "45% top", scrub: 1.4 },
+          }
+        );
+
+        // Photo RIGHT TOP
+        gsap.fromTo(
+          photoRightTopRef.current,
+          { y: "-22vh", x: "6vw", opacity: 0, rotate: 4, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "8% top", end: "42% top", scrub: 1.4 },
+          }
+        );
+
+        // Photo RIGHT BOTTOM
+        gsap.fromTo(
+          photoRightBotRef.current,
+          { y: "26vh", x: "4vw", opacity: 0, rotate: -4, scale: 0.98 },
+          {
+            y: "0vh", x: "0vw", opacity: 1, rotate: 0, scale: 1, ease: "power3.out",
+            scrollTrigger: { trigger: outer, start: "10% top", end: "45% top", scrub: 1.4 },
+          }
+        );
       });
 
       return () => mm.revert();

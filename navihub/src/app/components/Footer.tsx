@@ -10,7 +10,17 @@ export default function Footer() {
         {/* Brand Section */}
         <div className="flex flex-col gap-6">
           <Link href="/" className="inline-block">
-            <img src="/main_logo.png" alt="NaviHub Logo" className="h-10 brightness-0 invert opacity-90 hover:opacity-100 transition" />
+            <div
+              className="shadow-sm inline-block hover:opacity-100 opacity-90 transition"
+              style={{
+                width: "160px",
+                height: "116px",
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+            >
+              <img src="/main_logo.png" alt="NaviHub Logo" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0) invert(1)", display: "block" }} />
+            </div>
           </Link>
           <p className="!text-[15px] text-gray-400 leading-relaxed max-w-sm">
             Empowering the community to connect, learn, and grow together. Discover resources, local events, and real-time news tailored for you.

@@ -233,26 +233,26 @@
 
 .arch-photo--left-top {
   left: clamp(24px, 7vw, 140px);
-  top: clamp(30px, 8vh, 110px);
-  width: clamp(120px, 12vw, 180px);
+  top: clamp(10px, 4vh, 60px);
+  width: clamp(110px, 11vw, 160px);
 }
 
 .arch-photo--left-bottom {
   left: clamp(18px, 6vw, 110px);
-  bottom: clamp(70px, 14vh, 170px);
-  width: clamp(170px, 16vw, 230px);
+  bottom: clamp(20px, 6vh, 90px);
+  width: clamp(140px, 14vw, 190px);
 }
 
 .arch-photo--right-top {
   right: clamp(22px, 7vw, 120px);
-  top: clamp(40px, 8vh, 120px);
-  width: clamp(170px, 16vw, 230px);
+  top: clamp(20px, 5vh, 80px);
+  width: clamp(140px, 14vw, 190px);
 }
 
 .arch-photo--right-bottom {
   right: clamp(22px, 7vw, 150px);
-  bottom: clamp(20px, 6vh, 80px);
-  width: clamp(150px, 14vw, 210px);
+  bottom: clamp(16px, 4vh, 60px);
+  width: clamp(130px, 13vw, 180px);
 }
 
 /* ═══════════════════════════════════════
@@ -306,37 +306,26 @@
 ═══════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-  .arch-section { height: auto; }
-  .arch-stage { height: auto; padding: 120px 0 80px; }
-  .arch-pill {
-    position: relative;
-    left: auto;
-    top: auto;
-    transform: none;
-    margin: 0 auto 32px;
-  }
-  .arch-photo-grid {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 14px;
-    padding: 0 24px;
-    pointer-events: auto;
-  }
-  .arch-photo {
-    position: static;
-    width: 100%;
-  }
-  .arch-photo-caption {
-    max-width: none;
-    text-align: center;
+  .arch-section { height: 160vh; padding: 0; overflow: hidden; }
+  .arch-stage { 
+    height: 100vh;
+    display: block;
+    align-items: unset;
+    gap: unset;
+    padding-bottom: 0px;
   }
 }
 
 @media (max-width: 640px) {
-  .arch-stage { padding: 100px 0 60px; }
-  .arch-photo-grid { grid-template-columns: 1fr; }
-  .arch-photo { width: min(280px, 90vw); justify-self: center; }
+  .arch-section { height: 140vh; }
+  .arch-pill {
+    width: clamp(210px, 60vw, 250px) !important;
+    height: clamp(340px, 60vh, 480px) !important;
+  }
+  .arch-photo--left-top { top: clamp(20px, 8vh, 60px); width: clamp(80px, 20vw, 100px); left: clamp(10px, 4vw, 40px); }
+  .arch-photo--left-bottom { bottom: clamp(40px, 12vh, 100px); width: clamp(90px, 25vw, 120px); left: clamp(10px, 4vw, 40px); }
+  .arch-photo--right-top { top: clamp(20px, 8vh, 60px); width: clamp(100px, 22vw, 130px); right: clamp(10px, 4vw, 40px); }
+  .arch-photo--right-bottom { bottom: clamp(30px, 10vh, 80px); width: clamp(90px, 22vw, 110px); right: clamp(10px, 4vw, 40px); }
 }
 
 @media (max-width: 768px) {

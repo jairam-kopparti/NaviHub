@@ -103,13 +103,23 @@ export default function AuthCard({ type }: AuthCardProps) {
       {/* ── Left panel (desktop only) ── */}
       <div className="auth-brand-panel">
         <div className="auth-brand-inner">
-          <Image
-            src="/main_logo.png"
-            alt="NaviHub"
-            width={88}
-            height={64}
-            className="object-contain mb-6"
-          />
+          <div
+            className="shadow-sm inline-block mb-6"
+            style={{
+              width: "160px",
+              height: "116px",
+              borderRadius: "12px",
+              overflow: "hidden",
+            }}
+          >
+            <Image
+              src="/main_logo.png"
+              alt="NaviHub"
+              width={160}
+              height={116}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          </div>
           <h2 className="auth-brand-title">
             {isSignup ? "Join NaviHub" : "Welcome back"}
           </h2>
@@ -134,7 +144,17 @@ export default function AuthCard({ type }: AuthCardProps) {
         <div className="auth-card">
           {/* Mobile logo */}
           <div className="auth-mobile-logo">
-            <Image src="/main_logo.png" alt="NaviHub" width={48} height={34} className="object-contain" />
+            <div
+              className="shadow-sm inline-block"
+              style={{
+                width: "100px",
+                height: "70px",
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+            >
+              <Image src="/main_logo.png" alt="NaviHub" width={100} height={70} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            </div>
           </div>
 
           <h1 className="auth-title">
