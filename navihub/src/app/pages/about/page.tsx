@@ -263,7 +263,7 @@ export default function App() {
                 }}
               >
                 <Image src="/page-images/nyc-marathon.jpg"
-                alt="Community service"
+                alt="NYC Marathon runners in the community"
                 width={765.6}
                 height={574.2}
                 className="object-cover w-full h-full"
@@ -466,7 +466,7 @@ export default function App() {
                 }}
               >
                 <Image src="/page-images/community-impact.jpg"
-                alt="Community service"
+                alt="NaviHub community impact in New York City"
                 width={765.6}
                 height={574.2}
                 className="object-cover w-full h-full"
@@ -571,7 +571,7 @@ export default function App() {
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <item.icon className="w-6 h-6" style={{ color: "#997E67" }} />
+                  <item.icon className="w-6 h-6" style={{ color: "#997E67" }} aria-hidden="true" />
                 </motion.div>
                 <h3
                   className="mb-3"
@@ -677,6 +677,7 @@ export default function App() {
               >
                 <button
                   onClick={() => setActiveQuestion(activeQuestion === index ? null : index)}
+                  aria-expanded={activeQuestion === index}
                   className="w-full flex items-center justify-between p-6 text-left"
                   style={{ backgroundColor: activeQuestion === index ? "rgba(204, 190, 177, 0.05)" : "#FFFFFF" }}
                 >
@@ -690,7 +691,7 @@ export default function App() {
                     animate={{ rotate: activeQuestion === index ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M6 9L12 15L18 9" stroke="#997E67" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </motion.div>

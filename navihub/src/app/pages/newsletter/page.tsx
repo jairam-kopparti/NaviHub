@@ -479,13 +479,13 @@ function NewsletterPageInner() {
                 onClick={triggerModal}
                 className="mt-6 flex items-center gap-2 px-6 py-3 bg-[#4f4339] text-white! rounded-none border border-white hover:bg-white hover:text-[#4f4339] transition-all hover:-translate-y-0.5 hover:shadow-lg uppercase tracking-widest text-xs font-bold cursor-pointer"
               >
-                <Mail size={16} /> Subscribe
+                <Mail size={16} aria-hidden="true" /> Subscribe
               </button>
             </div>
           </div>
           <div className="mt-24 flex flex-col items-center text-[#7a6655]! text-[10px] uppercase tracking-widest">
             <span>Scroll down</span>
-            <ChevronDown size={18} className="mt-1 nh-scroll-bounce" />
+            <ChevronDown size={18} className="mt-1 nh-scroll-bounce" aria-hidden="true" />
           </div>
           <style jsx global>{`
             @keyframes nh-bounce-slow {
@@ -596,7 +596,7 @@ function NewsletterPageInner() {
             <div className="flex-1 grid gap-6 md:grid-cols-3">
               <div className="rounded-3xl p-6 border border-[#eadfd3] bg-white flex flex-col">
                 <h3 className="text-sm uppercase tracking-widest font-bold text-[#7a6655]! mb-4 pb-2 border-b border-[#eadfd3] flex items-center justify-between shrink-0">
-                  Resources <Star size={14} />
+                  Resources <Star size={14} aria-hidden="true" />
                 </h3>
                 <ul className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                   {widgetResources.length > 0 ? (
@@ -630,7 +630,7 @@ function NewsletterPageInner() {
 
               <div className="rounded-3xl p-6 border border-[#eadfd3] bg-white flex flex-col">
                 <h3 className="text-sm uppercase tracking-widest font-bold text-[#7a6655]! mb-4 pb-2 border-b border-[#eadfd3] flex items-center justify-between shrink-0">
-                  Upcoming <CalendarClock size={14} />
+                  Upcoming <CalendarClock size={14} aria-hidden="true" />
                 </h3>
                 <ul className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                   {widgetEvents.length > 0 ? (
@@ -665,7 +665,7 @@ function NewsletterPageInner() {
 
               <div className="rounded-3xl p-6 border border-[#eadfd3] bg-white flex flex-col">
                 <h3 className="text-sm uppercase tracking-widest font-bold text-[#7a6655]! mb-4 pb-2 border-b border-[#eadfd3] flex items-center justify-between shrink-0">
-                  Latest Posts <CalendarDays size={14} />
+                  Latest Posts <CalendarDays size={14} aria-hidden="true" />
                 </h3>
                 <ul className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                   {widgetPosts.length > 0 ? (

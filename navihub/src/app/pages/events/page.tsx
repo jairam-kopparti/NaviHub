@@ -295,7 +295,7 @@ const EventModal = ({
               transition={{ delay: 0.35 }}
             >
               <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
-                <Clock size={18} className="text-[#997e67]" />
+                <Clock size={18} className="text-[#997e67]" aria-hidden="true" />
               </div>
               <div>
                 <p className="!text-gray-400 text-xs uppercase tracking-wide">Time</p>
@@ -310,7 +310,7 @@ const EventModal = ({
               transition={{ delay: 0.4 }}
             >
               <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
-                <MapPin size={18} className="text-[#997e67]" />
+                <MapPin size={18} className="text-[#997e67]" aria-hidden="true" />
               </div>
               <div>
                 <p className="!text-gray-400 text-xs uppercase tracking-wide">Location</p>
@@ -327,7 +327,7 @@ const EventModal = ({
                 transition={{ delay: 0.45 }}
               >
                 <div className="w-10 h-10 rounded-full bg-[#f4f1ee] flex items-center justify-center">
-                  <Users size={18} className="text-[#997e67]" />
+                  <Users size={18} className="text-[#997e67]" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="!text-gray-400 text-xs uppercase tracking-wide">Availability</p>
@@ -371,7 +371,7 @@ const EventModal = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <MessageCircle size={18} />
+              <MessageCircle size={18} aria-hidden="true" />
               Open Event Chat
             </motion.button>
           )}
@@ -859,7 +859,7 @@ function CommunityEventsInner() {
                         className="mt-6 flex items-center text-[#997e67] font-medium group-hover:gap-3 gap-2 transition-all"
                         whileHover={{ x: 5 }}
                       >
-                        View Details <ArrowRight size={16} />
+                        View Details <ArrowRight size={16} aria-hidden="true" />
                       </motion.div>
                     </div>
                   </div>
@@ -999,7 +999,7 @@ function CommunityEventsInner() {
                         className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center group-hover:bg-[#997e67] group-hover:border-[#997e67] transition shrink-0"
                         whileHover={{ scale: 1.1 }}
                       >
-                        <ArrowRight size={16} className="text-gray-400 group-hover:text-white transition" />
+                        <ArrowRight size={16} className="text-gray-400 group-hover:text-white transition" aria-hidden="true" />
                       </motion.div>
                     </div>
                   </motion.div>
@@ -1020,7 +1020,7 @@ function CommunityEventsInner() {
                   }`}
                   aria-label="Previous page"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={20} aria-hidden="true" />
                 </button>
                 
                 <span className="text-gray-600 font-medium">
@@ -1037,7 +1037,7 @@ function CommunityEventsInner() {
                   }`}
                   aria-label="Next page"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={20} aria-hidden="true" />
                 </button>
               </div>
             )}
@@ -1249,7 +1249,7 @@ function CommunityEventsInner() {
                       disabled={suggestSubmitting || !canEditSuggest}
                       className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-[#997e67] hover:bg-[#8a6d5a] text-white rounded-2xl font-bold transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none disabled:translate-y-0"
                     >
-                      {suggestSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Submit Event</>}
+                      {suggestSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" aria-hidden="true" /> Submit Event</>}
                     </motion.button>
                   </fieldset>
                 </form>
@@ -1273,6 +1273,7 @@ function CommunityEventsInner() {
             />
             <motion.div
               id="events-filter-panel"
+              aria-label="Event filters"
               className="fixed top-0 right-0 h-full w-full max-w-[320px] sm:max-w-md bg-[#1F1F1F] z-50 p-5 sm:p-8 shadow-2xl border-l border-white/10 overflow-y-auto"
               variants={sidebarVariants}
               initial="hidden"

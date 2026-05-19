@@ -312,7 +312,9 @@ export default function AdminPage() {
 
 					{loading ? (
 						<div className="flex items-center justify-center min-h-90">
-							<Loader2 className="w-9 h-9 text-[#997e67] animate-spin" />
+							<span role="status" aria-label="Loading...">
+								<Loader2 className="w-9 h-9 text-[#997e67] animate-spin" aria-hidden="true" />
+							</span>
 						</div>
 					) : (
 						<AnimatePresence mode="wait">
